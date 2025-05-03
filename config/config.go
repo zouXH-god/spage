@@ -12,6 +12,9 @@ var (
 	Mode       string
 	JwtSecret  string
 
+	OAuth2ClientID     string
+	OAuth2ClientSecret string
+	OpenIDConnectURL   string
 	//MessageSavingDays      = 30 // 消息在数据库保存时间，单位天
 	//MessageHangingSeconds  = 10 // 消息挂起时间，单位秒
 	//MessageResponseTimeout = 60 // 长轮询消息响应超时时间，单位秒
@@ -19,7 +22,6 @@ var (
 	// CommitHash 构件时注入的git commit hash
 	CommitHash = "develop"             // git commit hash 构建时注入
 	BuildTime  = "0000-00-00 00:00:00" // 构建时间
-
 )
 
 func init() {
@@ -35,8 +37,12 @@ func init() {
 		}
 	}
 	// 初始化配置常量
-	ServerPort = GetString("server.port", "8888")
+	ServerPort = GetString("serverPort", "8888")
 	JwtSecret = GetString("jwtSecret", "none-secret")
+	Mode = GetString("mode", "prod")
+	OAuth2ClientID = GetString("oAuth2ClientID")
+	OAuth2ClientSecret = GetString("oAuth2ClientSecret")
+	OpenIDConnectURL = GetString("openIDConnectURL")
 	logrus.Info("配置初始化成功")
 }
 
