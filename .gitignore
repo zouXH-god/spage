@@ -1,0 +1,9 @@
+# build
+main
+main.exe
+
+config.yaml
+
+.DS_Store
+.idea/
+.vscode/
