@@ -20,16 +20,54 @@ func Run() error {
 	apiV1 := H.Group("/api/v1")
 	{
 		userGroup := apiV1.Group("/user")
-		_ = userGroup
+		{
+			userGroup.POST("/register")    // Register
+			userGroup.POST("/login")       // Login
+			userGroup.POST("/logout")      // Logout
+			userGroup.PUT("")              // Update user info
+			userGroup.DELETE("")           // Delete user
+			userGroup.GET("/:id")          // Get user info
+			userGroup.GET("/:id/projects") // Get user projects
+			userGroup.GET("/:id/orgs")     // Get user organizations
+		}
+		orgGroup := apiV1.Group("/org")
+		{
+			orgGroup.POST("")             // Create organization
+			orgGroup.PUT("")              // Update organization
+			orgGroup.DELETE("")           // Delete organization
+			orgGroup.GET("/:id")          // Get organization info
+			orgGroup.GET("/:id/projects") // Get organization projects
+		}
+		projectGroup := apiV1.Group("/project")
+		{
+			projectGroup.POST("")    // Create project
+			projectGroup.PUT("")     // Update project
+			projectGroup.DELETE("")  // Delete project
+			projectGroup.GET("/:id") // Get project info
+		}
+		siteGroup := apiV1.Group("/site")
+		{
+			siteRelease := siteGroup.Group("/release")
+			{
+				siteRelease.POST("")   // Create site release
+				siteRelease.DELETE("") // Delete site release
+			}
+			siteGroup.POST("")    // Create site
+			siteGroup.PUT("")     // Update site
+			siteGroup.DELETE("")  // Delete site
+			siteGroup.GET("/:id") // Get site info
+		}
 	}
 
 	// 运行服务
 	if config.Mode == "dev" {
+		// Development mode
 		err := H.Run()
 		if err != nil {
 			return err
 		}
 	} else {
+		// Production mode
 		H.Spin()
 	}
 	return nil
