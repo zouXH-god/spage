@@ -36,7 +36,7 @@ func init() {
 	ServerPort = GetString("serverPort", "8888")
 	JwtSecret = GetString("jwtSecret", "none-secret")
 	Mode = GetString("mode", "prod")
-	logrus.Info("配置初始化成功")
+	logrus.Info("Configuration loaded successfully, mode: ", Mode)
 }
 
 func Get[T any](key string, defaultValue T) T {

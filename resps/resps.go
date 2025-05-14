@@ -47,3 +47,7 @@ func InternalServerError(c *app.RequestContext, message string) {
 func ServiceUnavailable(c *app.RequestContext, message string) {
 	c.JSON(503, map[string]string{"message": message})
 }
+
+func RespMessageWithError(message string, err error) string {
+	return message + ": " + err.Error()
+}

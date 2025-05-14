@@ -3,6 +3,7 @@ package router
 import (
 	"context"
 	"github.com/LiteyukiStudio/spage/config"
+	"github.com/LiteyukiStudio/spage/middle"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"github.com/cloudwego/hertz/pkg/common/utils"
@@ -10,9 +11,16 @@ import (
 
 //var H *server.Hertz
 
+func emptyHandler() func(context.Context, *app.RequestContext) {
+	return func(ctx context.Context, c *app.RequestContext) {
+		c.JSON(200, utils.H{"message": "Hello World"})
+	}
+}
+
 func Run() error {
 	// 运行路由
 	H := server.New(server.WithHostPorts(":" + config.ServerPort))
+	H.Use(middle.Cors())
 	H.GET("/", func(ctx context.Context, c *app.RequestContext) {
 		c.JSON(200, utils.H{"message": "Hello World"})
 	})
@@ -21,41 +29,41 @@ func Run() error {
 	{
 		userGroup := apiV1.Group("/user")
 		{
-			userGroup.POST("/register")    // Register
-			userGroup.POST("/login")       // Login
-			userGroup.POST("/logout")      // Logout
-			userGroup.PUT("")              // Update user info
-			userGroup.DELETE("")           // Delete user
-			userGroup.GET("/:id")          // Get user info
-			userGroup.GET("/:id/projects") // Get user projects
-			userGroup.GET("/:id/orgs")     // Get user organizations
+			userGroup.POST("/register", emptyHandler())    // Register
+			userGroup.POST("/login", emptyHandler())       // Login
+			userGroup.POST("/logout", emptyHandler())      // Logout
+			userGroup.PUT("", emptyHandler())              // Update user info
+			userGroup.DELETE("", emptyHandler())           // Delete user
+			userGroup.GET("/:id", emptyHandler())          // Get user info
+			userGroup.GET("/:id/projects", emptyHandler()) // Get user projects
+			userGroup.GET("/:id/orgs", emptyHandler())     // Get user organizations
 		}
-		orgGroup := apiV1.Group("/org")
+		orgGroup := apiV1.Group("/org", emptyHandler())
 		{
-			orgGroup.POST("")             // Create organization
-			orgGroup.PUT("")              // Update organization
-			orgGroup.DELETE("")           // Delete organization
-			orgGroup.GET("/:id")          // Get organization info
-			orgGroup.GET("/:id/projects") // Get organization projects
+			orgGroup.POST("", emptyHandler())             // Create organization
+			orgGroup.PUT("", emptyHandler())              // Update organization
+			orgGroup.DELETE("", emptyHandler())           // Delete organization
+			orgGroup.GET("/:id", emptyHandler())          // Get organization info
+			orgGroup.GET("/:id/projects", emptyHandler()) // Get organization projects
 		}
-		projectGroup := apiV1.Group("/project")
+		projectGroup := apiV1.Group("/project", emptyHandler())
 		{
-			projectGroup.POST("")    // Create project
-			projectGroup.PUT("")     // Update project
-			projectGroup.DELETE("")  // Delete project
-			projectGroup.GET("/:id") // Get project info
+			projectGroup.POST("", emptyHandler())    // Create project
+			projectGroup.PUT("", emptyHandler())     // Update project
+			projectGroup.DELETE("", emptyHandler())  // Delete project
+			projectGroup.GET("/:id", emptyHandler()) // Get project info
 		}
-		siteGroup := apiV1.Group("/site")
+		siteGroup := apiV1.Group("/site", emptyHandler())
 		{
-			siteRelease := siteGroup.Group("/release")
+			siteRelease := siteGroup.Group("/release", emptyHandler())
 			{
-				siteRelease.POST("")   // Create site release
-				siteRelease.DELETE("") // Delete site release
+				siteRelease.POST("", emptyHandler())   // Create site release
+				siteRelease.DELETE("", emptyHandler()) // Delete site release
 			}
-			siteGroup.POST("")    // Create site
-			siteGroup.PUT("")     // Update site
-			siteGroup.DELETE("")  // Delete site
-			siteGroup.GET("/:id") // Get site info
+			siteGroup.POST("", emptyHandler())    // Create site
+			siteGroup.PUT("", emptyHandler())     // Update site
+			siteGroup.DELETE("", emptyHandler())  // Delete site
+			siteGroup.GET("/:id", emptyHandler()) // Get site info
 		}
 	}
 

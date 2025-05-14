@@ -8,6 +8,8 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+	"os"
+	"path/filepath"
 )
 
 var DB *gorm.DB
@@ -83,6 +85,10 @@ func initPostgres(config DBConfig, gormConfig *gorm.Config) error {
 func initSQLite(config DBConfig, gormConfig *gorm.Config) error {
 	if config.Path == "" {
 		config.Path = "./data/data.db"
+	}
+	// 创建 SQLite 数据库文件的目录
+	if err := os.MkdirAll(filepath.Dir(config.Path), os.ModePerm); err != nil {
+		return fmt.Errorf("failed to create directory for SQLite database: %w", err)
 	}
 
 	var err error
