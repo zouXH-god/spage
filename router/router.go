@@ -21,9 +21,19 @@ func Run() error {
 	// 运行路由
 	H := server.New(server.WithHostPorts(":" + config.ServerPort))
 	H.Use(middle.Cors())
-	H.GET("/", func(ctx context.Context, c *app.RequestContext) {
-		c.JSON(200, utils.H{"message": "Hello World"})
-	})
+
+	// 设置静态文件目录
+	web := H.Group("")
+	{
+		// Static routing 静态路由
+		web.GET("/", emptyHandler())      // Home
+		web.GET("/login", emptyHandler()) // Login page
+
+		// Dynamic routing SSR 动态路由，服务端填充元数据，浏览器拿到后通过元数据从后端API请求更多数据
+		web.GET("/:owner", emptyHandler())                // Get user info
+		web.GET("/:owner/:project", emptyHandler())       // Get project info
+		web.GET("/:owner/:project/:site", emptyHandler()) // Get site info
+	}
 
 	apiV1 := H.Group("/api/v1")
 	{
