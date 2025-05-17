@@ -1,4 +1,4 @@
-package api
+package handlers
 
 type LoginReq struct {
 	Username string `json:"username" form:"username" binding:"required"` // 用户名

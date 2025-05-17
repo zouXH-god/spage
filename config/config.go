@@ -2,25 +2,29 @@ package config
 
 import (
 	"errors"
-	"fmt"
+	"github.com/LiteyukiStudio/spage/utils"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"os"
+)
+
+const (
+	ModeDev  = "dev"
+	ModeProd = "prod"
 )
 
 var (
-	ServerPort string
-	Mode       string
-	JwtSecret  string
-	//MessageSavingDays      = 30 // 消息在数据库保存时间，单位天
-	//MessageHangingSeconds  = 10 // 消息挂起时间，单位秒
-	//MessageResponseTimeout = 60 // 长轮询消息响应超时时间，单位秒
+	ServerPort  string
+	Mode        = "prod"
+	JwtSecret   string
+	FrontendUrl string = "http://localhost:5173" // 前端开发服务器地址，仅在开发模式下使用
 
 	// CommitHash 构件时注入的git commit hash
 	CommitHash = "develop"             // git commit hash 构建时注入
 	BuildTime  = "0000-00-00 00:00:00" // 构建时间
 )
 
-func init() {
+func Init() error {
 	// 设置配置文件路径
 	viper.AddConfigPath(".")
 	viper.SetConfigName("config")
@@ -29,14 +33,31 @@ func init() {
 	if err := viper.ReadInConfig(); err != nil {
 		var configFileNotFoundError viper.ConfigFileNotFoundError
 		if errors.As(err, &configFileNotFoundError) {
-			panic(fmt.Errorf("Fatal error config file: %s \n", err))
+			return errors.New("config file not found")
 		}
 	}
 	// 初始化配置常量
 	ServerPort = GetString("serverPort", "8888")
 	JwtSecret = GetString("jwtSecret", "none-secret")
 	Mode = GetString("mode", "prod")
+
+	// 从启动参数拿取一些配置项mode frontend-url
+	argsMap := utils.Cmd.GetArgsMap(os.Args[1:])
+	queryKeys := []string{"mode", "frontend-url", "port"}
+	for _, key := range queryKeys {
+		if value, ok := argsMap[key]; ok {
+			switch key {
+			case "mode":
+				Mode = value
+			case "port":
+				ServerPort = value
+			case "frontend-url":
+				FrontendUrl = value
+			}
+		}
+	}
 	logrus.Info("Configuration loaded successfully, mode: ", Mode)
+	return nil
 }
 
 func Get[T any](key string, defaultValue T) T {
