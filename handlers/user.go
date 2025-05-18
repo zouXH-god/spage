@@ -20,7 +20,8 @@ var User = UserApi{}
 
 func (UserApi) Login(ctx context.Context, c *app.RequestContext) {
 	loginReq := &LoginReq{}
-	err := c.BindJSON(loginReq)
+	// TODO: 这里需要验证验证码
+	err := c.BindForm(loginReq)
 	if err != nil {
 		resps.BadRequest(c, "Parameter error")
 		return
@@ -31,8 +32,11 @@ func (UserApi) Login(ctx context.Context, c *app.RequestContext) {
 	}
 	user, err := store.User.GetUserByName(loginReq.Username)
 	if err != nil {
-		resps.BadRequest(c, "User does not exist")
-		return
+		user, err = store.User.GetUserByEmail(loginReq.Username)
+		if err != nil {
+			resps.BadRequest(c, "User does not exist")
+			return
+		}
 	}
 
 	if user.Password == nil {

@@ -40,6 +40,16 @@ func (userType) GetUserByID(id uint) (user *models.User, err error) {
 	return user, nil
 }
 
+// GetUserByEmail 根据邮箱获取用户
+func (userType) GetUserByEmail(email string) (user *models.User, err error) {
+	user = &models.User{} // 初始化指针
+	err = DB.Where("email = ?", email).First(user).Error
+	if err != nil {
+		return nil, err // 出错时返回nil
+	}
+	return user, nil
+}
+
 // UpdateUser 更新用户信息
 func (userType) UpdateUser(user *models.User) (err error) {
 	err = DB.Save(user).Error
