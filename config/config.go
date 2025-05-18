@@ -11,9 +11,11 @@ import (
 const ()
 
 var (
-	ServerPort string
-	Mode       = constants.ModeProd
-	JwtSecret  string
+	ServerPort  string
+	Mode        = constants.ModeProd
+	JwtSecret   string
+	FrontEndURL string
+	LogLevel    = "info" // 日志级别
 
 	AdminUsername = "admin" // 管理员用户名
 	AdminPassword = "admin" // 管理员密码
@@ -29,6 +31,7 @@ var (
 	CaptchaType      = constants.CaptchaTypeDisable // 验证码类型，支持turnstile、recaptcha和hcaptcha
 	CaptchaSiteKey   string                         // reCAPTCHA v3的站点密钥
 	CaptchaSecretKey string                         // reCAPTCHA v3的密钥
+	CaptchaUrl       string                         // for mcaptcha
 
 	TokenExpireTime        = 3600 * 24  // session过期时间，单位秒
 	RefreshTokenExpireTime = 3600 * 144 // 刷新token过期时间，单位秒
@@ -52,8 +55,9 @@ func Init() error {
 	}
 	// 初始化配置常量
 	ServerPort = GetString("server.port", "8888")
-
+	FrontEndURL = GetString("frontend.url", "http://localhost:5173")
 	Mode = GetString("mode", "prod")
+	LogLevel = GetString("log.level", "info")
 	// Admin配置项
 	AdminUsername = GetString("admin.username", "admin")
 	AdminPassword = GetString("admin.password", "admin")
@@ -61,6 +65,7 @@ func Init() error {
 	CaptchaType = GetString("captcha.type", CaptchaType)
 	CaptchaSiteKey = GetString("captcha.site-key", "")
 	CaptchaSecretKey = GetString("captcha.secret-key", "")
+	CaptchaUrl = GetString("captcha.url", "")
 	// Email配置项
 	EmailEnable = GetBool("email.enable", false)
 	EmailUsername = GetString("email.username", "")
@@ -84,10 +89,21 @@ func Init() error {
 				Mode = value
 			case "port":
 				ServerPort = value
+			case "frontend-url":
+				FrontEndURL = value
 			}
 		}
 	}
 	logrus.Info("Configuration loaded successfully, mode: ", Mode)
+	// 设置日志级别
+	logLevel, err := logrus.ParseLevel(LogLevel)
+	if err != nil {
+		logrus.Error("Invalid log level, using default level: info")
+		logLevel = logrus.InfoLevel
+	}
+	logrus.SetLevel(logLevel)
+	logrus.Info("Log level set to: ", logLevel)
+	logrus.Debugln("LogLevel is: ", LogLevel)
 	return nil
 }
 

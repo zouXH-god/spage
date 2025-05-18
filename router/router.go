@@ -40,6 +40,7 @@ func Run() error {
 			userGroup.GET("/:id", handlers.User.GetUser) // Get user info
 			userGroup.GET("/:id/projects", TODO())       // Get user projects
 			userGroup.GET("/:id/orgs", TODO())           // Get user organizations
+			userGroup.POST("/check")
 		}
 		orgGroup := apiV1.Group("/org", TODO())
 		{

@@ -1,8 +1,9 @@
 package handlers
 
 type LoginReq struct {
-	Username string `json:"username" form:"username" binding:"required"` // 用户名
-	Password string `json:"password" form:"password" binding:"required"` // 密码
+	Username     string `json:"username" binding:"required"` // 用户名
+	Password     string `json:"password" binding:"required"` // 密码
+	CaptchaToken string `json:"captcha_token" binding:"required"`
 }
 
 type UserDTO struct {
