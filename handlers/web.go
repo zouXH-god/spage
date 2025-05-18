@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"context"
-	"github.com/LiteyukiStudio/spage/web"
+	"github.com/LiteyukiStudio/spage/static"
 	"github.com/cloudwego/hertz/pkg/app"
 	"io"
 	"mime"
@@ -17,10 +17,10 @@ func getMimeType(path string) string {
 
 func WebHandler(ctx context.Context, c *app.RequestContext) {
 	path := "dist" + string(c.Path())
-	file, err := web.StaticFS.Open(path)
+	file, err := static.WebFS.Open(path)
 	if err != nil {
 		// fallback 到 index.html
-		file, err = web.StaticFS.Open("dist/index.html")
+		file, err = static.WebFS.Open("dist/index.html")
 		if err != nil {
 			c.String(404, "File not found")
 			return

@@ -2,19 +2,17 @@ package config
 
 import (
 	"errors"
+	"github.com/LiteyukiStudio/spage/constants"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"os"
 )
 
-const (
-	ModeDev  = "dev"
-	ModeProd = "prod"
-)
+const ()
 
 var (
 	ServerPort string
-	Mode       = "prod"
+	Mode       = constants.ModeProd
 	JwtSecret  string
 
 	AdminUsername = "admin" // 管理员用户名
@@ -27,6 +25,10 @@ var (
 	EmailPort     string // 邮箱服务器端口
 	EmailPassword string // 邮箱密码
 	EmailSSL      bool   // 是否启用SSL
+
+	CaptchaType      = constants.CaptchaTypeDisable // 验证码类型，支持turnstile、recaptcha和hcaptcha
+	CaptchaSiteKey   string                         // reCAPTCHA v3的站点密钥
+	CaptchaSecretKey string                         // reCAPTCHA v3的密钥
 
 	TokenExpireTime        = 3600 * 24  // session过期时间，单位秒
 	RefreshTokenExpireTime = 3600 * 144 // 刷新token过期时间，单位秒
@@ -55,6 +57,10 @@ func Init() error {
 	// Admin配置项
 	AdminUsername = GetString("admin.username", "admin")
 	AdminPassword = GetString("admin.password", "admin")
+	// Captcha配置项
+	CaptchaType = GetString("captcha.type", CaptchaType)
+	CaptchaSiteKey = GetString("captcha.site-key", "")
+	CaptchaSecretKey = GetString("captcha.secret-key", "")
 	// Email配置项
 	EmailEnable = GetBool("email.enable", false)
 	EmailUsername = GetString("email.username", "")

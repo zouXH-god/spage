@@ -29,13 +29,15 @@ func Run() error {
 	{
 		apiV1WithoutAuth.POST("/user/register", TODO()) // Register
 		apiV1WithoutAuth.POST("/user/login", handlers.User.Login)
+		apiV1WithoutAuth.GET("/user/captcha", handlers.User.GetCaptcha) // Get captcha
 
 		userGroup := apiV1.Group("/user")
 		{
-			userGroup.POST("/logout", TODO())            // Logout
-			userGroup.PUT("", TODO())                    // Update user info
-			userGroup.DELETE("", TODO())                 // Delete user
-			userGroup.GET("/*id", handlers.User.GetUser) // Get user info
+			userGroup.POST("/logout", TODO()) // Logout
+			userGroup.PUT("", TODO())         // Update user info
+			userGroup.DELETE("", TODO())      // Delete user
+			userGroup.GET("", handlers.User.GetUser)
+			userGroup.GET("/:id", handlers.User.GetUser) // Get user info
 			userGroup.GET("/:id/projects", TODO())       // Get user projects
 			userGroup.GET("/:id/orgs", TODO())           // Get user organizations
 		}
@@ -75,7 +77,7 @@ func Run() error {
 	// 设置静态文件目录
 	web := H.Group("")
 	{
-		web.GET("/:any", handlers.WebHandler)
+		web.GET("/*any", handlers.WebHandler)
 	}
 
 	// 运行服务

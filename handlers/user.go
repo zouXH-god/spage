@@ -9,6 +9,7 @@ import (
 	"github.com/LiteyukiStudio/spage/utils"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/protocol"
+	"github.com/sirupsen/logrus"
 	"strconv"
 	"time"
 )
@@ -95,5 +96,25 @@ func (UserApi) GetUser(ctx context.Context, c *app.RequestContext) {
 				Avatar:      crtUser.Avatar,
 			},
 		})
+	}
+}
+
+func (UserApi) Register(ctx context.Context, c *app.RequestContext) {
+
+}
+
+func (UserApi) GetCaptcha(ctx context.Context, c *app.RequestContext) {
+	widget, err := utils.Captcha.GenerateCaptchaWidget(&utils.CaptchaConfig{
+		Type:        config.CaptchaType,
+		SiteSecrete: config.CaptchaSiteKey,
+		SecretKey:   config.CaptchaSecretKey,
+	})
+	if err != nil {
+		resps.InternalServerError(c, "Failed to generate captcha")
+	}
+	c.SetContentTypeBytes([]byte("text/html; charset=utf-8"))
+	_, err = c.Write([]byte(widget))
+	if err != nil {
+		logrus.Error(err)
 	}
 }
