@@ -4,6 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/LiteyukiStudio/spage/config"
+	"github.com/LiteyukiStudio/spage/constants"
+	"github.com/LiteyukiStudio/spage/models"
+	"github.com/LiteyukiStudio/spage/utils"
+	"github.com/sirupsen/logrus"
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -64,6 +68,27 @@ func Init() error {
 		return errors.New("unsupported database driver, only sqlite and postgres are supported")
 	}
 
+	// 迁移模型
+	if err = models.Migrate(DB); err != nil {
+		logrus.Error("Failed to migrate models:", err)
+		return err
+	}
+	// 执行初始化数据
+	// 创建管理员账户
+	hashedPassword, err := utils.Password.HashPassword(config.AdminPassword, config.JwtSecret)
+	if err != nil {
+		logrus.Error("Failed to hash password:", err)
+		return err
+	}
+	user := &models.User{
+		Name:     config.AdminUsername,
+		Password: &hashedPassword,
+		Role:     constants.RoleAdmin,
+	}
+	if err = User.UpdateSystemAdminUser(user); err != nil {
+		logrus.Error("Failed to update admin user:", err)
+		return err
+	}
 	return nil
 }
 

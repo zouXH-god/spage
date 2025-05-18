@@ -1,6 +1,8 @@
-package utils
+package config
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestCmdUtilsType_GetArgsMap(t *testing.T) {
 	args := []string{"--mode=dev", "--port=8080", "--name=spage"}

@@ -30,7 +30,7 @@ func Unauthorized(c *app.RequestContext, message string) {
 	c.JSON(401, map[string]string{"message": message})
 }
 
-func Forbidden(c *app.RequestContext, message string, err error) {
+func Forbidden(c *app.RequestContext, message string) {
 	c.JSON(403, map[string]string{"message": message})
 }
 

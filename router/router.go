@@ -12,7 +12,7 @@ import (
 
 //var H *server.Hertz
 
-func emptyHandler() func(context.Context, *app.RequestContext) {
+func TODO() func(context.Context, *app.RequestContext) {
 	return func(ctx context.Context, c *app.RequestContext) {
 		c.JSON(200, utils.H{"message": "Hello World" + string(c.Path())})
 	}
@@ -24,44 +24,51 @@ func Run() error {
 	H.Use(middle.Cors())
 
 	apiV1 := H.Group("/api/v1")
+	apiV1.Use(middle.Auth.UseAuth())
+	apiV1WithoutAuth := H.Group("/api/v1")
 	{
+		apiV1WithoutAuth.POST("/user/register", TODO()) // Register
+		apiV1WithoutAuth.POST("/user/login", handlers.User.Login)
+
 		userGroup := apiV1.Group("/user")
 		{
-			userGroup.POST("/register", emptyHandler())    // Register
-			userGroup.POST("/login", emptyHandler())       // Login
-			userGroup.POST("/logout", emptyHandler())      // Logout
-			userGroup.PUT("", emptyHandler())              // Update user info
-			userGroup.DELETE("", emptyHandler())           // Delete user
-			userGroup.GET("/:id", emptyHandler())          // Get user info
-			userGroup.GET("/:id/projects", emptyHandler()) // Get user projects
-			userGroup.GET("/:id/orgs", emptyHandler())     // Get user organizations
+			userGroup.POST("/logout", TODO())            // Logout
+			userGroup.PUT("", TODO())                    // Update user info
+			userGroup.DELETE("", TODO())                 // Delete user
+			userGroup.GET("/*id", handlers.User.GetUser) // Get user info
+			userGroup.GET("/:id/projects", TODO())       // Get user projects
+			userGroup.GET("/:id/orgs", TODO())           // Get user organizations
 		}
-		orgGroup := apiV1.Group("/org", emptyHandler())
+		orgGroup := apiV1.Group("/org", TODO())
 		{
-			orgGroup.POST("", emptyHandler())             // Create organization
-			orgGroup.PUT("", emptyHandler())              // Update organization
-			orgGroup.DELETE("", emptyHandler())           // Delete organization
-			orgGroup.GET("/:id", emptyHandler())          // Get organization info
-			orgGroup.GET("/:id/projects", emptyHandler()) // Get organization projects
+			orgGroup.POST("", TODO())             // Create organization
+			orgGroup.PUT("", TODO())              // Update organization
+			orgGroup.DELETE("", TODO())           // Delete organization
+			orgGroup.GET("/:id", TODO())          // Get organization info
+			orgGroup.GET("/:id/projects", TODO()) // Get organization projects
 		}
-		projectGroup := apiV1.Group("/project", emptyHandler())
+		projectGroup := apiV1.Group("/project", TODO())
 		{
-			projectGroup.POST("", emptyHandler())    // Create project
-			projectGroup.PUT("", emptyHandler())     // Update project
-			projectGroup.DELETE("", emptyHandler())  // Delete project
-			projectGroup.GET("/:id", emptyHandler()) // Get project info
+			projectGroup.POST("", TODO())    // Create project
+			projectGroup.PUT("", TODO())     // Update project
+			projectGroup.DELETE("", TODO())  // Delete project
+			projectGroup.GET("/:id", TODO()) // Get project info
 		}
-		siteGroup := apiV1.Group("/site", emptyHandler())
+		siteGroup := apiV1.Group("/site", TODO())
 		{
-			siteRelease := siteGroup.Group("/release", emptyHandler())
+			siteRelease := siteGroup.Group("/release", TODO())
 			{
-				siteRelease.POST("", emptyHandler())   // Create site release
-				siteRelease.DELETE("", emptyHandler()) // Delete site release
+				siteRelease.POST("", TODO())   // Create site release
+				siteRelease.DELETE("", TODO()) // Delete site release
 			}
-			siteGroup.POST("", emptyHandler())    // Create site
-			siteGroup.PUT("", emptyHandler())     // Update site
-			siteGroup.DELETE("", emptyHandler())  // Delete site
-			siteGroup.GET("/:id", emptyHandler()) // Get site info
+			siteGroup.POST("", TODO())    // Create site
+			siteGroup.PUT("", TODO())     // Update site
+			siteGroup.DELETE("", TODO())  // Delete site
+			siteGroup.GET("/:id", TODO()) // Get site info
+		}
+		adminGroup := apiV1.Group("/admin").Use(middle.Auth.IsAdmin())
+		{
+			adminGroup.POST("/user", TODO()) // Create user
 		}
 	}
 

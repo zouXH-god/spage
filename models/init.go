@@ -11,6 +11,8 @@ func Migrate(db *gorm.DB) error {
 		&Project{},
 		// file.go
 		&File{},
+		// jwt
+		&Token{},
 		// oidc_config.go
 		&OIDCConfig{},
 		// site.go

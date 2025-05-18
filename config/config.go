@@ -2,7 +2,6 @@ package config
 
 import (
 	"errors"
-	"github.com/LiteyukiStudio/spage/utils"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"os"
@@ -14,10 +13,23 @@ const (
 )
 
 var (
-	ServerPort  string
-	Mode        = "prod"
-	JwtSecret   string
-	FrontendUrl string = "http://localhost:5173" // 前端开发服务器地址，仅在开发模式下使用
+	ServerPort string
+	Mode       = "prod"
+	JwtSecret  string
+
+	AdminUsername = "admin" // 管理员用户名
+	AdminPassword = "admin" // 管理员密码
+
+	EmailEnable   bool   // 是否启用邮箱发送
+	EmailUsername string // 邮箱用户名
+	EmailAddress  string // 邮箱地址
+	EmailHost     string // 邮箱服务器地址
+	EmailPort     string // 邮箱服务器端口
+	EmailPassword string // 邮箱密码
+	EmailSSL      bool   // 是否启用SSL
+
+	TokenExpireTime        = 3600 * 24  // session过期时间，单位秒
+	RefreshTokenExpireTime = 3600 * 144 // 刷新token过期时间，单位秒
 
 	// CommitHash 构件时注入的git commit hash
 	CommitHash = "develop"             // git commit hash 构建时注入
@@ -37,12 +49,27 @@ func Init() error {
 		}
 	}
 	// 初始化配置常量
-	ServerPort = GetString("serverPort", "8888")
-	JwtSecret = GetString("jwtSecret", "none-secret")
+	ServerPort = GetString("server.port", "8888")
+
 	Mode = GetString("mode", "prod")
+	// Admin配置项
+	AdminUsername = GetString("admin.username", "admin")
+	AdminPassword = GetString("admin.password", "admin")
+	// Email配置项
+	EmailEnable = GetBool("email.enable", false)
+	EmailUsername = GetString("email.username", "")
+	EmailAddress = GetString("email.address", "")
+	EmailHost = GetString("email.host", "")
+	EmailPort = GetString("email.port", "465")
+	EmailPassword = GetString("email.password", "")
+	EmailSSL = GetBool("email.ssl", true)
+	// Session过期时间
+	TokenExpireTime = GetInt("token.expire", TokenExpireTime)
+	RefreshTokenExpireTime = GetInt("token.refresh-expire", RefreshTokenExpireTime)
+	JwtSecret = GetString("token.secret", "none-secret")
 
 	// 从启动参数拿取一些配置项mode frontend-url
-	argsMap := utils.Cmd.GetArgsMap(os.Args[1:])
+	argsMap := Cmd.GetArgsMap(os.Args[1:])
 	queryKeys := []string{"mode", "frontend-url", "port"}
 	for _, key := range queryKeys {
 		if value, ok := argsMap[key]; ok {
@@ -51,8 +78,6 @@ func Init() error {
 				Mode = value
 			case "port":
 				ServerPort = value
-			case "frontend-url":
-				FrontendUrl = value
 			}
 		}
 	}

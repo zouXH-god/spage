@@ -13,6 +13,9 @@ type User struct {
 	Role          string          `gorm:"not null;default:member"`         // Global role of the user
 	Organizations []*Organization `gorm:"many2many:organization_members;"` // Belongs to many organizations
 	ProjectLimit  int             `gorm:"default:0"`                       // Project limit for the user, 0 means unlimited
+	Language      string          `gorm:"default:'zh-cn'"`                 // Language for the user, default is English
+	Flag          string          `gorm:"default:'0'"`                     // another flag for the system_admin
+	Password      *string         `gorm:"column:password"`                 // Password (hashed) for the user, only used for local authentication
 }
 
 func (User) TableName() string {
