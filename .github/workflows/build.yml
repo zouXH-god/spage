@@ -40,8 +40,8 @@ jobs:
           path: build/spage
           if-no-files-found: error
 
-  create_release:
-    name: Create Release
+  release:
+    name: Create and Publish Release
     runs-on: ubuntu-latest
     needs: build
 
@@ -50,6 +50,12 @@ jobs:
         id: extract_tag
         run: |
           echo "tag_name=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: spage-linux-amd64
+          path: build
 
       - name: Create Release
         id: create_release
@@ -65,24 +71,12 @@ jobs:
           draft: false
           prerelease: false
 
-  upload_release_asset:
-    name: Upload Release Asset
-    runs-on: ubuntu-latest
-    needs: create_release
-
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: spage-linux-amd64
-          path: build
-
-      - name: Upload to Release
+      - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ needs.create_release.outputs.upload_url }}
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: build/spage
           asset_name: spage-linux-amd64
           asset_content_type: application/octet-stream
