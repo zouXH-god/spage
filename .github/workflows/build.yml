@@ -1,0 +1,88 @@
+name: Build SPAGE with CGO
+
+on:
+  push:
+    tags:
+      - v*  # 只有在推送标签时触发，例如 v1.0.0
+
+jobs:
+  build:
+    name: Build Linux binary
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.24.3
+
+      - name: Install C dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc
+
+      - name: Build with CGO
+        env:
+          CGO_ENABLED: 1
+          GOOS: linux
+          GOARCH: amd64
+        run: |
+          mkdir -p build
+          go build -o build/spage main.go
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: spage-linux-amd64
+          path: build/spage
+          if-no-files-found: error
+
+  create_release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Extract tag name
+        id: extract_tag
+        run: |
+          echo "tag_name=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.extract_tag.outputs.tag_name }}
+          release_name: SPAGE ${{ steps.extract_tag.outputs.tag_name }}
+          body: |
+            SPAGE release ${{ steps.extract_tag.outputs.tag_name }}
+            Binary built with CGO_ENABLED=1 for Linux amd64
+          draft: false
+          prerelease: false
+
+  upload_release_asset:
+    name: Upload Release Asset
+    runs-on: ubuntu-latest
+    needs: create_release
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: spage-linux-amd64
+          path: build
+
+      - name: Upload to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create_release.outputs.upload_url }}
+          asset_path: build/spage
+          asset_name: spage-linux-amd64
+          asset_content_type: application/octet-stream
