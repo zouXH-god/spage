@@ -31,7 +31,7 @@ jobs:
           GOARCH: amd64
         run: |
           mkdir -p build
-          go build -o build/spage main.go
+          go build -o build/spage cmd/server/main.go
 
       - name: Upload binary
         uses: actions/upload-artifact@v4
