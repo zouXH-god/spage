@@ -13,10 +13,10 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o main  \
+RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o server \
     -ldflags="-X 'github.com/LiteyukiStudio/spage/config.CommitHash=$(git rev-parse HEAD)'  \
     -X 'github.com/LiteyukiStudio/spage/config.BuildTime=$(date "+%Y-%m-%d %H:%M:%S")'"  \
-    main.go
+    ./cmd/server
 
 # production
 FROM reg.liteyuki.icu/dockerhub/alpine:latest AS prod
@@ -27,10 +27,10 @@ WORKDIR /app
 
 RUN apk --no-cache add tzdata ca-certificates libc6-compat libgcc libstdc++
 
-COPY --from=builder /app/main /app/main
+COPY --from=builder /app/server /app/server
 
 EXPOSE 8888
 
-RUN chmod +x ./main
+RUN chmod +x ./server
 
-ENTRYPOINT ["./main"]
+ENTRYPOINT ["./server"]

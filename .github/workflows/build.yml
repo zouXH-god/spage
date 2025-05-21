@@ -12,17 +12,31 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
-          go-version: 1.24.3
+          go-version: 1.24.1
 
       - name: Install C dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y gcc
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Build frontend
+        run: |
+          git clone https://github.com/LiteyukiStudio/spage-web
+          cd spage-web
+          npm install pnpm@latest -g
+          pnpm install && pnpm build
+          mv dist/** ../static/dist
 
       - name: Build with CGO
         env:

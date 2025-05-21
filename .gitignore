@@ -11,3 +11,7 @@ config.yaml
 .vscode/
 
 data/
+
+# frontend dist
+
+static/dist/**
