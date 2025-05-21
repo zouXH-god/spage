@@ -12,6 +12,10 @@ config.yaml
 
 data/
 
+# frontend dev
+
+spage-web/
+
 # frontend dist
 
 static/dist/**
