@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"golang.org/x/crypto/bcrypt"
+	"unicode"
 )
 
 type PasswordType struct {
@@ -34,4 +35,42 @@ func (u *PasswordType) addSalt(password string, salt string) string {
 	hash := sha256.New()
 	hash.Write([]byte(combined))
 	return hex.EncodeToString(hash.Sum(nil))
+}
+
+// CheckPasswordComplexity 根据指定级别检查密码复杂度
+// password: 待检查的密码
+// level: 复杂度级别(1-4)
+// 返回值: 是否满足复杂度要求
+func CheckPasswordComplexity(password string, level int) bool {
+	if len(password) <= 8 {
+		return false
+	}
+
+	// 定义各种字符类型的检查标志
+	var (
+		hasLower   bool
+		hasUpper   bool
+		hasDigit   bool
+		hasSpecial bool
+		typesUsed  = 0
+	)
+
+	for _, char := range password {
+		switch {
+		case unicode.IsLower(char) && !hasLower:
+			hasLower = true
+			typesUsed++
+		case unicode.IsUpper(char) && !hasUpper:
+			hasUpper = true
+			typesUsed++
+		case unicode.IsDigit(char) && !hasDigit:
+			hasDigit = true
+			typesUsed++
+		case unicode.IsPunct(char) || unicode.IsSymbol(char) && !hasSpecial:
+			hasSpecial = true
+			typesUsed++
+		}
+	}
+
+	return typesUsed >= level
 }

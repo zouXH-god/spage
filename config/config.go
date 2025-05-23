@@ -1,11 +1,13 @@
 package config
 
 import (
+	"embed"
 	"errors"
 	"github.com/LiteyukiStudio/spage/constants"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"os"
+	"path/filepath"
 )
 
 const ()
@@ -39,7 +41,37 @@ var (
 	// CommitHash 构件时注入的git commit hash
 	CommitHash = "develop"             // git commit hash 构建时注入
 	BuildTime  = "0000-00-00 00:00:00" // 构建时间
+	//go:embed config.example.yaml
+	configExample embed.FS
 )
+
+// InitConfig 初始化配置文件
+func InitConfig() error {
+	configPath := "config.yaml" // 目标配置文件路径
+
+	// 如果 config.yaml 已存在，直接返回
+	if _, err := os.Stat(configPath); err == nil {
+		return nil
+	}
+
+	// 读取嵌入的示例配置
+	data, err := configExample.ReadFile("config.example.yaml")
+	if err != nil {
+		return errors.New("failed to read embedded config: " + err.Error())
+	}
+
+	// 确保目录存在（如果 config.yaml 不在当前目录）
+	if err := os.MkdirAll(filepath.Dir(configPath), 0755); err != nil {
+		return errors.New("failed to create config directory: " + err.Error())
+	}
+
+	// 写入 config.yaml
+	if err := os.WriteFile(configPath, data, 0644); err != nil {
+		return errors.New("failed to write config file: " + err.Error())
+	}
+
+	return nil
+}
 
 func Init() error {
 	// 设置配置文件路径
@@ -50,6 +82,10 @@ func Init() error {
 	if err := viper.ReadInConfig(); err != nil {
 		var configFileNotFoundError viper.ConfigFileNotFoundError
 		if errors.As(err, &configFileNotFoundError) {
+			err := InitConfig()
+			if err != nil {
+				return err
+			}
 			return errors.New("config file not found")
 		}
 	}

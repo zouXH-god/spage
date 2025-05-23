@@ -20,7 +20,7 @@ admin:
 
 # 数据库配置
 database:
-  driver: "sqlite"       # 数据库驱动，支持：sqlite/postgres/mysql
+  driver: "sqlite"       # 数据库驱动，支持：sqlite/postgres
   path: "./data/data.db" # SQLite数据库文件路径(仅sqlite驱动需要)
   host: "postgres"       # 数据库主机地址
   port: 5432             # 数据库端口

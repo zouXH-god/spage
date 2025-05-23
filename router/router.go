@@ -27,7 +27,7 @@ func Run() error {
 	apiV1.Use(middle.Auth.UseAuth())
 	apiV1WithoutAuth := H.Group("/api/v1")
 	{
-		apiV1WithoutAuth.POST("/user/register", TODO()) // Register
+		apiV1WithoutAuth.POST("/user/register", handlers.User.Register) // Register
 		apiV1WithoutAuth.POST("/user/login", handlers.User.Login)
 		apiV1WithoutAuth.GET("/user/captcha", handlers.User.GetCaptcha) // Get captcha
 
