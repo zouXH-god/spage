@@ -7,9 +7,9 @@ import (
 	"github.com/LiteyukiStudio/spage/constants"
 	"github.com/LiteyukiStudio/spage/models"
 	"github.com/LiteyukiStudio/spage/utils"
+	"github.com/glebarez/sqlite" // 基于Go的 SQLite 驱动
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/postgres"
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"os"
