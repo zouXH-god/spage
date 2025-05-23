@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/LiteyukiStudio/spage/config"
 	"github.com/LiteyukiStudio/spage/middle"
+	"github.com/LiteyukiStudio/spage/models"
 	"github.com/LiteyukiStudio/spage/resps"
 	"github.com/LiteyukiStudio/spage/store"
 	"github.com/LiteyukiStudio/spage/utils"
@@ -103,7 +104,46 @@ func (UserApi) GetUser(ctx context.Context, c *app.RequestContext) {
 }
 
 func (UserApi) Register(ctx context.Context, c *app.RequestContext) {
-
+	// 接收参数
+	request := &RegisterReq{}
+	err := c.BindForm(request)
+	if err != nil {
+		resps.BadRequest(c, "Parameter error")
+		return
+	}
+	// TODO 校验邮箱验证码
+	// 校验密码复杂度
+	passwordLevel := config.GetInt("password_complexity", 3)
+	if !utils.CheckPasswordComplexity(request.Password, passwordLevel) {
+		resps.BadRequest(c, "Password complexity is too low")
+		return
+	}
+	// 判断用户名是否存在
+	if store.User.IsUserNameExist(request.Username) {
+		resps.BadRequest(c, "Username already exists")
+		return
+	}
+	// 创建用户
+	hashPassword, err := utils.Password.HashPassword(request.Password, config.JwtSecret)
+	if err != nil {
+		resps.InternalServerError(c, "Failed to hash password")
+		return
+	}
+	err = store.User.CreateUser(&models.User{
+		Name:     request.Username,
+		Email:    &request.Email,
+		Password: &hashPassword,
+	})
+	if err != nil {
+		resps.InternalServerError(c, "Failed to create user")
+		return
+	}
+	resps.Ok(c, "Register successful", map[string]any{
+		"user": UserDTO{
+			Name:  request.Username,
+			Email: &request.Email,
+		},
+	})
 }
 
 func (UserApi) GetCaptcha(ctx context.Context, c *app.RequestContext) {
@@ -112,4 +152,8 @@ func (UserApi) GetCaptcha(ctx context.Context, c *app.RequestContext) {
 		"site_key": config.CaptchaSiteKey,
 		"url":      config.CaptchaUrl,
 	})
+}
+
+func (UserApi) UpdateUser(ctx context.Context, c *app.RequestContext) {
+
 }

@@ -30,6 +30,16 @@ func (userType) GetUserByName(name string) (user *models.User, err error) {
 	return user, nil
 }
 
+// IsUserNameExist 判断用户名是否存在
+func (userType) IsUserNameExist(name string) bool {
+	var count int64
+	err := DB.Model(&models.User{}).Where("name = ?", name).Count(&count).Error
+	if err != nil {
+		return false
+	}
+	return count > 0
+}
+
 // GetUserByID 根据ID获取用户
 func (userType) GetUserByID(id uint) (user *models.User, err error) {
 	user = &models.User{} // 初始化指针
