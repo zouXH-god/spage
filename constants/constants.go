@@ -9,6 +9,7 @@ const (
 	CaptchaTypeTurnstile = "turnstile"
 	CaptchaTypeReCaptcha = "recaptcha"
 	CaptchaTypeHCaptcha  = "hcaptcha"
+	CaptchaDevPasscode   = "dev-captcha"
 	ModeDev              = "dev"
 	ModeProd             = "prod"
 )

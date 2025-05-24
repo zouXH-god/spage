@@ -21,7 +21,7 @@ var User = UserApi{}
 func (UserApi) Login(ctx context.Context, c *app.RequestContext) {
 	loginReq := &LoginReq{}
 	// TODO: 这里需要验证验证码
-	err := c.BindForm(loginReq)
+	err := c.BindJSON(loginReq)
 	if err != nil {
 		resps.BadRequest(c, "Parameter error")
 		return
@@ -121,7 +121,7 @@ func (UserApi) GetUser(ctx context.Context, c *app.RequestContext) {
 func (UserApi) Register(ctx context.Context, c *app.RequestContext) {
 	// 接收参数
 	request := &RegisterReq{}
-	err := c.BindForm(request)
+	err := c.BindJSON(request)
 	if err != nil {
 		resps.BadRequest(c, "Parameter error")
 		return
