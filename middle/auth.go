@@ -15,9 +15,9 @@ import (
 	"time"
 )
 
-type AuthType struct{}
+type authType struct{}
 
-var Auth = AuthType{}
+var Auth = authType{}
 
 // PersistentHandler 持久化处理函数，使用依赖注入到 utils 中防止循环引用
 func PersistentHandler(userID uint) (*models.Token, error) {
@@ -34,7 +34,7 @@ func RevokeChecker(tokenID uint) bool {
 }
 
 // UseAuth 中间件函数
-func (AuthType) UseAuth() app.HandlerFunc {
+func (authType) UseAuth() app.HandlerFunc {
 	return func(ctx context.Context, c *app.RequestContext) {
 		// 1. 检查认证方式
 		authHeader := string(c.GetHeader("Authorization"))
@@ -140,7 +140,7 @@ func (AuthType) UseAuth() app.HandlerFunc {
 	}
 }
 
-func (AuthType) IsAdmin() app.HandlerFunc {
+func (authType) IsAdmin() app.HandlerFunc {
 	return func(ctx context.Context, c *app.RequestContext) {
 		user := Auth.GetUser(ctx, c)
 		if user.Role != constants.RoleAdmin {
@@ -153,7 +153,7 @@ func (AuthType) IsAdmin() app.HandlerFunc {
 }
 
 // GetUser 从已认证的上下文中获取用户信息,如果用户不存在则终止请求并返回
-func (AuthType) GetUser(ctx context.Context, c *app.RequestContext) *models.User {
+func (authType) GetUser(ctx context.Context, c *app.RequestContext) *models.User {
 	userID := ctx.Value("user").(uint)
 	if userID == 0 {
 		resps.Unauthorized(c, resps.TargetNotFound)

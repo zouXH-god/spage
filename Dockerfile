@@ -1,7 +1,5 @@
 # build
-FROM reg.liteyuki.icu/dockerhub/golang:1.24.2-alpine3.21 AS builder
-
-ENV TZ=Asia/Chongqing
+FROM golang:1.24.2-alpine3.21 AS builder
 
 WORKDIR /app
 
@@ -14,14 +12,12 @@ RUN go mod download
 COPY . .
 
 RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o server \
-    -ldflags="-X 'github.com/LiteyukiStudio/spage/config.CommitHash=$(git rev-parse HEAD)'  \
-    -X 'github.com/LiteyukiStudio/spage/config.BuildTime=$(date "+%Y-%m-%d %H:%M:%S")'"  \
+    -ldflags="-X './config.CommitHash=$(git rev-parse HEAD)'  \
+    -X './config.BuildTime=$(date "+%Y-%m-%d %H:%M:%S")'"  \
     ./cmd/server
 
 # production
-FROM reg.liteyuki.icu/dockerhub/alpine:latest AS prod
-
-ENV TZ=Asia/Chongqing
+FROM alpine:latest AS prod
 
 WORKDIR /app
 

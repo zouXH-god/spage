@@ -68,6 +68,21 @@ func (UserApi) Login(ctx context.Context, c *app.RequestContext) {
 	}
 }
 
+func (UserApi) Logout(ctx context.Context, c *app.RequestContext) {
+	// 删除cookie
+	c.SetCookie("token", "", -1, "/", "", protocol.CookieSameSiteLaxMode, true, true)
+	c.SetCookie("refresh_token", "", -1, "/", "", protocol.CookieSameSiteLaxMode, true, true)
+	resps.Ok(c, "Logout successful")
+}
+
+func (UserApi) GetCaptcha(ctx context.Context, c *app.RequestContext) {
+	resps.Ok(c, "ok", map[string]any{
+		"provider": config.CaptchaType,
+		"site_key": config.CaptchaSiteKey,
+		"url":      config.CaptchaUrl,
+	})
+}
+
 func (UserApi) GetUser(ctx context.Context, c *app.RequestContext) {
 	userID := c.Param("id")
 	crtUser := middle.Auth.GetUser(ctx, c)
@@ -143,14 +158,6 @@ func (UserApi) Register(ctx context.Context, c *app.RequestContext) {
 			Name:  request.Username,
 			Email: &request.Email,
 		},
-	})
-}
-
-func (UserApi) GetCaptcha(ctx context.Context, c *app.RequestContext) {
-	resps.Ok(c, "ok", map[string]any{
-		"provider": config.CaptchaType,
-		"site_key": config.CaptchaSiteKey,
-		"url":      config.CaptchaUrl,
 	})
 }
 

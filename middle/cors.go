@@ -8,7 +8,11 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func Cors() app.HandlerFunc {
+type corsType struct{}
+
+var Cors = corsType{}
+
+func (corsType) UseCors() app.HandlerFunc {
 	var allowedOrigins []string
 	if config.Mode == constants.ModeDev {
 		allowedOrigins = []string{config.FrontEndURL}

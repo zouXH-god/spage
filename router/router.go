@@ -21,21 +21,19 @@ func TODO() func(context.Context, *app.RequestContext) {
 func Run() error {
 	// 运行路由
 	H := server.New(server.WithHostPorts(":" + config.ServerPort))
-	H.Use(middle.Cors())
-
+	H.Use(middle.Cors.UseCors(), middle.Trace.UseTrace())
 	apiV1 := H.Group("/api/v1")
 	apiV1.Use(middle.Auth.UseAuth())
 	apiV1WithoutAuth := H.Group("/api/v1")
 	{
-		apiV1WithoutAuth.POST("/user/register", handlers.User.Register) // Register
-		apiV1WithoutAuth.POST("/user/login", handlers.User.Login)
+		apiV1WithoutAuth.POST("/user/register", handlers.User.Register).Use(middle.Captcha.UseCaptcha()) // Register
+		apiV1WithoutAuth.POST("/user/login", handlers.User.Login).Use(middle.Captcha.UseCaptcha())
 		apiV1WithoutAuth.GET("/user/captcha", handlers.User.GetCaptcha) // Get captcha
-
+		apiV1WithoutAuth.POST("/user/logout", handlers.User.Logout)
 		userGroup := apiV1.Group("/user")
 		{
-			userGroup.POST("/logout", TODO()) // Logout
-			userGroup.PUT("", TODO())         // Update user info
-			userGroup.DELETE("", TODO())      // Delete user
+			userGroup.PUT("", TODO())    // Update user info
+			userGroup.DELETE("", TODO()) // Delete user
 			userGroup.GET("", handlers.User.GetUser)
 			userGroup.GET("/:id", handlers.User.GetUser) // Get user info
 			userGroup.GET("/:id/projects", TODO())       // Get user projects
