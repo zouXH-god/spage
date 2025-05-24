@@ -9,10 +9,10 @@ type User struct {
 	DisplayName   *string         `gorm:"column:display_name"`             // Display name for the user
 	Email         *string         `gorm:"unique"`                          // Email address for the user, only user's email is unique (for oidc authentication)
 	Description   string          `gorm:"default:'No description.'"`       // Description of the user
-	Avatar        *string         `gorm:"column:avatar"`                   // Leave blank to use Gravatar
+	AvatarURL     *string         `gorm:"column:avatar_url"`               // Leave blank to use Gravatar
 	Role          string          `gorm:"not null;default:member"`         // Global role of the user
 	Organizations []*Organization `gorm:"many2many:organization_members;"` // Belongs to many organizations
-	ProjectLimit  int             `gorm:"default:0"`                       // Project limit for the user, 0 means unlimited
+	ProjectLimit  int             `gorm:"default:-1"`                      // Project limit for the user, 0 means unlimited
 	Language      string          `gorm:"default:'zh-cn'"`                 // Language for the user, default is English
 	Flag          string          `gorm:"default:'0'"`                     // another flag for the system_admin
 	Password      *string         `gorm:"column:password"`                 // Password (hashed) for the user, only used for local authentication
@@ -29,7 +29,7 @@ type Organization struct {
 	DisplayName  *string `gorm:"column:display_name"`             // Display name for the organization
 	Email        *string `gorm:"column:email"`                    // Email address for the organizations
 	Description  string  `gorm:"default:'No description.'"`       // Description of the organization
-	Avatar       *string `gorm:"column:avatar"`                   // Leave blank to use Gravatar
+	AvatarURL    *string `gorm:"column:avatar_url"`               // Leave blank to use Gravatar
 	Members      []*User `gorm:"many2many:organization_members;"` // Members of the organization, contains the creator
 	Owners       []User  `gorm:"many2many:organization_owners;"`  // Owners of the organization, no reverse relation, contains the creator
 	ProjectLimit int     `gorm:"default:0"`                       // Project limit for the organization, 0: follow the policy, -1: unlimited

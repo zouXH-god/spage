@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"github.com/LiteyukiStudio/spage/config"
+	"github.com/LiteyukiStudio/spage/constants"
 	"github.com/LiteyukiStudio/spage/middle"
 	"github.com/LiteyukiStudio/spage/models"
 	"github.com/LiteyukiStudio/spage/resps"
@@ -83,6 +84,69 @@ func (UserApi) GetCaptcha(ctx context.Context, c *app.RequestContext) {
 	})
 }
 
+func (UserApi) GetOrgs(ctx context.Context, c *app.RequestContext) {
+	userID := c.Param("id")
+	crtUser := middle.Auth.GetUser(ctx, c)
+	if userID != strconv.Itoa(int(crtUser.ID)) {
+		resps.Forbidden(c, resps.PermissionDenied)
+		return
+	}
+	page, limit := utils.Ctx.GetPageLimit(c)
+
+	orgs, err := store.Org.ListByUserID(userID, page, limit)
+	if err != nil {
+		resps.InternalServerError(c, "Failed to get organizations")
+		return
+	}
+
+	resps.Ok(c, resps.OK, map[string]any{
+		"organizations": func() (orgDTOs []OrganizationDTO) {
+			for _, org := range orgs {
+				orgDTOs = append(orgDTOs, OrganizationDTO{
+					ID:           org.ID,
+					Name:         org.Name,
+					DisplayName:  org.DisplayName,
+					Email:        org.Email,
+					Description:  org.Description,
+					AvatarURL:    org.AvatarURL,
+					ProjectLimit: org.ProjectLimit,
+				})
+			}
+			return
+		}(),
+	})
+}
+
+func (UserApi) GetProjects(ctx context.Context, c *app.RequestContext) {
+	userID := c.Param("id")
+	crtUser := middle.Auth.GetUser(ctx, c)
+	if userID != strconv.Itoa(int(crtUser.ID)) {
+		resps.Forbidden(c, resps.PermissionDenied)
+	}
+	page, limit := utils.Ctx.GetPageLimit(c)
+
+	projects, err := store.Project.ListByOwner(constants.OwnerTypeUser, userID, page, limit)
+	if err != nil {
+		resps.InternalServerError(c, "Failed to get projects")
+	}
+	resps.Ok(c, resps.OK, map[string]any{
+		"projects": func() (projectDTOs []ProjectDTO) {
+			for _, project := range projects {
+				projectDTOs = append(projectDTOs, ProjectDTO{
+					ID:          project.ID,
+					Name:        project.Name,
+					DisplayName: project.DisplayName,
+					Description: project.Description,
+					OwnerID:     project.OwnerID,
+					OwnerType:   project.OwnerType,
+					SiteLimit:   project.SiteLimit,
+				})
+			}
+			return
+		}(),
+	})
+}
+
 func (UserApi) GetUser(ctx context.Context, c *app.RequestContext) {
 	userID := c.Param("id")
 	crtUser := middle.Auth.GetUser(ctx, c)
@@ -98,7 +162,7 @@ func (UserApi) GetUser(ctx context.Context, c *app.RequestContext) {
 				DisplayName: crtUser.DisplayName,
 				Email:       crtUser.Email,
 				Description: crtUser.Description,
-				Avatar:      crtUser.Avatar,
+				Avatar:      crtUser.AvatarURL,
 				Role:        crtUser.Role,
 				Language:    crtUser.Language,
 			},
@@ -112,7 +176,7 @@ func (UserApi) GetUser(ctx context.Context, c *app.RequestContext) {
 				DisplayName: crtUser.DisplayName,
 				Email:       crtUser.Email,
 				Description: crtUser.Description,
-				Avatar:      crtUser.Avatar,
+				Avatar:      crtUser.AvatarURL,
 			},
 		})
 	}
@@ -173,7 +237,7 @@ func (UserApi) UpdateUser(ctx context.Context, c *app.RequestContext) {
 	crtUser.DisplayName = userDTO.DisplayName
 	crtUser.Email = userDTO.Email
 	crtUser.Description = userDTO.Description
-	crtUser.Avatar = userDTO.Avatar
+	crtUser.AvatarURL = userDTO.Avatar
 	crtUser.Language = userDTO.Language
 
 	if err := store.User.Update(crtUser); err != nil {

@@ -32,13 +32,11 @@ func Run() error {
 		apiV1WithoutAuth.POST("/user/logout", handlers.User.Logout)
 		userGroup := apiV1.Group("/user")
 		{
-			userGroup.PUT("", handlers.User.UpdateUser) // Update user info
-			// userGroup.DELETE("", )                // Delete user
-			userGroup.GET("", handlers.User.GetUser)
-			userGroup.GET("/:id", handlers.User.GetUser) // Get user info
-			userGroup.GET("/:id/projects", TODO())       // Get user projects
-			userGroup.GET("/:id/orgs", TODO())           // Get user organizations
-			userGroup.POST("/check")
+			userGroup.PUT("", handlers.User.UpdateUser)               // Update user info
+			userGroup.GET("", handlers.User.GetUser)                  // Get user info (self)
+			userGroup.GET("/:id", handlers.User.GetUser)              // Get user info
+			userGroup.GET("/:id/projects", handlers.User.GetProjects) // Get user projects
+			userGroup.GET("/:id/orgs", handlers.User.GetOrgs)         // Get user organizations
 		}
 		orgGroup := apiV1.Group("/org", TODO())
 		{

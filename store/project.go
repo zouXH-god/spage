@@ -20,8 +20,8 @@ func (p *projectType) Create(project *models.Project) (err error) {
 	return p.db.Create(project).Error
 }
 
-// GetByOwner 通过用户ID获取项目列表
-func (p *projectType) GetByOwner(ownerType string, ownerID uint) (projects []models.Project, err error) {
+// ListByOwner 通过用户ID获取项目列表，支持分页和从新到旧排序
+func (p *projectType) ListByOwner(ownerType, ownerID string, page, limit int) (projects []models.Project, err error) {
 	tableName := ""
 	switch ownerType {
 	case constants.OwnerTypeUser:
@@ -32,6 +32,14 @@ func (p *projectType) GetByOwner(ownerType string, ownerID uint) (projects []mod
 		err = fmt.Errorf("invalid owner type")
 		return
 	}
-	err = p.db.Where("owner_type = ? AND owner_id = ?", tableName, ownerID).Find(&projects).Error
+
+	projects, _, err = Paginate[models.Project](
+		p.db,
+		page,
+		limit,
+		"owner_type = ? AND owner_id = ?",
+		tableName,
+		ownerID,
+	)
 	return
 }

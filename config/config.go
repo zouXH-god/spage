@@ -30,10 +30,12 @@ var (
 	EmailPassword string // 邮箱密码
 	EmailSSL      bool   // 是否启用SSL
 
-	CaptchaType      = constants.CaptchaTypeDisable // 验证码类型，支持turnstile、recaptcha和hcaptcha
-	CaptchaSiteKey   string                         // reCAPTCHA v3的站点密钥
-	CaptchaSecretKey string                         // reCAPTCHA v3的密钥
-	CaptchaUrl       string                         // for mcaptcha
+	PageLimit int = 40
+
+	CaptchaType             = constants.CaptchaTypeDisable // 验证码类型，支持turnstile、recaptcha和hcaptcha
+	CaptchaSiteKey   string                                // reCAPTCHA v3的站点密钥
+	CaptchaSecretKey string                                // reCAPTCHA v3的密钥
+	CaptchaUrl       string                                // for mcaptcha
 
 	TokenExpireTime        = 3600 * 24  // session过期时间，单位秒
 	RefreshTokenExpireTime = 3600 * 144 // 刷新token过期时间，单位秒
@@ -110,6 +112,8 @@ func Init() error {
 	EmailPort = GetString("email.port", "465")
 	EmailPassword = GetString("email.password", "")
 	EmailSSL = GetBool("email.ssl", true)
+	// 分页查询限制
+	PageLimit = GetInt("page-limit", PageLimit)
 	// Session过期时间
 	TokenExpireTime = GetInt("token.expire", TokenExpireTime)
 	RefreshTokenExpireTime = GetInt("token.refresh-expire", RefreshTokenExpireTime)
@@ -140,6 +144,8 @@ func Init() error {
 	logrus.SetLevel(logLevel)
 	logrus.Info("Log level set to: ", logLevel)
 	logrus.Debugln("LogLevel is: ", LogLevel)
+	// 其他配置项合法校验流程
+	// ...
 	return nil
 }
 
