@@ -85,7 +85,7 @@ func Init() error {
 		Password: &hashedPassword,
 		Role:     constants.RoleAdmin,
 	}
-	if err = User.UpdateSystemAdminUser(user); err != nil {
+	if err = User.UpdateSystemAdmin(user); err != nil {
 		logrus.Error("Failed to update admin user:", err)
 		return err
 	}

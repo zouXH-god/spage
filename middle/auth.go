@@ -161,7 +161,7 @@ func (authType) GetUser(ctx context.Context, c *app.RequestContext) *models.User
 		return nil
 	}
 
-	user, err := store.User.GetUserByID(uint(userID))
+	user, err := store.User.GetByID(uint(userID))
 	if err != nil {
 		resps.Unauthorized(c, resps.TargetNotFound)
 		c.Abort()

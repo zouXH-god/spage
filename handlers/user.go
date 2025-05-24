@@ -30,9 +30,9 @@ func (UserApi) Login(ctx context.Context, c *app.RequestContext) {
 		resps.BadRequest(c, "Username or password cannot be empty")
 		return
 	}
-	user, err := store.User.GetUserByName(loginReq.Username)
+	user, err := store.User.GetByName(loginReq.Username)
 	if err != nil {
-		user, err = store.User.GetUserByEmail(loginReq.Username)
+		user, err = store.User.GetByEmail(loginReq.Username)
 		if err != nil {
 			resps.BadRequest(c, "User does not exist")
 			return
@@ -95,7 +95,7 @@ func (UserApi) GetUser(ctx context.Context, c *app.RequestContext) {
 			"user": UserDTO{
 				ID:          crtUser.ID,
 				Name:        crtUser.Name,
-				DisplayName: crtUser.Name,
+				DisplayName: crtUser.DisplayName,
 				Email:       crtUser.Email,
 				Description: crtUser.Description,
 				Avatar:      crtUser.Avatar,
@@ -109,7 +109,7 @@ func (UserApi) GetUser(ctx context.Context, c *app.RequestContext) {
 			"user": UserDTO{
 				ID:          crtUser.ID,
 				Name:        crtUser.Name,
-				DisplayName: crtUser.Name,
+				DisplayName: crtUser.DisplayName,
 				Email:       crtUser.Email,
 				Description: crtUser.Description,
 				Avatar:      crtUser.Avatar,
@@ -127,14 +127,14 @@ func (UserApi) Register(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	// TODO 校验邮箱验证码
-	// 校验密码复杂度
+	// TODO 校验密码复杂度
 	passwordLevel := config.GetInt("password_complexity", 3)
 	if !utils.CheckPasswordComplexity(request.Password, passwordLevel) {
 		resps.BadRequest(c, "Password complexity is too low")
 		return
 	}
 	// 判断用户名是否存在
-	if store.User.IsUserNameExist(request.Username) {
+	if store.User.IsNameExist(request.Username) {
 		resps.BadRequest(c, "Username already exists")
 		return
 	}
@@ -144,7 +144,7 @@ func (UserApi) Register(ctx context.Context, c *app.RequestContext) {
 		resps.InternalServerError(c, "Failed to hash password")
 		return
 	}
-	err = store.User.CreateUser(&models.User{
+	err = store.User.Create(&models.User{
 		Name:     request.Username,
 		Email:    &request.Email,
 		Password: &hashPassword,
@@ -162,5 +162,24 @@ func (UserApi) Register(ctx context.Context, c *app.RequestContext) {
 }
 
 func (UserApi) UpdateUser(ctx context.Context, c *app.RequestContext) {
+	userDTO := &UserDTO{}
+	if err := c.BindJSON(userDTO); err != nil {
+		resps.BadRequest(c, resps.ParameterError)
+		return
+	}
 
+	crtUser := middle.Auth.GetUser(ctx, c)
+	crtUser.Name = userDTO.Name
+	crtUser.DisplayName = userDTO.DisplayName
+	crtUser.Email = userDTO.Email
+	crtUser.Description = userDTO.Description
+	crtUser.Avatar = userDTO.Avatar
+	crtUser.Language = userDTO.Language
+
+	if err := store.User.Update(crtUser); err != nil {
+		resps.InternalServerError(c, "Failed to update user")
+		return
+	}
+
+	resps.Ok(c, resps.OK, map[string]any{})
 }

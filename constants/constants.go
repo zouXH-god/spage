@@ -12,4 +12,7 @@ const (
 	CaptchaDevPasscode   = "dev-captcha"
 	ModeDev              = "dev"
 	ModeProd             = "prod"
+
+	OwnerTypeUser = "user"
+	OwnerTypeOrg  = "organization"
 )

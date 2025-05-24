@@ -7,90 +7,90 @@ import (
 	"gorm.io/gorm"
 )
 
-type userType struct{}
-
-var User = userType{}
-
-// CreateUser 创建用户
-func (userType) CreateUser(user *models.User) (err error) {
-	err = DB.Create(user).Error
-	if err != nil {
-		return err
-	}
-	return nil
+type userType struct {
+	db *gorm.DB
 }
 
-// GetUserByName 根据名称获取用户
-func (userType) GetUserByName(name string) (user *models.User, err error) {
+var User = userType{
+	db: DB,
+}
+
+// Create 创建用户
+func (u *userType) Create(user *models.User) (err error) {
+	return u.db.Create(user).Error
+}
+
+// GetByName 根据名称获取用户
+func (u *userType) GetByName(name string) (user *models.User, err error) {
 	user = &models.User{} // 初始化指针
-	err = DB.Where("name = ?", name).First(user).Error
+	err = u.db.Where("name = ?", name).First(user).Error
 	if err != nil {
 		return nil, err // 出错时返回nil
 	}
 	return user, nil
 }
 
-// IsUserNameExist 判断用户名是否存在
-func (userType) IsUserNameExist(name string) bool {
+// IsNameExist 判断用户名是否存在
+func (u *userType) IsNameExist(name string) bool {
 	var count int64
-	err := DB.Model(&models.User{}).Where("name = ?", name).Count(&count).Error
+	err := u.db.Model(&models.User{}).Where("name = ?", name).Count(&count).Error
 	if err != nil {
 		return false
 	}
 	return count > 0
 }
 
-// GetUserByID 根据ID获取用户
-func (userType) GetUserByID(id uint) (user *models.User, err error) {
+// GetByID 根据ID获取用户
+func (u *userType) GetByID(id uint) (user *models.User, err error) {
 	user = &models.User{} // 初始化指针
-	err = DB.Where("id = ?", id).First(user).Error
+	err = u.db.Where("id = ?", id).First(user).Error
 	if err != nil {
 		return nil, err // 出错时返回nil
 	}
 	return user, nil
 }
 
-// GetUserByEmail 根据邮箱获取用户
-func (userType) GetUserByEmail(email string) (user *models.User, err error) {
+// GetByEmail 根据邮箱获取用户
+func (u *userType) GetByEmail(email string) (user *models.User, err error) {
 	user = &models.User{} // 初始化指针
-	err = DB.Where("email = ?", email).First(user).Error
+	err = u.db.Where("email = ?", email).First(user).Error
 	if err != nil {
 		return nil, err // 出错时返回nil
 	}
 	return user, nil
 }
 
-// UpdateUser 更新用户信息
-func (userType) UpdateUser(user *models.User) (err error) {
-	err = DB.Save(user).Error
+// Update 更新用户信息
+func (u *userType) Update(user *models.User) (err error) {
+	err = u.db.Save(user).Error
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-// DeleteUserByID 根据ID删除用户
-func (userType) DeleteUserByID(id uint) (err error) {
-	err = DB.Delete(&models.User{}, id).Error
+// DeleteByID 根据ID删除用户
+func (u *userType) DeleteByID(id uint) (err error) {
+	err = u.db.Delete(&models.User{}, id).Error
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-// UpdateSystemAdminUser 更新系统管理员用户，不存在则创建
-func (userType) UpdateSystemAdminUser(user *models.User) (err error) {
+// UpdateSystemAdmin 更新系统管理员用户，不存在则创建
+func (u *userType) UpdateSystemAdmin(user *models.User) (err error) {
 	// 设置该用户为系统管理员
 	user.Flag = constants.FlagSystemAdmin
 	user.Role = constants.RoleAdmin
 	// 尝试查找系统管理员
 	var existingAdmin models.User
-	result := DB.Where("flag = ?", constants.FlagSystemAdmin).First(&existingAdmin)
+	result := u.db.Where("flag = ?", constants.FlagSystemAdmin).First(&existingAdmin)
 	if result.Error != nil {
 		// 如果不存在系统管理员（记录未找到），则创建一个
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			// 创建新的系统管理员
-			return DB.Create(user).Error
+			return u.db.Create(user).Error
 		}
 		// 其他错误则直接返回
 		return result.Error
@@ -98,5 +98,5 @@ func (userType) UpdateSystemAdminUser(user *models.User) (err error) {
 	// 系统管理员已存在，更新信息
 	// 保留ID，更新其他字段
 	user.ID = existingAdmin.ID
-	return DB.Model(&existingAdmin).Updates(user).Error
+	return u.db.Model(&existingAdmin).Updates(user).Error
 }

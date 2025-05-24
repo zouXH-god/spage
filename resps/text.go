@@ -5,4 +5,5 @@ const (
 	MissingParameter = "Missing parameter"
 	TargetNotFound   = "Target not found"
 	OK               = "OK"
+	PermissionDenied = "PermissionDenied"
 )
