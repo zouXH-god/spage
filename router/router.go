@@ -40,11 +40,13 @@ func Run() error {
 		}
 		orgGroup := apiV1.Group("/org", TODO())
 		{
-			orgGroup.POST("", TODO())             // Create organization
-			orgGroup.PUT("", TODO())              // Update organization
-			orgGroup.DELETE("", TODO())           // Delete organization
-			orgGroup.GET("/:id", TODO())          // Get organization info
-			orgGroup.GET("/:id/projects", TODO()) // Get organization projects
+			orgGroup.POST("", handlers.Org.CreateOrganization)                                               // Create organization
+			orgGroup.PUT("/:id", handlers.Org.UserIsOrgOwner, handlers.Org.UpdateOrganization)               // Update organization
+			orgGroup.DELETE("/:id", handlers.Org.UserIsOrgOwner, handlers.Org.DeleteOrganization)            // Delete organization
+			orgGroup.GET("/:id", handlers.Org.UserIsOrgMember, handlers.Org.GetOrganization)                 // Get organization info
+			orgGroup.GET("/:id/projects", handlers.Org.UserIsOrgMember, handlers.Org.GetOrganizationProject) // Get organization projects
+			orgGroup.PUT("/:id/users", handlers.Org.UserIsOrgOwner, handlers.Org.AddOrganizationUser)        // Add organization member or owner
+			orgGroup.DELETE("/:id/users", handlers.Org.UserIsOrgOwner, handlers.Org.DeleteOrganizationUser)  // Remove organization member or owner
 		}
 		projectGroup := apiV1.Group("/project", TODO())
 		{

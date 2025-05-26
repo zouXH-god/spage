@@ -21,7 +21,7 @@ func (p *projectType) Create(project *models.Project) (err error) {
 }
 
 // ListByOwner 通过用户ID获取项目列表，支持分页和从新到旧排序
-func (p *projectType) ListByOwner(ownerType, ownerID string, page, limit int) (projects []models.Project, err error) {
+func (p *projectType) ListByOwner(ownerType, ownerID string, page, limit int) (projects []models.Project, total int64, err error) {
 	tableName := ""
 	switch ownerType {
 	case constants.OwnerTypeUser:
@@ -33,7 +33,7 @@ func (p *projectType) ListByOwner(ownerType, ownerID string, page, limit int) (p
 		return
 	}
 
-	projects, _, err = Paginate[models.Project](
+	projects, total, err = Paginate[models.Project](
 		p.db,
 		page,
 		limit,

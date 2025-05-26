@@ -125,7 +125,7 @@ func (UserApi) GetProjects(ctx context.Context, c *app.RequestContext) {
 	}
 	page, limit := utils.Ctx.GetPageLimit(c)
 
-	projects, err := store.Project.ListByOwner(constants.OwnerTypeUser, userID, page, limit)
+	projects, total, err := store.Project.ListByOwner(constants.OwnerTypeUser, userID, page, limit)
 	if err != nil {
 		resps.InternalServerError(c, "Failed to get projects")
 	}
@@ -144,6 +144,7 @@ func (UserApi) GetProjects(ctx context.Context, c *app.RequestContext) {
 			}
 			return
 		}(),
+		"total": total,
 	})
 }
 
@@ -193,7 +194,7 @@ func (UserApi) Register(ctx context.Context, c *app.RequestContext) {
 	// TODO 校验邮箱验证码
 	// TODO 校验密码复杂度
 	passwordLevel := config.GetInt("password_complexity", 3)
-	if !utils.CheckPasswordComplexity(request.Password, passwordLevel) {
+	if !utils.Password.CheckPasswordComplexity(request.Password, passwordLevel) {
 		resps.BadRequest(c, "Password complexity is too low")
 		return
 	}

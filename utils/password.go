@@ -41,7 +41,7 @@ func (u *PasswordType) addSalt(password string, salt string) string {
 // password: 待检查的密码
 // level: 复杂度级别(1-4)
 // 返回值: 是否满足复杂度要求
-func CheckPasswordComplexity(password string, level int) bool {
+func (u *PasswordType) CheckPasswordComplexity(password string, level int) bool {
 	if len(password) <= 8 {
 		return false
 	}
