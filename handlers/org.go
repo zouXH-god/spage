@@ -188,6 +188,33 @@ func (OrgApi) GetOrganization(ctx context.Context, c *app.RequestContext) {
 	})
 }
 
+func (OrgApi) GetOrganizationUsers(ctx context.Context, c *app.RequestContext) {
+	org := getOrg(ctx)
+	err := store.Org.LoadOrgUsers(org)
+	if err != nil {
+		resps.InternalServerError(c, err.Error())
+		return
+	}
+	resps.Ok(c, resps.OK, map[string]any{
+		"members": func() (users []UserDTO) {
+			for _, user := range org.Members {
+				u := UserDTO{}
+				u.FromUser(user)
+				users = append(users, u)
+			}
+			return
+		},
+		"owners": func() (users []UserDTO) {
+			for _, user := range org.Owners {
+				u := UserDTO{}
+				u.FromUser(&user)
+				users = append(users, u)
+			}
+			return
+		},
+	})
+}
+
 func (OrgApi) AddOrganizationUser(ctx context.Context, c *app.RequestContext) {
 	req := &OrgUserReq{}
 	if err := c.BindAndValidate(&req); err != nil {

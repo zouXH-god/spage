@@ -36,6 +36,11 @@ func (o *orgType) GetOrgById(id uint) (org *models.Organization, err error) {
 	return
 }
 
+// LoadOrgUsers 加载组织成员
+func (o *orgType) LoadOrgUsers(org *models.Organization) error {
+	return o.db.Model(org).Preload("Members").Preload("Owners").Find(org).Error
+}
+
 // OrgNameIsExist 判断组织名称是否存在
 func (o *orgType) OrgNameIsExist(name string) bool {
 	var count int64

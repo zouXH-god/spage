@@ -45,6 +45,7 @@ func Run() error {
 			orgGroup.DELETE("/:id", handlers.Org.UserIsOrgOwner, handlers.Org.DeleteOrganization)            // Delete organization
 			orgGroup.GET("/:id", handlers.Org.UserIsOrgMember, handlers.Org.GetOrganization)                 // Get organization info
 			orgGroup.GET("/:id/projects", handlers.Org.UserIsOrgMember, handlers.Org.GetOrganizationProject) // Get organization projects
+			orgGroup.GET("/:id/users", handlers.Org.UserIsOrgOwner, handlers.Org.GetOrganizationUsers)       // Get organization all member and owner
 			orgGroup.PUT("/:id/users", handlers.Org.UserIsOrgOwner, handlers.Org.AddOrganizationUser)        // Add organization member or owner
 			orgGroup.DELETE("/:id/users", handlers.Org.UserIsOrgOwner, handlers.Org.DeleteOrganizationUser)  // Remove organization member or owner
 		}
