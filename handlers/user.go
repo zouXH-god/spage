@@ -19,6 +19,22 @@ type UserApi struct{}
 
 var User = UserApi{}
 
+func (UserApi) ToDTO(user *models.User, self bool) UserDTO {
+	userDTO := UserDTO{
+		ID:          user.ID,
+		Name:        user.Name,
+		DisplayName: user.DisplayName,
+		Email:       user.Email,
+		Description: user.Description,
+		Avatar:      user.AvatarURL,
+	}
+	if self {
+		userDTO.Role = user.Role
+		userDTO.Language = user.Language
+	}
+	return userDTO
+}
+
 func (UserApi) Login(ctx context.Context, c *app.RequestContext) {
 	loginReq := &LoginReq{}
 	// TODO: 这里需要验证验证码
@@ -102,15 +118,7 @@ func (UserApi) GetOrgs(ctx context.Context, c *app.RequestContext) {
 	resps.Ok(c, resps.OK, map[string]any{
 		"organizations": func() (orgDTOs []OrganizationDTO) {
 			for _, org := range orgs {
-				orgDTOs = append(orgDTOs, OrganizationDTO{
-					ID:           org.ID,
-					Name:         org.Name,
-					DisplayName:  org.DisplayName,
-					Email:        org.Email,
-					Description:  org.Description,
-					AvatarURL:    org.AvatarURL,
-					ProjectLimit: org.ProjectLimit,
-				})
+				orgDTOs = append(orgDTOs, Org.ToDTO(&org))
 			}
 			return
 		}(),
@@ -132,15 +140,7 @@ func (UserApi) GetProjects(ctx context.Context, c *app.RequestContext) {
 	resps.Ok(c, resps.OK, map[string]any{
 		"projects": func() (projectDTOs []ProjectDTO) {
 			for _, project := range projects {
-				projectDTOs = append(projectDTOs, ProjectDTO{
-					ID:          project.ID,
-					Name:        project.Name,
-					DisplayName: project.DisplayName,
-					Description: project.Description,
-					OwnerID:     project.OwnerID,
-					OwnerType:   project.OwnerType,
-					SiteLimit:   project.SiteLimit,
-				})
+				projectDTOs = append(projectDTOs, Project.toDTO(&project))
 			}
 			return
 		}(),
@@ -157,28 +157,12 @@ func (UserApi) GetUser(ctx context.Context, c *app.RequestContext) {
 	if userID == strconv.Itoa(int(crtUser.ID)) {
 		// 本人
 		resps.Ok(c, "ok", map[string]any{
-			"user": UserDTO{
-				ID:          crtUser.ID,
-				Name:        crtUser.Name,
-				DisplayName: crtUser.DisplayName,
-				Email:       crtUser.Email,
-				Description: crtUser.Description,
-				Avatar:      crtUser.AvatarURL,
-				Role:        crtUser.Role,
-				Language:    crtUser.Language,
-			},
+			"user": User.ToDTO(crtUser, true),
 		})
 	} else {
 		// 其他人
 		resps.Ok(c, "ok", map[string]any{
-			"user": UserDTO{
-				ID:          crtUser.ID,
-				Name:        crtUser.Name,
-				DisplayName: crtUser.DisplayName,
-				Email:       crtUser.Email,
-				Description: crtUser.Description,
-				Avatar:      crtUser.AvatarURL,
-			},
+			"user": User.ToDTO(crtUser, false),
 		})
 	}
 }

@@ -38,23 +38,23 @@ func Run() error {
 			userGroup.GET("/:id/projects", handlers.User.GetProjects) // Get user projects
 			userGroup.GET("/:id/orgs", handlers.User.GetOrgs)         // Get user organizations
 		}
-		orgGroup := apiV1.Group("/org", TODO())
+		orgGroup := apiV1.Group("/org", handlers.Org.UserOrgAuth)
 		{
-			orgGroup.POST("", handlers.Org.CreateOrganization)                                               // Create organization
-			orgGroup.PUT("/:id", handlers.Org.UserIsOrgOwner, handlers.Org.UpdateOrganization)               // Update organization
-			orgGroup.DELETE("/:id", handlers.Org.UserIsOrgOwner, handlers.Org.DeleteOrganization)            // Delete organization
-			orgGroup.GET("/:id", handlers.Org.UserIsOrgMember, handlers.Org.GetOrganization)                 // Get organization info
-			orgGroup.GET("/:id/projects", handlers.Org.UserIsOrgMember, handlers.Org.GetOrganizationProject) // Get organization projects
-			orgGroup.GET("/:id/users", handlers.Org.UserIsOrgOwner, handlers.Org.GetOrganizationUsers)       // Get organization all member and owner
-			orgGroup.PUT("/:id/users", handlers.Org.UserIsOrgOwner, handlers.Org.AddOrganizationUser)        // Add organization member or owner
-			orgGroup.DELETE("/:id/users", handlers.Org.UserIsOrgOwner, handlers.Org.DeleteOrganizationUser)  // Remove organization member or owner
+			orgGroup.POST("", handlers.Org.CreateOrganization)                 // Create organization
+			orgGroup.PUT("/:id", handlers.Org.UpdateOrganization)              // Update organization
+			orgGroup.DELETE("/:id", handlers.Org.DeleteOrganization)           // Delete organization
+			orgGroup.GET("/:id", handlers.Org.GetOrganization)                 // Get organization info
+			orgGroup.GET("/:id/projects", handlers.Org.GetOrganizationProject) // Get organization projects
+			orgGroup.GET("/:id/users", handlers.Org.GetOrganizationUsers)      // Get organization all member and owner
+			orgGroup.PUT("/:id/users", handlers.Org.AddOrganizationUser)       // Add organization member or owner
+			orgGroup.DELETE("/:id/users", handlers.Org.DeleteOrganizationUser) // Remove organization member or owner
 		}
-		projectGroup := apiV1.Group("/project", TODO())
+		projectGroup := apiV1.Group("/project", handlers.Project.UserProjectAuth)
 		{
-			projectGroup.POST("", TODO())    // Create project
-			projectGroup.PUT("", TODO())     // Update project
-			projectGroup.DELETE("", TODO())  // Delete project
-			projectGroup.GET("/:id", TODO()) // Get project info
+			projectGroup.POST("", handlers.Project.Create)       // Create project
+			projectGroup.PUT("/:id", handlers.Project.Update)    // Update project
+			projectGroup.DELETE("/:id", handlers.Project.Delete) // Delete project
+			projectGroup.GET("/:id", handlers.Project.Info)      // Get project info
 		}
 		siteGroup := apiV1.Group("/site", TODO())
 		{
