@@ -23,11 +23,15 @@ func getOrg(ctx context.Context) *models.Organization {
 	return org
 }
 
-// 组织权限检查
-func orgAuth(ctx context.Context, c *app.RequestContext, authType string) {
+// UserOrgAuth 组织权限检查
+func (OrgApi) UserOrgAuth(ctx context.Context, c *app.RequestContext) {
 	user := middle.Auth.GetUser(ctx, c)
-	// 查询
+	// 当 id 为空的 POST 请求默认为 create
 	orgIdStr := c.Param("id")
+	if orgIdStr == "" && string(c.Method()) == "POST" {
+		return
+	}
+	// 查询
 	orgId, err := strconv.Atoi(orgIdStr)
 	if err != nil {
 		resps.BadRequest(c, resps.ParameterError)
@@ -40,23 +44,16 @@ func orgAuth(ctx context.Context, c *app.RequestContext, authType string) {
 		c.Abort()
 		return
 	}
-	if authType == "owner" {
-		// 检查用户是否为组织所有者
-		for _, owner := range org.Owners {
-			if owner.ID == user.ID {
-				context.WithValue(ctx, "userOrg", org)
-				return
-			}
-		}
-	} else if authType == "member" {
-		// 检查用户是否为组织成员
-		for _, member := range org.Members {
-			if member.ID == user.ID {
-				// 存储组织信息
-				context.WithValue(ctx, "userOrg", org)
-				return
-			}
-		}
+	// 判断权限 (GET 请求需要用户权限，其他请求需要管理员权限)
+	var authType string
+	if string(c.Method()) == "GET" {
+		authType = "member"
+	} else {
+		authType = "owner"
+	}
+	if authType == store.Org.GetUserAuth(org, user.ID) {
+		context.WithValue(ctx, "userOrg", org)
+		return
 	} else {
 		resps.BadRequest(c, resps.ParameterError)
 		c.Abort()
@@ -64,17 +61,7 @@ func orgAuth(ctx context.Context, c *app.RequestContext, authType string) {
 	}
 }
 
-// UserIsOrgOwner 验证用户是否为组织所有者
-func (OrgApi) UserIsOrgOwner(ctx context.Context, c *app.RequestContext) {
-	orgAuth(ctx, c, "owner")
-}
-
-// UserIsOrgMember 验证用户是否为组织成员
-func (OrgApi) UserIsOrgMember(ctx context.Context, c *app.RequestContext) {
-	orgAuth(ctx, c, "member")
-}
-
-func organizationModelToDTO(org *models.Organization) OrganizationDTO {
+func (OrgApi) ToDTO(org *models.Organization) OrganizationDTO {
 	return OrganizationDTO{
 		ID:           org.ID,
 		Name:         org.Name,
@@ -114,7 +101,7 @@ func (OrgApi) CreateOrganization(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	resps.Ok(c, resps.OK, map[string]any{
-		"organization": organizationModelToDTO(&org),
+		"organization": Org.ToDTO(&org),
 	})
 }
 
@@ -135,7 +122,7 @@ func (OrgApi) UpdateOrganization(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	resps.Ok(c, resps.OK, map[string]any{
-		"organization": organizationModelToDTO(org),
+		"organization": Org.ToDTO(org),
 	})
 }
 
@@ -155,15 +142,7 @@ func (OrgApi) GetOrganizationProject(ctx context.Context, c *app.RequestContext)
 	resps.Ok(c, resps.OK, map[string]any{
 		"projects": func() (projectDTOs []ProjectDTO) {
 			for _, project := range projects {
-				projectDTOs = append(projectDTOs, ProjectDTO{
-					ID:          project.ID,
-					Name:        project.Name,
-					DisplayName: project.DisplayName,
-					Description: project.Description,
-					OwnerID:     project.OwnerID,
-					OwnerType:   project.OwnerType,
-					SiteLimit:   project.SiteLimit,
-				})
+				projectDTOs = append(projectDTOs, Project.toDTO(&project))
 			}
 			return
 		}(),
@@ -184,7 +163,25 @@ func (OrgApi) DeleteOrganization(ctx context.Context, c *app.RequestContext) {
 func (OrgApi) GetOrganization(ctx context.Context, c *app.RequestContext) {
 	org := getOrg(ctx)
 	resps.Ok(c, resps.OK, map[string]any{
-		"organization": organizationModelToDTO(org),
+		"organization": Org.ToDTO(org),
+	})
+}
+
+func (OrgApi) GetOrganizationUsers(ctx context.Context, c *app.RequestContext) {
+	org := getOrg(ctx)
+	resps.Ok(c, resps.OK, map[string]any{
+		"members": func() (users []UserDTO) {
+			for _, user := range org.Members {
+				users = append(users, User.ToDTO(user, false))
+			}
+			return
+		},
+		"owners": func() (users []UserDTO) {
+			for _, user := range org.Owners {
+				users = append(users, User.ToDTO(&user, false))
+			}
+			return
+		},
 	})
 }
 

@@ -32,7 +32,7 @@ func (o *orgType) ListByUserID(userID string, page, limit int) (orgs []models.Or
 
 // GetOrgById 通过ID获取组织
 func (o *orgType) GetOrgById(id uint) (org *models.Organization, err error) {
-	err = o.db.Model(&models.Organization{}).Where("id = ?", id).First(&org).Error
+	err = o.db.Model(&models.Organization{}).Where("id = ?", id).Preload("Members").Preload("Owners").First(&org).Error
 	return
 }
 
@@ -41,6 +41,21 @@ func (o *orgType) OrgNameIsExist(name string) bool {
 	var count int64
 	o.db.Model(&models.Organization{}).Where("name = ?", name).Count(&count)
 	return count > 0
+}
+
+// GetUserAuth 获取用户在组织中的权限
+func (o *orgType) GetUserAuth(org *models.Organization, userID uint) (auth string) {
+	for _, owner := range org.Owners {
+		if owner.ID == userID {
+			return "owner"
+		}
+	}
+	for _, member := range org.Members {
+		if member.ID == userID {
+			return "member"
+		}
+	}
+	return ""
 }
 
 // CreateOrg 创建组织
