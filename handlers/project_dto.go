@@ -24,3 +24,7 @@ type UpdateProjectReq struct {
 	DisplayName *string `json:"display_name"`
 	Description *string `json:"description"`
 }
+
+type ProjectUserReq struct {
+	UserID uint `json:"user_id" binding:"required"`
+}

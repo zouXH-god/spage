@@ -51,10 +51,13 @@ func Run() error {
 		}
 		projectGroup := apiV1.Group("/project", handlers.Project.UserProjectAuth)
 		{
-			projectGroup.POST("", handlers.Project.Create)       // Create project
-			projectGroup.PUT("/:id", handlers.Project.Update)    // Update project
-			projectGroup.DELETE("/:id", handlers.Project.Delete) // Delete project
-			projectGroup.GET("/:id", handlers.Project.Info)      // Get project info
+			projectGroup.POST("", handlers.Project.Create)                  // Create project
+			projectGroup.PUT("/:id", handlers.Project.Update)               // Update project
+			projectGroup.DELETE("/:id", handlers.Project.Delete)            // Delete project
+			projectGroup.GET("/:id", handlers.Project.Info)                 // Get project info
+			projectGroup.GET("/:id/owners", handlers.Project.GetOwners)     // Get project owners
+			projectGroup.PUT("/:id/owner", handlers.Project.AddOwner)       // Update project owners
+			projectGroup.DELETE("/:id/owner", handlers.Project.DeleteOwner) // Remove project owners
 		}
 		siteGroup := apiV1.Group("/site", TODO())
 		{

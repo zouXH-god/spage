@@ -187,3 +187,80 @@ func (ProjectApi) Info(ctx context.Context, c *app.RequestContext) {
 		"project": Project.toDTO(project),
 	})
 }
+
+func (ProjectApi) GetOwners(ctx context.Context, c *app.RequestContext) {
+	project := getProject(ctx)
+	if project == nil {
+		resps.NotFound(c, resps.TargetNotFound)
+		return
+	}
+	resps.Ok(c, resps.OK, map[string]any{
+		"owners": func([]models.User) (owners []UserDTO) {
+			for _, owner := range project.Owners {
+				owners = append(owners, User.ToDTO(&owner, false))
+			}
+			return
+		}(project.Owners),
+	})
+}
+
+func (ProjectApi) AddOwner(ctx context.Context, c *app.RequestContext) {
+	project := getProject(ctx)
+	if project == nil {
+		resps.NotFound(c, resps.TargetNotFound)
+		return
+	}
+	req := ProjectUserReq{}
+	if err := c.BindAndValidate(&req); err != nil {
+		resps.BadRequest(c, resps.ParameterError)
+		return
+	}
+	// 查询用户
+	user, err := store.User.GetByID(req.UserID)
+	if err != nil || user == nil {
+		resps.NotFound(c, resps.TargetNotFound)
+		return
+	}
+	// 判断用户是否已存在权限列表
+	for _, owner := range project.Owners {
+		if owner.ID == user.ID {
+			resps.BadRequest(c, "User already exists in the permission list")
+			return
+		}
+	}
+	// 添加用户
+	if err := store.Project.AddOwner(project, user); err != nil {
+		resps.InternalServerError(c, resps.ParameterError)
+		return
+	}
+	resps.Ok(c, resps.OK, map[string]any{
+		"project": Project.toDTO(project),
+	})
+}
+
+func (ProjectApi) DeleteOwner(ctx context.Context, c *app.RequestContext) {
+	project := getProject(ctx)
+	if project == nil {
+		resps.NotFound(c, resps.TargetNotFound)
+		return
+	}
+	req := ProjectUserReq{}
+	if err := c.BindAndValidate(&req); err != nil {
+		resps.BadRequest(c, resps.ParameterError)
+		return
+	}
+	// 查询用户
+	user, err := store.User.GetByID(req.UserID)
+	if err != nil || user == nil {
+		resps.NotFound(c, resps.TargetNotFound)
+		return
+	}
+	// 删除用户
+	if err := store.Project.DeleteOwner(project, user); err != nil {
+		resps.InternalServerError(c, resps.ParameterError)
+		return
+	}
+	resps.Ok(c, resps.OK, map[string]any{
+		"project": Project.toDTO(project),
+	})
+}
