@@ -58,18 +58,19 @@ func Run() error {
 			projectGroup.GET("/:id/owners", handlers.Project.GetOwners)     // Get project owners
 			projectGroup.PUT("/:id/owner", handlers.Project.AddOwner)       // Update project owners
 			projectGroup.DELETE("/:id/owner", handlers.Project.DeleteOwner) // Remove project owners
-		}
-		siteGroup := apiV1.Group("/site", TODO())
-		{
-			siteRelease := siteGroup.Group("/release", TODO())
+			projectGroup.GET("/:id/sites", handlers.Project.GetSites)       // Get project sites
+			siteGroup := projectGroup.Group("/:id/site")
 			{
-				siteRelease.POST("", TODO())   // Create site release
-				siteRelease.DELETE("", TODO()) // Delete site release
+				siteRelease := siteGroup.Group("/:site_id/release", TODO())
+				{
+					siteRelease.POST("", TODO())   // Create site release
+					siteRelease.DELETE("", TODO()) // Delete site release
+				}
+				siteGroup.POST("", handlers.Site.Create) // Create site
+				siteGroup.PUT("/:site_id", TODO())       // Update site
+				siteGroup.DELETE("/:site_id", TODO())    // Delete site
+				siteGroup.GET("/:site_id", TODO())       // Get site info
 			}
-			siteGroup.POST("", TODO())    // Create site
-			siteGroup.PUT("", TODO())     // Update site
-			siteGroup.DELETE("", TODO())  // Delete site
-			siteGroup.GET("/:id", TODO()) // Get site info
 		}
 		adminGroup := apiV1.Group("/admin").Use(middle.Auth.IsAdmin())
 		{

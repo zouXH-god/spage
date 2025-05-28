@@ -82,3 +82,15 @@ func (p *projectType) AddOwner(project *models.Project, user *models.User) (err 
 func (p *projectType) DeleteOwner(project *models.Project, user *models.User) (err error) {
 	return p.db.Model(project).Association("Owners").Delete(user)
 }
+
+// GetSiteList 获取项目下的站点列表
+func (p *projectType) GetSiteList(project *models.Project, page, limit int) (sites []models.Site, total int64, err error) {
+	sites, total, err = Paginate[models.Site](
+		p.db,
+		page,
+		limit,
+		"project_id = ?",
+		project.ID,
+	)
+	return
+}

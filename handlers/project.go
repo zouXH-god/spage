@@ -16,22 +16,25 @@ type ProjectApi struct {
 
 var Project = ProjectApi{}
 
-func (ProjectApi) toDTO(project *models.Project) ProjectDTO {
-	return ProjectDTO{
+func (ProjectApi) toDTO(project *models.Project, full bool) ProjectDTO {
+	projectDto := ProjectDTO{
 		Description: project.Description,
 		DisplayName: project.DisplayName,
 		ID:          project.ID,
 		Name:        project.Name,
-		OwnerID:     project.OwnerID,
 		OwnerType:   project.OwnerType,
-		Owners: func([]models.User) (owners []UserDTO) {
+	}
+	if full {
+		projectDto.OwnerID = project.OwnerID
+		projectDto.Owners = func([]models.User) (owners []UserDTO) {
 			for _, owner := range project.Owners {
 				owners = append(owners, User.ToDTO(&owner, false))
 			}
 			return
-		}(project.Owners),
-		SiteLimit: project.SiteLimit,
+		}(project.Owners)
+		projectDto.SiteLimit = project.SiteLimit
 	}
+	return projectDto
 }
 
 func getProject(ctx context.Context) *models.Project {
@@ -136,7 +139,7 @@ func (ProjectApi) Create(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	resps.Ok(c, resps.OK, map[string]any{
-		"project": Project.toDTO(project),
+		"project": Project.toDTO(project, true),
 	})
 }
 
@@ -160,7 +163,7 @@ func (ProjectApi) Update(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	resps.Ok(c, resps.OK, map[string]any{
-		"project": Project.toDTO(project),
+		"project": Project.toDTO(project, true),
 	})
 }
 
@@ -184,7 +187,7 @@ func (ProjectApi) Info(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	resps.Ok(c, resps.OK, map[string]any{
-		"project": Project.toDTO(project),
+		"project": Project.toDTO(project, true),
 	})
 }
 
@@ -234,7 +237,7 @@ func (ProjectApi) AddOwner(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	resps.Ok(c, resps.OK, map[string]any{
-		"project": Project.toDTO(project),
+		"project": Project.toDTO(project, true),
 	})
 }
 
@@ -261,6 +264,33 @@ func (ProjectApi) DeleteOwner(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	resps.Ok(c, resps.OK, map[string]any{
-		"project": Project.toDTO(project),
+		"project": Project.toDTO(project, true),
+	})
+}
+
+func (ProjectApi) GetSites(ctx context.Context, c *app.RequestContext) {
+	req := GetSiteListReq{}
+	if err := c.BindAndValidate(&req); err != nil {
+		resps.BadRequest(c, resps.ParameterError)
+		return
+	}
+	project := getProject(ctx)
+	if project == nil {
+		resps.NotFound(c, resps.TargetNotFound)
+		return
+	}
+	sites, total, err := store.Project.GetSiteList(project, req.Page, req.Limit)
+	if err != nil {
+		resps.InternalServerError(c, "Failed to get sites")
+		return
+	}
+	resps.Ok(c, resps.OK, map[string]any{
+		"sites": func([]models.Site) (siteDTOs []SiteDTO) {
+			for _, site := range sites {
+				siteDTOs = append(siteDTOs, Site.ToDTO(&site, false))
+			}
+			return
+		}(sites),
+		"total": total,
 	})
 }

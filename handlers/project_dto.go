@@ -28,3 +28,10 @@ type UpdateProjectReq struct {
 type ProjectUserReq struct {
 	UserID uint `json:"user_id" binding:"required"`
 }
+
+type GetSiteListReq struct {
+	Page     int    `form:"page" binding:"required"`
+	Limit    int    `form:"limit" binding:"required"`
+	Project  string `form:"project" binding:"required"`
+	SiteName string `form:"site_name"`
+}
