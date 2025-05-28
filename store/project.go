@@ -72,3 +72,25 @@ func (p *projectType) Update(project *models.Project) (err error) {
 func (p *projectType) Delete(project *models.Project) (err error) {
 	return p.db.Delete(project).Error
 }
+
+// AddOwner 为项目添加所有者
+func (p *projectType) AddOwner(project *models.Project, user *models.User) (err error) {
+	return p.db.Model(project).Association("Owners").Append(user)
+}
+
+// DeleteOwner 从项目删除所有者
+func (p *projectType) DeleteOwner(project *models.Project, user *models.User) (err error) {
+	return p.db.Model(project).Association("Owners").Delete(user)
+}
+
+// GetSiteList 获取项目下的站点列表
+func (p *projectType) GetSiteList(project *models.Project, page, limit int) (sites []models.Site, total int64, err error) {
+	sites, total, err = Paginate[models.Site](
+		p.db,
+		page,
+		limit,
+		"project_id = ?",
+		project.ID,
+	)
+	return
+}
