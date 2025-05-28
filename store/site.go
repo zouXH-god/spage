@@ -13,10 +13,14 @@ var Site = SiteType{
 	db: DB,
 }
 
+// Create 创建站点
+// Create Site
 func (s *SiteType) Create(site *models.Site) (err error) {
 	return s.db.Create(site).Error
 }
 
+// GetByID 根据id获取站点信息
+// Get Site Info by ID
 func (s *SiteType) GetByID(id uint) (site *models.Site, err error) {
 	site = &models.Site{}
 	err = s.db.Where("id = ?", id).First(site).Error

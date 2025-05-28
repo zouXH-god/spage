@@ -2,6 +2,9 @@ package handlers
 
 import (
 	"context"
+	"strconv"
+	"time"
+
 	"github.com/LiteyukiStudio/spage/config"
 	"github.com/LiteyukiStudio/spage/constants"
 	"github.com/LiteyukiStudio/spage/middle"
@@ -11,14 +14,14 @@ import (
 	"github.com/LiteyukiStudio/spage/utils"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/protocol"
-	"strconv"
-	"time"
 )
 
 type UserApi struct{}
 
 var User = UserApi{}
 
+// UserDTO 用户信息数据传输对象
+// User Information Data Transfer Object (DTO)
 func (UserApi) ToDTO(user *models.User, self bool) UserDTO {
 	userDTO := UserDTO{
 		ID:          user.ID,
@@ -35,6 +38,8 @@ func (UserApi) ToDTO(user *models.User, self bool) UserDTO {
 	return userDTO
 }
 
+// Login 用户登录
+// User login
 func (UserApi) Login(ctx context.Context, c *app.RequestContext) {
 	loginReq := &LoginReq{}
 	// TODO: 这里需要验证验证码
@@ -85,6 +90,8 @@ func (UserApi) Login(ctx context.Context, c *app.RequestContext) {
 	}
 }
 
+// Logout 用户登出
+// User logout
 func (UserApi) Logout(ctx context.Context, c *app.RequestContext) {
 	// 删除cookie
 	c.SetCookie("token", "", -1, "/", "", protocol.CookieSameSiteLaxMode, true, true)
@@ -92,6 +99,8 @@ func (UserApi) Logout(ctx context.Context, c *app.RequestContext) {
 	resps.Ok(c, "Logout successful")
 }
 
+// GetCaptcha 获取验证码
+// Get captcha
 func (UserApi) GetCaptcha(ctx context.Context, c *app.RequestContext) {
 	resps.Ok(c, "ok", map[string]any{
 		"provider": config.CaptchaType,
@@ -100,6 +109,8 @@ func (UserApi) GetCaptcha(ctx context.Context, c *app.RequestContext) {
 	})
 }
 
+// GetUserOrgs 获取用户的组织
+// Get user organizations
 func (UserApi) GetOrgs(ctx context.Context, c *app.RequestContext) {
 	userID := c.Param("id")
 	crtUser := middle.Auth.GetUser(ctx, c)
@@ -125,6 +136,8 @@ func (UserApi) GetOrgs(ctx context.Context, c *app.RequestContext) {
 	})
 }
 
+// GetUserProjects 获取用户的项目
+// Get user projects
 func (UserApi) GetProjects(ctx context.Context, c *app.RequestContext) {
 	userID := c.Param("id")
 	crtUser := middle.Auth.GetUser(ctx, c)
@@ -140,7 +153,7 @@ func (UserApi) GetProjects(ctx context.Context, c *app.RequestContext) {
 	resps.Ok(c, resps.OK, map[string]any{
 		"projects": func() (projectDTOs []ProjectDTO) {
 			for _, project := range projects {
-				projectDTOs = append(projectDTOs, Project.toDTO(&project))
+				projectDTOs = append(projectDTOs, Project.toDTO(&project, false)) // 这里naloveyuki尝试修复了下gitd7b49ff的问题
 			}
 			return
 		}(),
@@ -148,6 +161,8 @@ func (UserApi) GetProjects(ctx context.Context, c *app.RequestContext) {
 	})
 }
 
+// GetUser 获取用户信息
+// Get user information
 func (UserApi) GetUser(ctx context.Context, c *app.RequestContext) {
 	userID := c.Param("id")
 	crtUser := middle.Auth.GetUser(ctx, c)
@@ -167,6 +182,8 @@ func (UserApi) GetUser(ctx context.Context, c *app.RequestContext) {
 	}
 }
 
+// Register 用户注册
+// User registration
 func (UserApi) Register(ctx context.Context, c *app.RequestContext) {
 	// 接收参数
 	request := &RegisterReq{}
@@ -210,6 +227,8 @@ func (UserApi) Register(ctx context.Context, c *app.RequestContext) {
 	})
 }
 
+// UpdateUser 更新用户信息
+// Update user information
 func (UserApi) UpdateUser(ctx context.Context, c *app.RequestContext) {
 	userDTO := &UserDTO{}
 	if err := c.BindJSON(userDTO); err != nil {

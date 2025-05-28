@@ -2,16 +2,19 @@ package middle
 
 import (
 	"context"
-	"github.com/cloudwego/hertz/pkg/app"
-	"github.com/sirupsen/logrus"
 	"strconv"
 	"time"
+
+	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/sirupsen/logrus"
 )
 
 type traceType struct{}
 
 var Trace = traceType{}
 
+// UseTrace 中间件函数，用于记录请求日志
+// Middleware function for request logging
 func (traceType) UseTrace() app.HandlerFunc {
 	return func(ctx context.Context, c *app.RequestContext) {
 		start := time.Now()

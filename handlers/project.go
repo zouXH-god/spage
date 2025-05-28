@@ -2,13 +2,14 @@ package handlers
 
 import (
 	"context"
+	"strconv"
+
 	"github.com/LiteyukiStudio/spage/constants"
 	"github.com/LiteyukiStudio/spage/middle"
 	"github.com/LiteyukiStudio/spage/models"
 	"github.com/LiteyukiStudio/spage/resps"
 	"github.com/LiteyukiStudio/spage/store"
 	"github.com/cloudwego/hertz/pkg/app"
-	"strconv"
 )
 
 type ProjectApi struct {
@@ -16,6 +17,8 @@ type ProjectApi struct {
 
 var Project = ProjectApi{}
 
+// ProjectDTO 项目信息数据传输对象
+// Project Information Data Transfer Object (DTO)
 func (ProjectApi) toDTO(project *models.Project, full bool) ProjectDTO {
 	projectDto := ProjectDTO{
 		Description: project.Description,
@@ -37,6 +40,8 @@ func (ProjectApi) toDTO(project *models.Project, full bool) ProjectDTO {
 	return projectDto
 }
 
+// GetProject 获取项目信息
+// Get project information
 func getProject(ctx context.Context) *models.Project {
 	project, ok := ctx.Value("userProject").(*models.Project)
 	if !ok {
@@ -45,6 +50,8 @@ func getProject(ctx context.Context) *models.Project {
 	return project
 }
 
+// UserProjectAuth 用户项目权限认证
+// User project authorization
 func (ProjectApi) UserProjectAuth(ctx context.Context, c *app.RequestContext) {
 	user := middle.Auth.GetUser(ctx, c)
 	projectIdStr := c.Param("id")
@@ -65,12 +72,12 @@ func (ProjectApi) UserProjectAuth(ctx context.Context, c *app.RequestContext) {
 		c.Abort()
 		return
 	}
-	// 项目权限判断
+	// 项目权限判断 Project authorization check
 	if store.Project.UserIsOwner(project, user.ID) {
 		context.WithValue(ctx, "userProject", project)
 		return
 	}
-	// 组织权限判断
+	// 组织权限判断 Organization authorization check
 	if project.OwnerType == constants.OwnerTypeOrg {
 		// 组织查询
 		org, err := store.Org.GetOrgById(project.OwnerID)
@@ -101,6 +108,8 @@ func (ProjectApi) UserProjectAuth(ctx context.Context, c *app.RequestContext) {
 	}
 }
 
+// Create 创建项目
+// Create project
 func (ProjectApi) Create(ctx context.Context, c *app.RequestContext) {
 	req := CreateProjectReq{}
 	if err := c.BindAndValidate(&req); err != nil {
@@ -108,9 +117,10 @@ func (ProjectApi) Create(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	user := middle.Auth.GetUser(ctx, c)
-	// 校验权限
+	// 校验权限 Check permissions
 	if req.OwnerType == constants.OwnerTypeOrg {
 		// 如果为组织，需要具有组织管理员权限
+		// If it is an organization, you need to have the organization administrator permission
 		org, err := store.Org.GetOrgById(req.OwnerID)
 		if err != nil || org == nil {
 			resps.InternalServerError(c, resps.ParameterError)
@@ -121,6 +131,7 @@ func (ProjectApi) Create(ctx context.Context, c *app.RequestContext) {
 		}
 	} else if req.OwnerType == constants.OwnerTypeUser {
 		// 如果为用户，仅允许为自己添加
+		// If it is a user, only allow adding for user-self
 		req.OwnerID = user.ID
 	} else {
 		resps.BadRequest(c, resps.ParameterError)
@@ -143,6 +154,8 @@ func (ProjectApi) Create(ctx context.Context, c *app.RequestContext) {
 	})
 }
 
+// Update 更新项目
+// Update project
 func (ProjectApi) Update(ctx context.Context, c *app.RequestContext) {
 	req := UpdateProjectReq{}
 	if err := c.BindAndValidate(&req); err != nil {
@@ -154,7 +167,7 @@ func (ProjectApi) Update(ctx context.Context, c *app.RequestContext) {
 		resps.NotFound(c, resps.TargetNotFound)
 		return
 	}
-	// 更新数据
+	// 更新数据 Update data
 	project.Description = *req.Description
 	project.DisplayName = req.DisplayName
 	project.Name = *req.Name
@@ -167,6 +180,8 @@ func (ProjectApi) Update(ctx context.Context, c *app.RequestContext) {
 	})
 }
 
+// Delete 删除项目
+// Delete project
 func (ProjectApi) Delete(ctx context.Context, c *app.RequestContext) {
 	project := getProject(ctx)
 	if project == nil {
@@ -180,6 +195,8 @@ func (ProjectApi) Delete(ctx context.Context, c *app.RequestContext) {
 	resps.Ok(c, resps.OK)
 }
 
+// Info 获取项目信息
+// Get project information
 func (ProjectApi) Info(ctx context.Context, c *app.RequestContext) {
 	project := getProject(ctx)
 	if project == nil {
@@ -191,6 +208,8 @@ func (ProjectApi) Info(ctx context.Context, c *app.RequestContext) {
 	})
 }
 
+// GetOwners 获取项目所有者列表
+// Get project owner list
 func (ProjectApi) GetOwners(ctx context.Context, c *app.RequestContext) {
 	project := getProject(ctx)
 	if project == nil {
@@ -207,6 +226,8 @@ func (ProjectApi) GetOwners(ctx context.Context, c *app.RequestContext) {
 	})
 }
 
+// AddOwner 添加项目所有者
+// Add project owner
 func (ProjectApi) AddOwner(ctx context.Context, c *app.RequestContext) {
 	project := getProject(ctx)
 	if project == nil {
@@ -218,20 +239,20 @@ func (ProjectApi) AddOwner(ctx context.Context, c *app.RequestContext) {
 		resps.BadRequest(c, resps.ParameterError)
 		return
 	}
-	// 查询用户
+	// 查询用户	查询用户
 	user, err := store.User.GetByID(req.UserID)
 	if err != nil || user == nil {
 		resps.NotFound(c, resps.TargetNotFound)
 		return
 	}
-	// 判断用户是否已存在权限列表
+	// 判断用户是否已存在权限列表 Check if the user already exists in the permission list
 	for _, owner := range project.Owners {
 		if owner.ID == user.ID {
 			resps.BadRequest(c, "User already exists in the permission list")
 			return
 		}
 	}
-	// 添加用户
+	// 添加用户	Add user
 	if err := store.Project.AddOwner(project, user); err != nil {
 		resps.InternalServerError(c, resps.ParameterError)
 		return
@@ -241,6 +262,8 @@ func (ProjectApi) AddOwner(ctx context.Context, c *app.RequestContext) {
 	})
 }
 
+// DeleteOwner 删除项目所有者
+// Delete project owner
 func (ProjectApi) DeleteOwner(ctx context.Context, c *app.RequestContext) {
 	project := getProject(ctx)
 	if project == nil {
@@ -252,13 +275,13 @@ func (ProjectApi) DeleteOwner(ctx context.Context, c *app.RequestContext) {
 		resps.BadRequest(c, resps.ParameterError)
 		return
 	}
-	// 查询用户
+	// 查询用户 Query user
 	user, err := store.User.GetByID(req.UserID)
 	if err != nil || user == nil {
 		resps.NotFound(c, resps.TargetNotFound)
 		return
 	}
-	// 删除用户
+	// 删除用户 Delete user
 	if err := store.Project.DeleteOwner(project, user); err != nil {
 		resps.InternalServerError(c, resps.ParameterError)
 		return
@@ -268,6 +291,8 @@ func (ProjectApi) DeleteOwner(ctx context.Context, c *app.RequestContext) {
 	})
 }
 
+// GetSites 获取站点列表
+// Get site list
 func (ProjectApi) GetSites(ctx context.Context, c *app.RequestContext) {
 	req := GetSiteListReq{}
 	if err := c.BindAndValidate(&req); err != nil {

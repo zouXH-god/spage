@@ -1,9 +1,9 @@
 package resps
 
 const (
-	ParameterError   = "Parameter error"
-	MissingParameter = "Missing parameter"
-	TargetNotFound   = "Target not found"
-	OK               = "OK"
-	PermissionDenied = "PermissionDenied"
+	ParameterError   = "Parameter error"   // 参数错误
+	MissingParameter = "Missing parameter" // 缺少参数
+	TargetNotFound   = "Target not found"  // 目标不存在
+	OK               = "OK"                // 操作成功
+	PermissionDenied = "PermissionDenied"  // 权限不足
 )
