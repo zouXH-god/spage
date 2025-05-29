@@ -26,3 +26,11 @@ func (s *SiteType) GetByID(id uint) (site *models.Site, err error) {
 	err = s.db.Where("id = ?", id).First(site).Error
 	return
 }
+
+func (s *SiteType) Update(site *models.Site) (err error) {
+	return s.db.Updates(site).Error
+}
+
+func (s *SiteType) Delete(site *models.Site) (err error) {
+	return s.db.Delete(site).Error
+}

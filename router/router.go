@@ -63,17 +63,17 @@ func Run() error {
 			projectGroup.PUT("/:id/owner", handlers.Project.AddOwner)       // 更新项目所有者 Add project owner
 			projectGroup.DELETE("/:id/owner", handlers.Project.DeleteOwner) // 删除项目所有者 Delete project owner
 			projectGroup.GET("/:id/sites", handlers.Project.GetSites)       // 获取项目站点 Get project sites
-			siteGroup := projectGroup.Group("/:id/site")
+			siteGroup := projectGroup.Group("/:id/site", handlers.Site.SiteAuth)
 			{
 				siteRelease := siteGroup.Group("/:site_id/release", TODO())
 				{
 					siteRelease.POST("", TODO())   // 创建站点发布 Create site release
 					siteRelease.DELETE("", TODO()) // 删除站点版本 Delete site release
 				}
-				siteGroup.POST("", handlers.Site.Create) // 创建站点 Create site
-				siteGroup.PUT("/:site_id", TODO())       // 更新站点 Update site
-				siteGroup.DELETE("/:site_id", TODO())    // 删除站点 Delete site
-				siteGroup.GET("/:site_id", TODO())       // 获取网站信息 Get site info
+				siteGroup.POST("", handlers.Site.Create)            // 创建站点 Create site
+				siteGroup.PUT("/:site_id", handlers.Site.Update)    // 更新站点 Update site
+				siteGroup.DELETE("/:site_id", handlers.Site.Delete) // 删除站点 Delete site
+				siteGroup.GET("/:site_id", handlers.Site.Info)      // 获取网站信息 Get site info
 			}
 		}
 		adminGroup := apiV1.Group("/admin").Use(middle.Auth.IsAdmin())

@@ -21,3 +21,10 @@ type CreateSiteReq struct {
 	SubDomain   *string  `json:"sub_domain"`                    // 子域名 SubDomain
 	Domains     []string `json:"domains"`                       // 域名 Domains
 }
+
+type UpdateSiteReq struct {
+	Name        *string  `json:"name"`        // 网站名称 WebSiteName
+	Description *string  `json:"description"` // 网站描述 WebSiteDescription
+	SubDomain   *string  `json:"sub_domain"`  // 子域名 SubDomain
+	Domains     []string `json:"domains"`     // 域名 Domains
+}
