@@ -71,6 +71,8 @@ var (
 
 	BuildTime = "0000-00-00 00:00:00" // 构建时间 Build Time
 
+	ReleaseSavePath = "data/releases"
+
 	//go:embed config.example.yaml
 	configExample embed.FS
 )
@@ -158,6 +160,9 @@ func Init() error {
 	EmailPort = GetString("email.port", "465")
 	EmailPassword = GetString("email.password", "")
 	EmailSSL = GetBool("email.ssl", true)
+
+	// File存储配置项
+	ReleaseSavePath = GetString("file.release-path", "data/releases")
 
 	// 分页查询限制
 	// Pagination query limit
