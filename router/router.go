@@ -1,24 +1,11 @@
 package router
 
 import (
-	"context"
-
 	"github.com/LiteyukiStudio/spage/config"
 	"github.com/LiteyukiStudio/spage/handlers"
 	"github.com/LiteyukiStudio/spage/middle"
-	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/server"
-	"github.com/cloudwego/hertz/pkg/common/utils"
 )
-
-// var H *server.Hertz
-// TODO: 暂时用这个函数测试，后续换成真实的路由处理
-// TODO: Use this function temporarily, replace it with real routes later
-func TODO() func(context.Context, *app.RequestContext) {
-	return func(ctx context.Context, c *app.RequestContext) {
-		c.JSON(200, utils.H{"message": "Hello World" + string(c.Path())})
-	}
-}
 
 // Run 运行路由服务
 // Run router service
@@ -63,22 +50,29 @@ func Run() error {
 			projectGroup.PUT("/:id/owner", handlers.Project.AddOwner)       // 更新项目所有者 Add project owner
 			projectGroup.DELETE("/:id/owner", handlers.Project.DeleteOwner) // 删除项目所有者 Delete project owner
 			projectGroup.GET("/:id/sites", handlers.Project.GetSites)       // 获取项目站点 Get project sites
-			siteGroup := projectGroup.Group("/:id/site")
+			siteGroup := projectGroup.Group("/:id/site", handlers.Site.SiteAuth)
 			{
-				siteRelease := siteGroup.Group("/:site_id/release", TODO())
+				siteGroup.POST("", handlers.Site.Create)            // 创建站点 Create site
+				siteGroup.PUT("/:site_id", handlers.Site.Update)    // 更新站点 Update site
+				siteGroup.DELETE("/:site_id", handlers.Site.Delete) // 删除站点 Delete site
+				siteGroup.GET("/:site_id", handlers.Site.Info)      // 获取网站信息 Get site info
+
+				siteGroup.GET("/:site_id/releases", handlers.Release.ReleaseList) // 获取站点 release 列表
+				siteRelease := siteGroup.Group("/:site_id/release")
 				{
-					siteRelease.POST("", TODO())   // 创建站点发布 Create site release
-					siteRelease.DELETE("", TODO()) // 删除站点版本 Delete site release
+					siteRelease.POST("", handlers.Release.Create)                // 创建站点发布 Create site release
+					siteRelease.DELETE("", handlers.Release.Delete)              // 删除站点版本 Delete site release
+					siteRelease.POST("/activation", handlers.Release.Activation) // 指定使用该站点版本
 				}
-				siteGroup.POST("", handlers.Site.Create) // 创建站点 Create site
-				siteGroup.PUT("/:site_id", TODO())       // 更新站点 Update site
-				siteGroup.DELETE("/:site_id", TODO())    // 删除站点 Delete site
-				siteGroup.GET("/:site_id", TODO())       // 获取网站信息 Get site info
 			}
 		}
-		adminGroup := apiV1.Group("/admin").Use(middle.Auth.IsAdmin())
+		adminGroup := apiV1.Group("/admin")
+		adminGroup.Use(middle.Auth.IsAdmin())
 		{
-			adminGroup.POST("/user", TODO()) // 创建用户 Create user
+			adminUser := adminGroup.Group("/user")
+			{
+				adminUser.POST("", handlers.Admin.CreateUser) // 创建用户 Create user
+			}
 		}
 	}
 

@@ -51,3 +51,7 @@ token:
   secret: "none-secret"         # JWT密钥
   expire: 86400                 # Token过期时间(秒)，默认24小时
   refresh-expire: 518400         # 刷新Token过期时间(秒)，默认6天
+  
+# File配置
+file:
+  release-path: "./data/release"    # 发布文件保存路径

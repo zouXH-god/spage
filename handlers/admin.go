@@ -11,7 +11,7 @@ type AdminApi struct{}
 
 var Admin = AdminApi{}
 
-// 创建用户
+// CreateUser 创建用户
 // Create User
 func (AdminApi) CreateUser(ctx context.Context, c *app.RequestContext) {
 	var userDTO *UserDTO
