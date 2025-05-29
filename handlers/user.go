@@ -193,7 +193,7 @@ func (UserApi) Register(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	// TODO 校验邮箱验证码
-	// TODO 校验密码复杂度
+	// 校验密码复杂度
 	passwordLevel := config.GetInt("password_complexity", 3)
 	if !utils.Password.CheckPasswordComplexity(request.Password, passwordLevel) {
 		resps.BadRequest(c, "Password complexity is too low")
