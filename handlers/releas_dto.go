@@ -13,6 +13,6 @@ type CreateReleaseReq struct {
 	File *multipart.FileHeader `json:"file" binding:"required"`
 }
 
-type DeleteReleaseReq struct {
+type ReleaseIdReq struct {
 	ID uint `json:"id" binding:"required"`
 }

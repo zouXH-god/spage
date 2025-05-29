@@ -46,10 +46,20 @@ func (s *SiteType) GetReleaseById(id uint) (release *models.SiteRelease, err err
 	return
 }
 
+func (s *SiteType) GetLatestRelease(site *models.Site) (release *models.SiteRelease, err error) {
+	release = &models.SiteRelease{}
+	err = s.db.Where("site_id = ? AND tag = ?", site.ID, "latest").First(release).Error
+	return
+}
+
 func (s *SiteType) CreateRelease(release *models.SiteRelease) (err error) {
 	return s.db.Create(release).Error
 }
 
 func (s *SiteType) DeleteRelease(release *models.SiteRelease) (err error) {
 	return s.db.Delete(release).Error
+}
+
+func (s *SiteType) UpdateRelease(release *models.SiteRelease) (err error) {
+	return s.db.Updates(release).Error
 }

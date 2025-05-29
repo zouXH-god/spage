@@ -60,8 +60,9 @@ func Run() error {
 				siteGroup.GET("/:site_id/releases", handlers.Release.ReleaseList) // 获取站点 release 列表
 				siteRelease := siteGroup.Group("/:site_id/release")
 				{
-					siteRelease.POST("", handlers.Release.Create)   // 创建站点发布 Create site release
-					siteRelease.DELETE("", handlers.Release.Delete) // 删除站点版本 Delete site release
+					siteRelease.POST("", handlers.Release.Create)                // 创建站点发布 Create site release
+					siteRelease.DELETE("", handlers.Release.Delete)              // 删除站点版本 Delete site release
+					siteRelease.POST("/activation", handlers.Release.Activation) // 指定使用该站点版本
 				}
 			}
 		}

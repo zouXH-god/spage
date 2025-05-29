@@ -95,6 +95,16 @@ func (ReleaseApi) Create(ctx context.Context, c *app.RequestContext) {
 		resps.InternalServerError(c, "create release record error")
 		return
 	}
+	// 创建 latest 发布记录
+	latestRelease := models.SiteRelease{
+		SiteID: site.ID,
+		Tag:    "latest",
+		FileID: file.ID,
+	}
+	if err := store.Site.CreateRelease(&latestRelease); err != nil {
+		resps.InternalServerError(c, "create release record error")
+		return
+	}
 	// TODO 创建发布任务
 	resps.Ok(c, resps.OK, map[string]any{
 		"release": Release.ToDTO(&release),
@@ -102,7 +112,7 @@ func (ReleaseApi) Create(ctx context.Context, c *app.RequestContext) {
 }
 
 func (ReleaseApi) Delete(ctx context.Context, c *app.RequestContext) {
-	req := DeleteReleaseReq{}
+	req := ReleaseIdReq{}
 	if err := c.BindAndValidate(&req); err != nil {
 		resps.BadRequest(c, resps.ParameterError)
 		return
@@ -125,5 +135,39 @@ func (ReleaseApi) Delete(ctx context.Context, c *app.RequestContext) {
 		resps.InternalServerError(c, "delete release record error")
 		return
 	}
+	resps.Ok(c, resps.OK)
+}
+
+func (ReleaseApi) Activation(ctx context.Context, c *app.RequestContext) {
+	req := ReleaseIdReq{}
+	if err := c.BindAndValidate(&req); err != nil {
+		resps.BadRequest(c, resps.ParameterError)
+		return
+	}
+	// 获取 release
+	release, err := store.Site.GetReleaseById(req.ID)
+	if err != nil {
+		resps.NotFound(c, resps.TargetNotFound)
+		return
+	}
+	site := getSite(ctx)
+	if site == nil || site.ID != release.SiteID {
+		resps.NotFound(c, resps.TargetNotFound)
+		return
+	}
+	// 获取 latest release
+	latestRelease, err := store.Site.GetLatestRelease(site)
+	if err != nil {
+		resps.InternalServerError(c, "get latest release error")
+		return
+	}
+	// 修改 latest release
+	latestRelease.FileID = release.FileID
+	err = store.Site.UpdateRelease(latestRelease)
+	if err != nil {
+		resps.InternalServerError(c, "update latest release error")
+		return
+	}
+	// TODO 创建发布任务
 	resps.Ok(c, resps.OK)
 }
