@@ -1,24 +1,11 @@
 package router
 
 import (
-	"context"
-
 	"github.com/LiteyukiStudio/spage/config"
 	"github.com/LiteyukiStudio/spage/handlers"
 	"github.com/LiteyukiStudio/spage/middle"
-	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/server"
-	"github.com/cloudwego/hertz/pkg/common/utils"
 )
-
-// var H *server.Hertz
-// TODO: 暂时用这个函数测试，后续换成真实的路由处理
-// TODO: Use this function temporarily, replace it with real routes later
-func TODO() func(context.Context, *app.RequestContext) {
-	return func(ctx context.Context, c *app.RequestContext) {
-		c.JSON(200, utils.H{"message": "Hello World" + string(c.Path())})
-	}
-}
 
 // Run 运行路由服务
 // Run router service
@@ -78,9 +65,13 @@ func Run() error {
 				}
 			}
 		}
-		adminGroup := apiV1.Group("/admin").Use(middle.Auth.IsAdmin())
+		adminGroup := apiV1.Group("/admin")
+		adminGroup.Use(middle.Auth.IsAdmin())
 		{
-			adminGroup.POST("/user", TODO()) // 创建用户 Create user
+			adminUser := adminGroup.Group("/user")
+			{
+				adminUser.POST("", handlers.Admin.CreateUser) // 创建用户 Create user
+			}
 		}
 	}
 
