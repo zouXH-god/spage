@@ -1,9 +1,7 @@
 # Spage - 自托管静态页面托管服务
 
-<center><img src="./logos/apage.png" width=300 alt="Liteyuki apage.dev"></center>
-
-<center>
-    <a src="./README.md">简体中文</a>
+<center><img src="https://socialify.git.ci/Nanaloveyuki/spage/image?description=1&font=Bitter&forks=1&issues=1&logo=https%3A%2F%2Fcdn.liteyuki.icu%2Flogos%2Fapage.png&name=1&pattern=Overlapping+Hexagons&pulls=1&stargazers=1&theme=Auto" alt="spage" width="780" height="320" />
+    <a href="./README.md">简体中文</a>
     |
     <a href="./README/en.md">English</a>
     |
