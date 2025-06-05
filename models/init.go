@@ -19,6 +19,8 @@ func Migrate(db *gorm.DB) error {
 		// site.go
 		&Site{},
 		&SiteRelease{},
+		// node.go
+		&Node{},
 	); err != nil {
 		return err
 	}
