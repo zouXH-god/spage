@@ -5,17 +5,56 @@ option go_package = "./proto";
 // 定义服务
 service AgentService {
   // 创建站点
+  rpc CreateSite(CreateSiteRequest) returns (CreateSiteResponse) {}
   // 更新站点信息
+  rpc UpdateSite(UpdateSiteRequest) returns (UpdateSiteResponse) {}
   // 删除站点
+  rpc DeleteSite(DeleteSiteRequest) returns (DeleteSiteResponse) {}
   // 上传文件
+  rpc UploadRelease(stream UploadReleaseRequest) returns (UploadReleaseResponse) {}
 }
 
-// 请求消息
-message HelloRequest {
+// 创建站点
+message CreateSiteRequest {
   string name = 1;
+  string projectName = 2;
+  string OwnerName  = 3;
+  string subDomain = 4;
+  repeated string domains = 5;
+}
+message CreateSiteResponse {
+  string message = 1;
 }
 
-// 响应消息
-message HelloResponse {
+// 更新站点信息
+message UpdateSiteRequest {
+  string name = 1;
+  string projectName = 2;
+  string OwnerName  = 3;
+  string subDomain = 4;
+  repeated string domains = 5;
+}
+message UpdateSiteResponse {
+  string message = 1;
+}
+
+// 删除站点
+message DeleteSiteRequest {
+  string name = 1;
+  string projectName = 2;
+  string OwnerName  = 3;
+}
+message DeleteSiteResponse {
+  string message = 1;
+}
+
+// 上传 release
+message UploadReleaseRequest {
+  string siteName = 1;
+  string projectName = 2;
+  string OwnerName  = 3;
+  bytes content = 4;
+}
+message UploadReleaseResponse {
   string message = 1;
 }
