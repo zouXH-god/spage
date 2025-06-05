@@ -1,11 +1,15 @@
 package handlers
 
-import "mime/multipart"
+import (
+	"github.com/LiteyukiStudio/spage/models"
+	"mime/multipart"
+)
 
 type ReleaseDTO struct {
-	ID   uint    `json:"id"`
-	Site SiteDTO `json:"site"`
-	Tag  string  `json:"tag"`
+	ID   uint        `json:"id"`
+	Site SiteDTO     `json:"site"`
+	Tag  string      `json:"tag"`
+	File models.File `json:"file"`
 }
 
 type CreateReleaseReq struct {

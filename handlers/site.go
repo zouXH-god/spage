@@ -78,6 +78,7 @@ func (SiteApi) Create(ctx context.Context, c *app.RequestContext) {
 		resps.InternalServerError(c, err.Error())
 		return
 	}
+	// TODO 创建站点信息
 	resps.Ok(c, resps.OK, map[string]any{
 		"site": Site.ToDTO(&site, true),
 	})
@@ -102,6 +103,7 @@ func (SiteApi) Update(ctx context.Context, c *app.RequestContext) {
 		resps.InternalServerError(c, resps.ParameterError)
 		return
 	}
+	// TODO 更新站点信息
 	resps.Ok(c, resps.OK, map[string]any{
 		"site": Site.ToDTO(site, true),
 	})
@@ -117,6 +119,7 @@ func (SiteApi) Delete(ctx context.Context, c *app.RequestContext) {
 		resps.InternalServerError(c, resps.ParameterError)
 		return
 	}
+	// TODO 删除站点
 	resps.Ok(c, resps.OK, map[string]any{
 		"site": Site.ToDTO(site, true),
 	})

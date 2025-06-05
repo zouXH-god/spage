@@ -16,10 +16,13 @@ func main() {
 		return
 	}
 
+	// 初始化数据相关
 	if err := store.Init(); err != nil {
 		logrus.Panicf("failed to init data store: %v", err)
 		return
 	}
+
+	// TODO 创建节点检查任务 task/node_check.go
 
 	if err := router.Run(); err != nil {
 		logrus.Panicf("failed to run router: %v", err)

@@ -3,8 +3,11 @@ package utils
 import (
 	"archive/zip"
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"io"
 	"mime/multipart"
+	"os"
 )
 
 // IsValidZipFile 检查 multipart.FileHeader 是否为合法的 ZIP 文件
@@ -68,4 +71,28 @@ func isZipFileSignature(data []byte) bool {
 		(data[2] == 0x03 && data[3] == 0x04 || // 常规文件
 			data[2] == 0x05 && data[3] == 0x06 || // 空归档
 			data[2] == 0x07 && data[3] == 0x08) // 分卷归档
+}
+
+// FileHash 计算文件的哈希值并返回十六进制字符串
+func FileHash(filePath string) (string, error) {
+	// 打开文件
+	file, err := os.Open(filePath)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	// 创建哈希计算器
+	hash := sha256.New()
+
+	// 将文件内容拷贝到哈希计算器
+	if _, err := io.Copy(hash, file); err != nil {
+		return "", err
+	}
+
+	// 计算哈希值并转换为十六进制字符串
+	hashInBytes := hash.Sum(nil)
+	hashString := hex.EncodeToString(hashInBytes)
+
+	return hashString, nil
 }
