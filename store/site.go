@@ -36,7 +36,7 @@ func (s *SiteType) Delete(site *models.Site) (err error) {
 }
 
 func (s *SiteType) GetReleaseList(siteID uint) (releases []*models.SiteRelease, err error) {
-	err = s.db.Where("site_id = ?", siteID).Find(&releases).Error
+	err = s.db.Where("site_id = ?", siteID).Preload("File").Find(&releases).Error
 	return
 }
 
@@ -48,7 +48,7 @@ func (s *SiteType) GetReleaseById(id uint) (release *models.SiteRelease, err err
 
 func (s *SiteType) GetLatestRelease(site *models.Site) (release *models.SiteRelease, err error) {
 	release = &models.SiteRelease{}
-	err = s.db.Where("site_id = ? AND tag = ?", site.ID, "latest").First(release).Error
+	err = s.db.Where("site_id = ? AND tag = ?", site.ID, "latest").Preload("File").First(release).Error
 	return
 }
 

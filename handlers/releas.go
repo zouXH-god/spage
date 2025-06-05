@@ -22,6 +22,7 @@ func (ReleaseApi) ToDTO(release *models.SiteRelease) ReleaseDTO {
 		ID:   release.ID,
 		Site: Site.ToDTO(&release.Site, false),
 		Tag:  release.Tag,
+		File: release.File,
 	}
 }
 
@@ -77,9 +78,16 @@ func (ReleaseApi) Create(ctx context.Context, c *app.RequestContext) {
 		resps.InternalServerError(c, "create release file error")
 		return
 	}
+	// 计算文件hash
+	fileHash, err := utils.FileHash(releaseSavePath)
+	if err != nil {
+		resps.InternalServerError(c, "calculate file hash error")
+		return
+	}
 	// 创建文件记录
 	file := models.File{
 		Path: releaseSavePath,
+		Hash: fileHash,
 	}
 	if err := store.File.Create(&file); err != nil {
 		resps.InternalServerError(c, "create file record error")
