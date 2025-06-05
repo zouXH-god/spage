@@ -1,0 +1,21 @@
+syntax = "proto3";
+package agent;
+option go_package = "./proto";
+
+// 定义服务
+service AgentService {
+  // 创建站点
+  // 更新站点信息
+  // 删除站点
+  // 上传文件
+}
+
+// 请求消息
+message HelloRequest {
+  string name = 1;
+}
+
+// 响应消息
+message HelloResponse {
+  string message = 1;
+}
