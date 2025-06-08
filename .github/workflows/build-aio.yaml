@@ -9,10 +9,6 @@ env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   BIN_NAME: spage
   BIN_OUT: build
-  REGISTRY_URLS: ghcr.io docker.io git.liteyuki.org reg.liteyuki.org
-  REGISTRY_USERS: ${{ secrets.GHCR_USER }} ${{ secrets.DOCKERHUB_USER }} ${{ secrets.LITEYUKIGITEA_USER }} ${{ secrets.LITEYUKIREG_USER }}
-  REGISTRY_TOKENS: ${{ secrets.GHCR_TOKEN }} ${{ secrets.DOCKERHUB_TOKEN }} ${{ secrets.LITEYUKIGITEA_TOKEN }} ${{ secrets.LITEYUKIREG_TOKEN }}
-  REGISTRY_NAMESPACES: liteyukistudio/spage liteyukistudio/spage spage/spage spage/spage
 
 concurrency:
   group: 'build-aio'
@@ -112,42 +108,61 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build and push container images (multi-registry, multi-arch)
-        env:
-          TAG: ${{ steps.version.outputs.tag }}
-          REGISTRY_URLS: ${{ env.REGISTRY_URLS }}
-          REGISTRY_USERS: ${{ env.REGISTRY_USERS }}
-          REGISTRY_TOKENS: ${{ env.REGISTRY_TOKENS }}
-          REGISTRY_NAMESPACES: ${{ env.REGISTRY_NAMESPACES }}
-        run: |
-          IFS=' ' read -r -a urls <<< "$REGISTRY_URLS"
-          IFS=' ' read -r -a users <<< "$REGISTRY_USERS"
-          IFS=' ' read -r -a tokens <<< "$REGISTRY_TOKENS"
-          IFS=' ' read -r -a namespaces <<< "$REGISTRY_NAMESPACES"
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GHCR_USER }}
+          password: ${{ secrets.GHCR_TOKEN }}
+      - name: Build & Push to GHCR
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/liteyukistudio/spage:${{ steps.version.outputs.tag }}
+          platforms: linux/amd64,linux/arm64
 
-          for i in "${!urls[@]}"; do
-            url="${urls[$i]}"
-            user="${users[$i]}"
-            token="${tokens[$i]}"
-            namespace="${namespaces[$i]}"
-            imagename="$url/$namespace:$TAG"
-            echo "$token" | docker login "$url" -u "$user" --password-stdin
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKERHUB_USER }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build & Push to DockerHub
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: docker.io/liteyukistudio/spage:${{ steps.version.outputs.tag }}
+          platforms: linux/amd64,linux/arm64
 
-            if [[ "$url" == "reg.liteyuki.org" ]]; then
-              # 只构建 amd64，直接用 docker build/push
-              docker build -t "$imagename" -f ./Dockerfile .
-              docker push "$imagename"
-              if [[ "${{ steps.version.outputs.nightly }}" == "false" ]]; then
-                docker tag "$imagename" "$url/$namespace:latest"
-                docker push "$url/$namespace:latest"
-              fi
-            else
-              docker buildx build --platform linux/amd64,linux/arm64 -f ./Dockerfile -t "$imagename" --push .
-              if [[ "${{ steps.version.outputs.nightly }}" == "false" ]]; then
-                docker buildx build --platform linux/amd64,linux/arm64 -f ./Dockerfile -t "$url/$namespace:latest" --push .
-              fi
-            fi
-          done
+      - name: Login to Gitea
+        uses: docker/login-action@v3
+        with:
+          registry: git.liteyuki.org
+          username: ${{ secrets.LITEYUKIGITEA_USER }}
+          password: ${{ secrets.LITEYUKIGITEA_TOKEN }}
+      - name: Build & Push to Gitea
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: git.liteyuki.org/spage/spage:${{ steps.version.outputs.tag }}
+          platforms: linux/amd64,linux/arm64
+
+      - name: Login to Harbor
+        uses: docker/login-action@v3
+        with:
+          registry: reg.liteyuki.org
+          username: ${{ secrets.LITEYUKIREG_USER }}
+          password: ${{ secrets.LITEYUKIREG_TOKEN }}
+      - name: Build & Push to Harbor (amd64 only)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: reg.liteyuki.org/spage/spage:${{ steps.version.outputs.tag }}
+          platforms: linux/amd64
 
       - name: Publish GitHub Release
         if: ${{ steps.version.outputs.nightly == 'false' }}

@@ -14,6 +14,10 @@
 
 ---
 
+## 简介
+
+一个基于Go语言开发的, 开源自托管静态页面托管服务, 使用Caddy作为web服务器
+
 ## 快速开始 
 
 容器化一键部署
@@ -28,17 +32,13 @@ ghcr.io/liteyukistudio/spage:latest
 # Liteyuki Gitea Container Registry源
 git.liteyuki.org/spage/spage:latest
 
-# Liteyuki Container Registry源 amd64 only
+# Liteyuki Container Registry源 amd64 architecture only
 reg.liteyuki.org/spage/spage:latest
 ```
 
 你可使用docker，podman等工具部署，也可以将其部署到Kubernetes集群中
 
-如果不想容器化，也可以直接跑二进制
-
-## 简介
-
-一个基于Go语言开发的, 开源自托管静态页面托管服务
+如果不想容器化，也可以直接跑二进制，支持[darwin, linux, windows] x [amd64, arm64]，由于上游库netpoll不支持32位，因此不支持32位系统
 
 ## 初衷
 
@@ -133,10 +133,6 @@ CLI将输出文件夹压缩后使用指定接口上传到服务器
 更多细节请查看[文档](https://docs.apage.dev/)
 
 ---
-
-## 快速开始
-
-从[Github Release](https://github.com/LiteyukiStudio/spage/releases)下载对应版本的二进制文件, 运行即可
 
 **Todo: 编写快速开始部分的文档**
 
