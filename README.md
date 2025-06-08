@@ -14,6 +14,25 @@
 
 ---
 
+## 快速开始 
+
+容器化一键部署
+
+```bash
+# Docker Hub源
+liteyukistudio/spage:latest
+
+# GitHub Container Registry源
+ghcr.io/liteyukistudio/spage:latest
+
+# Liteyuki Container Registry源
+reg.liteyuki.org/spage/spage:latest
+```
+
+你可使用docker，podman等工具部署，也可以将其部署到Kubernetes集群中
+
+如果不想容器化，也可以直接跑二进制
+
 ## 简介
 
 一个基于Go语言开发的, 开源自托管静态页面托管服务
