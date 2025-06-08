@@ -30,6 +30,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Test Login Liteyuki Harbor
+        run: docker login reg.liteyuki.org -u ${{ secrets.LITEYUKIHARBOR_USER }} -p ${{ secrets.LITEYUKIHARBOR_TOKEN }}
+
       - name: Setup Go
         uses: actions/setup-go@v5
       # 调试期间关掉前端构建
