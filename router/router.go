@@ -69,6 +69,7 @@ func Run() error {
 		{
 			adminGroup.POST("/user", TODO()) // Create user
 		}
+
 	}
 
 	// 设置静态文件目录

@@ -13,8 +13,8 @@ config.yaml
 data/
 
 # frontend dev
-
-spage-web/
+**/node_modules/
+.next
 
 # frontend dist
 
