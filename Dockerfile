@@ -21,7 +21,7 @@ FROM alpine:latest AS prod
 
 WORKDIR /app
 
-RUN apk --no-cache add tzdata ca-certificates libc6-compat libgcc libstdc++
+RUN apk --no-cache add tzdata ca-certificates
 
 COPY --from=builder /app/server /app/server
 
