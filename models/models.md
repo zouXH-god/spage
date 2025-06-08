@@ -100,5 +100,6 @@
 | Tag    | string     | `gorm:"not null"`                                                        | 版本标签       |
 | FileID | uint       | `gorm:"not null"`                                                        | 版本文件ID     |
 | File   | File       | `gorm:"foreignKey:FileID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"` | 版本文件       |
+| Hash   | string     | `gorm:"not null"`                                                        | 文件哈希值      |
 
 表名: `site_releases`

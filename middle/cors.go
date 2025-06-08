@@ -12,6 +12,8 @@ type corsType struct{}
 
 var Cors = corsType{}
 
+// UseCors 跨域中间件
+// Cross-domain middleware
 func (corsType) UseCors() app.HandlerFunc {
 	var allowedOrigins []string
 	if config.Mode == constants.ModeDev {

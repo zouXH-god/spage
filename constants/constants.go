@@ -1,18 +1,19 @@
 package constants
 
 const (
-	RoleAdmin       = "admin"        // 管理员
-	RoleUser        = "user"         // 普通用户
-	FlagSystemAdmin = "system_admin" // 系统管理员标志
+	RoleAdmin       = "admin"        // 管理员 Admin
+	RoleUser        = "user"         // 普通用户 User
+	FlagSystemAdmin = "system_admin" // 系统管理员标志 SystemAdmin
 
-	CaptchaTypeDisable   = "disable" // 禁用验证码
-	CaptchaTypeTurnstile = "turnstile"
-	CaptchaTypeReCaptcha = "recaptcha"
-	CaptchaTypeHCaptcha  = "hcaptcha"
-	CaptchaDevPasscode   = "dev-captcha"
-	ModeDev              = "dev"
-	ModeProd             = "prod"
+	CaptchaTypeDisable   = "disable"     // 禁用验证码 Captcha
+	CaptchaTypeTurnstile = "turnstile"   // 云flare turnstile
+	CaptchaTypeReCaptcha = "recaptcha"   // Google reCAPTCHA
+	CaptchaTypeHCaptcha  = "hcaptcha"    // HCaptcha
+	CaptchaDevPasscode   = "dev-captcha" // 开发者验证码 Developer Captcha
 
-	OwnerTypeUser = "user"
-	OwnerTypeOrg  = "organization"
+	ModeDev  = "dev"  // 开发者模式 Developer Mode
+	ModeProd = "prod" // 生产模式 Production Mode
+
+	OwnerTypeUser = "user"         // 个人用户 Personal user
+	OwnerTypeOrg  = "organization" // 组织用户 Organization user
 )

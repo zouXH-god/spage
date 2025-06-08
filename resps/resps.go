@@ -2,6 +2,8 @@ package resps
 
 import "github.com/cloudwego/hertz/pkg/app"
 
+// 自定义响应
+// Custom response
 func Custom(c *app.RequestContext, code int, message string, data ...map[string]any) {
 	if len(data) == 0 {
 		data = append(data, map[string]any{})

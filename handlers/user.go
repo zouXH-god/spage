@@ -2,6 +2,9 @@ package handlers
 
 import (
 	"context"
+	"strconv"
+	"time"
+
 	"github.com/LiteyukiStudio/spage/config"
 	"github.com/LiteyukiStudio/spage/constants"
 	"github.com/LiteyukiStudio/spage/middle"
@@ -11,14 +14,32 @@ import (
 	"github.com/LiteyukiStudio/spage/utils"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/protocol"
-	"strconv"
-	"time"
 )
 
 type UserApi struct{}
 
 var User = UserApi{}
 
+// UserDTO 用户信息数据传输对象
+// User Information Data Transfer Object (DTO)
+func (UserApi) ToDTO(user *models.User, self bool) UserDTO {
+	userDTO := UserDTO{
+		ID:          user.ID,
+		Name:        user.Name,
+		DisplayName: user.DisplayName,
+		Email:       user.Email,
+		Description: user.Description,
+		Avatar:      user.AvatarURL,
+	}
+	if self {
+		userDTO.Role = user.Role
+		userDTO.Language = user.Language
+	}
+	return userDTO
+}
+
+// Login 用户登录
+// User login
 func (UserApi) Login(ctx context.Context, c *app.RequestContext) {
 	loginReq := &LoginReq{}
 	// TODO: 这里需要验证验证码
@@ -69,6 +90,8 @@ func (UserApi) Login(ctx context.Context, c *app.RequestContext) {
 	}
 }
 
+// Logout 用户登出
+// User logout
 func (UserApi) Logout(ctx context.Context, c *app.RequestContext) {
 	// 删除cookie
 	c.SetCookie("token", "", -1, "/", "", protocol.CookieSameSiteLaxMode, true, true)
@@ -76,6 +99,8 @@ func (UserApi) Logout(ctx context.Context, c *app.RequestContext) {
 	resps.Ok(c, "Logout successful")
 }
 
+// GetCaptcha 获取验证码
+// Get captcha
 func (UserApi) GetCaptcha(ctx context.Context, c *app.RequestContext) {
 	resps.Ok(c, "ok", map[string]any{
 		"provider": config.CaptchaType,
@@ -84,6 +109,8 @@ func (UserApi) GetCaptcha(ctx context.Context, c *app.RequestContext) {
 	})
 }
 
+// GetUserOrgs 获取用户的组织
+// Get user organizations
 func (UserApi) GetOrgs(ctx context.Context, c *app.RequestContext) {
 	userID := c.Param("id")
 	crtUser := middle.Auth.GetUser(ctx, c)
@@ -102,21 +129,15 @@ func (UserApi) GetOrgs(ctx context.Context, c *app.RequestContext) {
 	resps.Ok(c, resps.OK, map[string]any{
 		"organizations": func() (orgDTOs []OrganizationDTO) {
 			for _, org := range orgs {
-				orgDTOs = append(orgDTOs, OrganizationDTO{
-					ID:           org.ID,
-					Name:         org.Name,
-					DisplayName:  org.DisplayName,
-					Email:        org.Email,
-					Description:  org.Description,
-					AvatarURL:    org.AvatarURL,
-					ProjectLimit: org.ProjectLimit,
-				})
+				orgDTOs = append(orgDTOs, Org.ToDTO(&org))
 			}
 			return
 		}(),
 	})
 }
 
+// GetUserProjects 获取用户的项目
+// Get user projects
 func (UserApi) GetProjects(ctx context.Context, c *app.RequestContext) {
 	userID := c.Param("id")
 	crtUser := middle.Auth.GetUser(ctx, c)
@@ -125,28 +146,23 @@ func (UserApi) GetProjects(ctx context.Context, c *app.RequestContext) {
 	}
 	page, limit := utils.Ctx.GetPageLimit(c)
 
-	projects, err := store.Project.ListByOwner(constants.OwnerTypeUser, userID, page, limit)
+	projects, total, err := store.Project.ListByOwner(constants.OwnerTypeUser, userID, page, limit)
 	if err != nil {
 		resps.InternalServerError(c, "Failed to get projects")
 	}
 	resps.Ok(c, resps.OK, map[string]any{
 		"projects": func() (projectDTOs []ProjectDTO) {
 			for _, project := range projects {
-				projectDTOs = append(projectDTOs, ProjectDTO{
-					ID:          project.ID,
-					Name:        project.Name,
-					DisplayName: project.DisplayName,
-					Description: project.Description,
-					OwnerID:     project.OwnerID,
-					OwnerType:   project.OwnerType,
-					SiteLimit:   project.SiteLimit,
-				})
+				projectDTOs = append(projectDTOs, Project.toDTO(&project, false)) // 这里naloveyuki尝试修复了下gitd7b49ff的问题
 			}
 			return
 		}(),
+		"total": total,
 	})
 }
 
+// GetUser 获取用户信息
+// Get user information
 func (UserApi) GetUser(ctx context.Context, c *app.RequestContext) {
 	userID := c.Param("id")
 	crtUser := middle.Auth.GetUser(ctx, c)
@@ -156,32 +172,18 @@ func (UserApi) GetUser(ctx context.Context, c *app.RequestContext) {
 	if userID == strconv.Itoa(int(crtUser.ID)) {
 		// 本人
 		resps.Ok(c, "ok", map[string]any{
-			"user": UserDTO{
-				ID:          crtUser.ID,
-				Name:        crtUser.Name,
-				DisplayName: crtUser.DisplayName,
-				Email:       crtUser.Email,
-				Description: crtUser.Description,
-				Avatar:      crtUser.AvatarURL,
-				Role:        crtUser.Role,
-				Language:    crtUser.Language,
-			},
+			"user": User.ToDTO(crtUser, true),
 		})
 	} else {
 		// 其他人
 		resps.Ok(c, "ok", map[string]any{
-			"user": UserDTO{
-				ID:          crtUser.ID,
-				Name:        crtUser.Name,
-				DisplayName: crtUser.DisplayName,
-				Email:       crtUser.Email,
-				Description: crtUser.Description,
-				Avatar:      crtUser.AvatarURL,
-			},
+			"user": User.ToDTO(crtUser, false),
 		})
 	}
 }
 
+// Register 用户注册
+// User registration
 func (UserApi) Register(ctx context.Context, c *app.RequestContext) {
 	// 接收参数
 	request := &RegisterReq{}
@@ -191,9 +193,9 @@ func (UserApi) Register(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	// TODO 校验邮箱验证码
-	// TODO 校验密码复杂度
+	// 校验密码复杂度
 	passwordLevel := config.GetInt("password_complexity", 3)
-	if !utils.CheckPasswordComplexity(request.Password, passwordLevel) {
+	if !utils.Password.CheckPasswordComplexity(request.Password, passwordLevel) {
 		resps.BadRequest(c, "Password complexity is too low")
 		return
 	}
@@ -225,6 +227,8 @@ func (UserApi) Register(ctx context.Context, c *app.RequestContext) {
 	})
 }
 
+// UpdateUser 更新用户信息
+// Update user information
 func (UserApi) UpdateUser(ctx context.Context, c *app.RequestContext) {
 	userDTO := &UserDTO{}
 	if err := c.BindJSON(userDTO); err != nil {
