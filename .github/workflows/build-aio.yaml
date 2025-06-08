@@ -32,19 +32,19 @@ jobs:
 
       - name: Setup Go
         uses: actions/setup-go@v5
-      # 调试期间关掉前端构建
-      # - name: Setup Node.js
-      #   uses: actions/setup-node@v4
-      #   with:
-      #     node-version: 22
 
-      # - name: Build frontend
-      #   run: |
-      #     cd web-src
-      #     npm install pnpm -g
-      #     pnpm install
-      #     pnpm build
-      #     cp -r out/* ../static/dist/
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build frontend
+        run: |
+          cd web-src
+          npm install pnpm -g
+          pnpm install
+          pnpm build
+          cp -r out/* ../static/dist/
 
       - name: Build Go binary
         env:
@@ -133,9 +133,9 @@ jobs:
             namespace="${namespaces[$i]}"
             imagename="$url/$namespace:$TAG"
             echo "$token" | docker login "$url" -u "$user" --password-stdin
-            docker buildx build --platform linux/amd64,linux/arm64 -f ./Dockerfile -t "$imagename" --push .
+            docker buildx build --provenance=false --platform linux/amd64,linux/arm64 -f ./Dockerfile -t "$imagename" --push .
             if [[ "${{ steps.version.outputs.nightly }}" == "false" ]]; then
-              docker buildx build --platform linux/amd64,linux/arm64 -f ./Dockerfile -t "$url/$namespace:latest" --push .
+              docker buildx build --provenance=false --platform linux/amd64,linux/arm64 -f ./Dockerfile -t "$url/$namespace:latest" --push .
             fi
           done
 
