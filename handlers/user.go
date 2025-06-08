@@ -81,6 +81,7 @@ func (UserApi) Login(ctx context.Context, c *app.RequestContext) {
 			resps.Ok(c, "Login successful", map[string]any{
 				"token":         token,
 				"refresh_token": refreshToken,
+				"user_id":       user.ID,
 			})
 			return
 		} else {

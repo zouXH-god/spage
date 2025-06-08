@@ -2,7 +2,7 @@ package models
 
 import "gorm.io/gorm"
 
-// 用户模型
+// User 用户模型
 type User struct {
 	gorm.Model
 	Name          string          `gorm:"not null;unique"`                 // 用户的唯一名称 User's unique name
@@ -18,13 +18,13 @@ type User struct {
 	Password      *string         `gorm:"column:password"`                 // 用户的密码（经过哈希处理），仅用于本地身份验证 User's password (hashed), only used for local authentication
 }
 
-// 用户
+// TableName 用户
 // User
 func (User) TableName() string {
 	return "users"
 }
 
-// 组织模型
+// Organization 组织模型
 // Organization Model
 type Organization struct {
 	gorm.Model
@@ -38,13 +38,13 @@ type Organization struct {
 	ProjectLimit int     `gorm:"default:0"`                       // 组织的项目限制，0：遵循策略，-1：无限制 Organization's project limit, 0: follow the policy, -1: unlimited
 }
 
-// 组织
+// TableName 组织
 // Organization
 func (Organization) TableName() string {
 	return "organizations"
 }
 
-// 项目模型
+// Project 项目模型
 // Project Model
 type Project struct {
 	gorm.Model
@@ -57,7 +57,7 @@ type Project struct {
 	SiteLimit   int     `gorm:"default:0"`                 // 项目的站点限制，0：遵循策略，-1：无限制 Project's site limit, 0: follow the policy, -1: unlimited
 }
 
-// 项目
+// TableName 项目
 // Project
 func (Project) TableName() string {
 	return "projects"
