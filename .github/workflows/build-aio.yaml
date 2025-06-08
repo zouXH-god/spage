@@ -7,6 +7,7 @@ on:
 
 env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  BIN_NAME: spage
   BIN_OUT: build
   REGISTRY_URLS: ghcr.io docker.io reg.liteyuki.org
   REGISTRY_USERS: ${{ secrets.GHCR_USER }} ${{ secrets.DOCKERHUB_USER }} ${{ secrets.LITEYUKIHARBOR_USER }}
@@ -52,17 +53,17 @@ jobs:
         run: |
           mkdir -p ${{ env.BIN_OUT }}/${{ matrix.goos }}-${{ matrix.goarch }}
           if [ "${{ matrix.goos }}" = "windows" ]; then
-            BIN_NAME="spage.exe"
+            BIN_NAME="${{ env.BIN_NAME }}.exe"
           else
-            BIN_NAME="spage"
+            BIN_NAME="${{ env.BIN_NAME }}"
           fi
           go build -o ${{ env.BIN_OUT }}/${{ matrix.goos }}-${{ matrix.goarch }}/$BIN_NAME ./cmd/server
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: spage-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: ${{ env.BIN_OUT }}/${{ matrix.goos }}-${{ matrix.goarch }}/spage*
+          name: ${{ env.BIN_NAME }}-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: ${{ env.BIN_OUT }}/${{ matrix.goos }}-${{ matrix.goarch }}/${{ env.BIN_NAME }}*
 
   publish:
     name: Publish Artifacts & Images
@@ -72,18 +73,18 @@ jobs:
       # 下载所有产物用于 Release
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Download all artifacts for release
         uses: actions/download-artifact@v4
         with:
-          pattern: spage-*
+          pattern: ${{ env.BIN_NAME }}-*
           path: ${{ env.BIN_OUT }}
 
       # 只下载 linux 产物用于镜像构建
       - name: Download linux artifacts for image
         uses: actions/download-artifact@v4
         with:
-          pattern: spage-linux-*
+          pattern: ${{ env.BIN_NAME }}-linux-*
           path: ${{ env.BIN_OUT }}
 
       - name: Set version/tag
@@ -141,4 +142,4 @@ jobs:
             Release ${{ steps.version.outputs.tag }}
             Built from tag ${{ steps.version.outputs.tag }}
           files: |
-            ${{ env.BIN_OUT }}/**/spage*
+            ${{ env.BIN_OUT }}/**/${{ env.BIN_NAME }}*
