@@ -133,11 +133,13 @@ jobs:
             imagename="$url/$namespace:$TAG"
             echo "$token" | docker login "$url" -u "$user" --password-stdin
 
-            # 如果是 Harbor，只推送 amd64
             if [[ "$url" == "reg.liteyuki.org" ]]; then
-              docker buildx build --platform linux/amd64 -f ./Dockerfile -t "$imagename" --push .
+              # 只构建 amd64，直接用 docker build/push
+              docker build -t "$imagename" -f ./Dockerfile .
+              docker push "$imagename"
               if [[ "${{ steps.version.outputs.nightly }}" == "false" ]]; then
-                docker buildx build --platform linux/amd64 -f ./Dockerfile -t "$url/$namespace:latest" --push .
+                docker tag "$imagename" "$url/$namespace:latest"
+                docker push "$url/$namespace:latest"
               fi
             else
               docker buildx build --platform linux/amd64,linux/arm64 -f ./Dockerfile -t "$imagename" --push .
