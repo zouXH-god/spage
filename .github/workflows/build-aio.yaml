@@ -9,10 +9,10 @@ env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   BIN_NAME: spage
   BIN_OUT: build
-  REGISTRY_URLS: ghcr.io docker.io reg.liteyuki.org
-  REGISTRY_USERS: ${{ secrets.GHCR_USER }} ${{ secrets.DOCKERHUB_USER }} ${{ secrets.LITEYUKIREG_USER }}
-  REGISTRY_TOKENS: ${{ secrets.GHCR_TOKEN }} ${{ secrets.DOCKERHUB_TOKEN }} ${{ secrets.LITEYUKIREG_TOKEN }}
-  REGISTRY_NAMESPACES: liteyukistudio/spage liteyukistudio/spage spage/spage
+  REGISTRY_URLS: reg.liteyuki.org
+  REGISTRY_USERS: ${{ secrets.LITEYUKIREG_USER }}
+  REGISTRY_TOKENS: ${{ secrets.LITEYUKIREG_TOKEN }}
+  REGISTRY_NAMESPACES: spage/spage
 
 concurrency:
   group: 'build-aio'
@@ -133,9 +133,9 @@ jobs:
             namespace="${namespaces[$i]}"
             imagename="$url/$namespace:$TAG"
             echo "$token" | docker login "$url" -u "$user" --password-stdin
-            docker buildx build --provenance=false --platform linux/amd64,linux/arm64 -f ./Dockerfile -t "$imagename" --push .
+            docker buildx build --platform linux/amd64,linux/arm64 -f ./Dockerfile -t "$imagename" --push .
             if [[ "${{ steps.version.outputs.nightly }}" == "false" ]]; then
-              docker buildx build --provenance=false --platform linux/amd64,linux/arm64 -f ./Dockerfile -t "$url/$namespace:latest" --push .
+              docker buildx build --platform linux/amd64,linux/arm64 -f ./Dockerfile -t "$url/$namespace:latest" --push .
             fi
           done
 
