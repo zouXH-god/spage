@@ -9,22 +9,19 @@ import (
 )
 
 type userType struct {
-	db *gorm.DB
 }
 
-var User = userType{
-	db: DB,
-}
+var User = userType{}
 
 // Create 创建用户
 func (u *userType) Create(user *models.User) (err error) {
-	return u.db.Create(user).Error
+	return DB.Create(user).Error
 }
 
 // GetByName 根据名称获取用户
 func (u *userType) GetByName(name string) (user *models.User, err error) {
 	user = &models.User{} // 初始化指针 // Initialize pointer
-	err = u.db.Where("name = ?", name).First(user).Error
+	err = DB.Where("name = ?", name).First(user).Error
 	if err != nil {
 		return nil, err // 出错时返回nil When an error occurs, return nil
 	}
@@ -34,7 +31,7 @@ func (u *userType) GetByName(name string) (user *models.User, err error) {
 // IsNameExist 判断用户名是否存在
 func (u *userType) IsNameExist(name string) bool {
 	var count int64
-	err := u.db.Model(&models.User{}).Where("name = ?", name).Count(&count).Error
+	err := DB.Model(&models.User{}).Where("name = ?", name).Count(&count).Error
 	if err != nil {
 		return false
 	}
@@ -44,7 +41,7 @@ func (u *userType) IsNameExist(name string) bool {
 // GetByID 根据ID获取用户
 func (u *userType) GetByID(id uint) (user *models.User, err error) {
 	user = &models.User{} // 初始化指针
-	err = u.db.Where("id = ?", id).First(user).Error
+	err = DB.Where("id = ?", id).First(user).Error
 	if err != nil {
 		return nil, err // 出错时返回nil
 	}
@@ -54,7 +51,7 @@ func (u *userType) GetByID(id uint) (user *models.User, err error) {
 // GetByEmail 根据邮箱获取用户
 func (u *userType) GetByEmail(email string) (user *models.User, err error) {
 	user = &models.User{} // 初始化指针
-	err = u.db.Where("email = ?", email).First(user).Error
+	err = DB.Where("email = ?", email).First(user).Error
 	if err != nil {
 		return nil, err // 出错时返回nil
 	}
@@ -63,7 +60,7 @@ func (u *userType) GetByEmail(email string) (user *models.User, err error) {
 
 // Update 更新用户信息
 func (u *userType) Update(user *models.User) (err error) {
-	err = u.db.Save(user).Error
+	err = DB.Save(user).Error
 	if err != nil {
 		return err
 	}
@@ -72,7 +69,7 @@ func (u *userType) Update(user *models.User) (err error) {
 
 // DeleteByID 根据ID删除用户
 func (u *userType) DeleteByID(id uint) (err error) {
-	err = u.db.Delete(&models.User{}, id).Error
+	err = DB.Delete(&models.User{}, id).Error
 	if err != nil {
 		return err
 	}
@@ -87,14 +84,14 @@ func (u *userType) UpdateSystemAdmin(user *models.User) (err error) {
 	user.Role = constants.RoleAdmin
 
 	// 尝试查找系统管理员 Try to find system admin
-	var existingAdmin models.User
-	result := u.db.Where("flag = ?", constants.FlagSystemAdmin).First(&existingAdmin)
+	existingAdmin := models.User{}
+	result := DB.Where("flag = ?", constants.FlagSystemAdmin).First(&existingAdmin)
 
 	if result.Error != nil {
 		// 如果不存在系统管理员（记录未找到），则创建一个 If there is no system admin (record not found), create one
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			// 创建新的系统管理员 Create new system admin
-			return u.db.Create(user).Error
+			return DB.Create(user).Error
 		}
 		// 其他错误则直接返回 Other errors are returned directly
 		return result.Error
@@ -102,5 +99,5 @@ func (u *userType) UpdateSystemAdmin(user *models.User) (err error) {
 	// 系统管理员已存在，更新信息 System admin exists, update information
 	// 保留ID，更新其他字段 Keep ID, update other fields
 	user.ID = existingAdmin.ID
-	return u.db.Model(&existingAdmin).Updates(user).Error
+	return DB.Model(&existingAdmin).Updates(user).Error
 }

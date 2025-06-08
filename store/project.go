@@ -5,27 +5,23 @@ import (
 
 	"github.com/LiteyukiStudio/spage/constants"
 	"github.com/LiteyukiStudio/spage/models"
-	"gorm.io/gorm"
 )
 
 type projectType struct {
-	db *gorm.DB
 }
 
-var Project = projectType{
-	db: DB,
-}
+var Project = projectType{}
 
 // Create 创建项目
 // Create a project
 func (p *projectType) Create(project *models.Project) (err error) {
-	return p.db.Create(project).Error
+	return DB.Create(project).Error
 }
 
 // GetByID 通过项目ID获取项目
 // Get Project by ID
 func (p *projectType) GetByID(id uint) (project *models.Project, err error) {
-	err = p.db.First(&project, id).Preload("Owners").Error
+	err = DB.First(&project, id).Preload("Owners").Error
 	return
 }
 
@@ -58,7 +54,7 @@ func (p *projectType) ListByOwner(ownerType, ownerID string, page, limit int) (p
 	}
 
 	projects, total, err = Paginate[models.Project](
-		p.db,
+		DB,
 		page,
 		limit,
 		"owner_type = ? AND owner_id = ?",
@@ -70,31 +66,31 @@ func (p *projectType) ListByOwner(ownerType, ownerID string, page, limit int) (p
 
 // Update 更新项目
 func (p *projectType) Update(project *models.Project) (err error) {
-	return p.db.Updates(project).Error
+	return DB.Updates(project).Error
 }
 
 // Delete 删除项目
 func (p *projectType) Delete(project *models.Project) (err error) {
-	return p.db.Delete(project).Error
+	return DB.Delete(project).Error
 }
 
 // AddOwner 为项目添加所有者
 // Add Owner to a project
 func (p *projectType) AddOwner(project *models.Project, user *models.User) (err error) {
-	return p.db.Model(project).Association("Owners").Append(user)
+	return DB.Model(project).Association("Owners").Append(user)
 }
 
 // DeleteOwner 从项目删除所有者
 // Delete Owner from a project
 func (p *projectType) DeleteOwner(project *models.Project, user *models.User) (err error) {
-	return p.db.Model(project).Association("Owners").Delete(user)
+	return DB.Model(project).Association("Owners").Delete(user)
 }
 
 // GetSiteList 获取项目下的站点列表
 // Get Site List of a project
 func (p *projectType) GetSiteList(project *models.Project, page, limit int) (sites []models.Site, total int64, err error) {
 	sites, total, err = Paginate[models.Site](
-		p.db,
+		DB,
 		page,
 		limit,
 		"project_id = ?",

@@ -2,22 +2,18 @@ package store
 
 import (
 	"github.com/LiteyukiStudio/spage/models"
-	"gorm.io/gorm"
 )
 
 type orgType struct {
-	db *gorm.DB
 }
 
-var Org = orgType{
-	db: DB,
-}
+var Org = orgType{}
 
 // ListByUserID 通过UserID获取用户组织，支持分页和预加载关系
 // Get Organizations by UserID, support pagination and preload relationships
 func (o *orgType) ListByUserID(userID string, page, limit int) (orgs []models.Organization, err error) {
 	// 使用连接查询
-	query := o.db.Joins("JOIN organization_members ON organizations.id = organization_members.organization_id").
+	query := DB.Joins("JOIN organization_members ON organizations.id = organization_members.organization_id").
 		Where("organization_members.user_id = ?", userID)
 	// 预加载关系
 	query = WithPreloads(query, "Members", "Owners")
@@ -34,7 +30,7 @@ func (o *orgType) ListByUserID(userID string, page, limit int) (orgs []models.Or
 // GetOrgById 通过ID获取组织
 // Get Organization by ID
 func (o *orgType) GetOrgById(id uint) (org *models.Organization, err error) {
-	err = o.db.Model(&models.Organization{}).Where("id = ?", id).Preload("Members").Preload("Owners").First(&org).Error
+	err = DB.Model(&models.Organization{}).Where("id = ?", id).Preload("Members").Preload("Owners").First(&org).Error
 	return
 }
 
@@ -42,7 +38,7 @@ func (o *orgType) GetOrgById(id uint) (org *models.Organization, err error) {
 // Check if the organization name exists
 func (o *orgType) OrgNameIsExist(name string) bool {
 	var count int64
-	o.db.Model(&models.Organization{}).Where("name = ?", name).Count(&count)
+	DB.Model(&models.Organization{}).Where("name = ?", name).Count(&count)
 	return count > 0
 }
 
@@ -64,15 +60,15 @@ func (o *orgType) GetUserAuth(org *models.Organization, userID uint) (auth strin
 
 // CreateOrg 创建组织
 func (o *orgType) CreateOrg(org *models.Organization) error {
-	return o.db.Create(org).Error
+	return DB.Create(org).Error
 }
 
 // UpdateOrg 更新组织
 func (o *orgType) UpdateOrg(org *models.Organization) error {
-	return o.db.Updates(org).Error
+	return DB.Updates(org).Error
 }
 
 // DeleteOrg 删除组织
 func (o *orgType) DeleteOrg(org *models.Organization) error {
-	return o.db.Model(org).Delete(org).Error
+	return DB.Model(org).Delete(org).Error
 }
