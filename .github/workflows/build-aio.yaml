@@ -9,10 +9,10 @@ env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   BIN_NAME: spage
   BIN_OUT: build
-  REGISTRY_URLS: ghcr.io docker.io git.liteyuki.org
-  REGISTRY_USERS: ${{ secrets.GHCR_USER }} ${{ secrets.DOCKERHUB_USER }} ${{ secrets.LITEYUKIGITEA_USER }}
-  REGISTRY_TOKENS: ${{ secrets.GHCR_TOKEN }} ${{ secrets.DOCKERHUB_TOKEN }} ${{ secrets.LITEYUKIGITEA_TOKEN }}
-  REGISTRY_NAMESPACES: liteyukistudio/spage liteyukistudio/spage spage/spage
+  REGISTRY_URLS: ghcr.io docker.io git.liteyuki.org reg.liteyuki.org
+  REGISTRY_USERS: ${{ secrets.GHCR_USER }} ${{ secrets.DOCKERHUB_USER }} ${{ secrets.LITEYUKIGITEA_USER }} ${{ secrets.LITEYUKIREG_USER }}
+  REGISTRY_TOKENS: ${{ secrets.GHCR_TOKEN }} ${{ secrets.DOCKERHUB_TOKEN }} ${{ secrets.LITEYUKIGITEA_TOKEN }} ${{ secrets.LITEYUKIREG_TOKEN }}
+  REGISTRY_NAMESPACES: liteyukistudio/spage liteyukistudio/spage spage/spage spage/spage
 
 concurrency:
   group: 'build-aio'
@@ -129,13 +129,21 @@ jobs:
             url="${urls[$i]}"
             user="${users[$i]}"
             token="${tokens[$i]}"
-            docker login "$url" -u "$user" -p "$token"
             namespace="${namespaces[$i]}"
             imagename="$url/$namespace:$TAG"
             echo "$token" | docker login "$url" -u "$user" --password-stdin
-            docker buildx build --platform linux/amd64,linux/arm64 -f ./Dockerfile -t "$imagename" --push .
-            if [[ "${{ steps.version.outputs.nightly }}" == "false" ]]; then
-              docker buildx build --platform linux/amd64,linux/arm64 -f ./Dockerfile -t "$url/$namespace:latest" --push .
+
+            # 如果是 Harbor，只推送 amd64
+            if [[ "$url" == "reg.liteyuki.org" ]]; then
+              docker buildx build --platform linux/amd64 -f ./Dockerfile -t "$imagename" --push .
+              if [[ "${{ steps.version.outputs.nightly }}" == "false" ]]; then
+                docker buildx build --platform linux/amd64 -f ./Dockerfile -t "$url/$namespace:latest" --push .
+              fi
+            else
+              docker buildx build --platform linux/amd64,linux/arm64 -f ./Dockerfile -t "$imagename" --push .
+              if [[ "${{ steps.version.outputs.nightly }}" == "false" ]]; then
+                docker buildx build --platform linux/amd64,linux/arm64 -f ./Dockerfile -t "$url/$namespace:latest" --push .
+              fi
             fi
           done
 
