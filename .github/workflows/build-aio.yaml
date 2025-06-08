@@ -47,7 +47,7 @@ jobs:
           GOARCH: ${{ matrix.goarch }}
         run: |
           mkdir -p ${{ env.BIN_OUT }}/${{ matrix.goos }}-${{ matrix.goarch }}
-          go build -o ${{ env.BIN_OUT }}/${{ matrix.goos }}-${{ matrix.goarch }}/spage cmd/server/main.go
+          go build -o ${{ env.BIN_OUT }}/${{ matrix.goos }}-${{ matrix.goarch }}/spage ./cmd/server
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
