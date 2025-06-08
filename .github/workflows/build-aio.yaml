@@ -99,7 +99,10 @@ jobs:
           echo "tag=${TAG}" >> $GITHUB_OUTPUT
           echo "nightly=${NIGHTLY}" >> $GITHUB_OUTPUT
 
-      - name: Build and push container images (multi-registry)
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push container images (multi-registry, multi-arch)
         env:
           TAG: ${{ steps.version.outputs.tag }}
           REGISTRY_URLS: ${{ env.REGISTRY_URLS }}
@@ -112,9 +115,6 @@ jobs:
           IFS=' ' read -r -a tokens <<< "$REGISTRY_TOKENS"
           IFS=' ' read -r -a namespaces <<< "$REGISTRY_NAMESPACES"
 
-          # 只build一次镜像，Dockerfile 只 COPY linux 产物
-          docker build -t tmpimg:${TAG} .
-
           for i in "${!urls[@]}"; do
             url="${urls[$i]}"
             user="${users[$i]}"
@@ -122,12 +122,9 @@ jobs:
             namespace="${namespaces[$i]}"
             imagename="$url/$namespace:$TAG"
             echo "$token" | docker login "$url" -u "$user" --password-stdin
-            docker tag tmpimg:${TAG} "$imagename"
-            docker push "$imagename"
-            # 如果是release，额外推送latest标签
+            docker buildx build --platform linux/amd64,linux/arm64 -f ./Dockerfile -t "$imagename" --push .
             if [[ "${{ steps.version.outputs.nightly }}" == "false" ]]; then
-              docker tag tmpimg:${TAG} "$url/$namespace:latest"
-              docker push "$url/$namespace:latest"
+              docker buildx build --platform linux/amd64,linux/arm64 -f ./Dockerfile -t "$url/$namespace:latest" --push .
             fi
           done
 
