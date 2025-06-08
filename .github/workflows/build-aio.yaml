@@ -11,7 +11,11 @@ env:
   REPO_OWNER: ${{ github.repository_owner }}
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   BIN_OUT: build
-  DOCKERFILE: ./Dockerfile
+
+  REGISTRY_URLS: ghcr.io docker.io reg.liteyuki.org
+  REGISTRY_USERS: ${{ secrets.GHCR_USER }} ${{ secrets.DOCKERHUB_USER }} ${{ secrets.LITEYUKIHARBOR_USER }}
+  REGISTRY_TOKENS: ${{ secrets.GHCR_TOKEN }} ${{ secrets.DOCKERHUB_TOKEN }} ${{ secrets.LITEYUKIHARBOR_TOKEN }}
+  REGISTRY_NAMESPACES: ${{ github.repository_owner }}/spage liteyukistudio/spage spage/spage
 
 concurrency:
   group: 'build-aio'
@@ -51,7 +55,12 @@ jobs:
           GOARCH: ${{ matrix.goarch }}
         run: |
           mkdir -p ${{ env.BIN_OUT }}/${{ matrix.goos }}-${{ matrix.goarch }}
-          go build -o ${{ env.BIN_OUT }}/${{ matrix.goos }}-${{ matrix.goarch }}/spage ./cmd/server
+          if [ "${{ matrix.goos }}" = "windows" ]; then
+            BIN_NAME="spage.exe"
+          else
+            BIN_NAME="spage"
+          fi
+          go build -o ${{ env.BIN_OUT }}/${{ matrix.goos }}-${{ matrix.goarch }}/$BIN_NAME ./cmd/server
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -86,22 +95,37 @@ jobs:
           echo "tag=${TAG}" >> $GITHUB_OUTPUT
           echo "nightly=${NIGHTLY}" >> $GITHUB_OUTPUT
 
-      - name: Build and push container image
+      - name: Build and push container images (multi-registry)
         env:
           TAG: ${{ steps.version.outputs.tag }}
-          REGISTRY: ${{ env.REGISTRY }}
-          IMAGE_NAME: ${{ env.IMAGE_NAME }}
-          REPO_OWNER: ${{ env.REPO_OWNER }}
-          GH_TOKEN: ${{ env.GH_TOKEN }}
+          REGISTRY_URLS: ${{ env.REGISTRY_URLS }}
+          REGISTRY_USERS: ${{ env.REGISTRY_USERS }}
+          REGISTRY_TOKENS: ${{ env.REGISTRY_TOKENS }}
+          REGISTRY_NAMESPACES: ${{ env.REGISTRY_NAMESPACES }}
         run: |
-          echo "${GH_TOKEN}" | docker login $REGISTRY -u $REPO_OWNER --password-stdin
-          docker build -f ${{ env.DOCKERFILE }} -t $REGISTRY/$REPO_OWNER/$IMAGE_NAME:$TAG .
-          docker push $REGISTRY/$REPO_OWNER/$IMAGE_NAME:$TAG
-          # 如果是release，额外推送latest标签
-          if [[ "${{ steps.version.outputs.nightly }}" == "false" ]]; then
-            docker tag $REGISTRY/$REPO_OWNER/$IMAGE_NAME:$TAG $REGISTRY/$REPO_OWNER/$IMAGE_NAME:latest
-            docker push $REGISTRY/$REPO_OWNER/$IMAGE_NAME:latest
-          fi
+          IFS=' ' read -r -a urls <<< "$REGISTRY_URLS"
+          IFS=' ' read -r -a users <<< "$REGISTRY_USERS"
+          IFS=' ' read -r -a tokens <<< "$REGISTRY_TOKENS"
+          IFS=' ' read -r -a namespaces <<< "$REGISTRY_NAMESPACES"
+
+          # 只build一次镜像
+          docker build -t tmpimg:${TAG} .
+
+          for i in "${!urls[@]}"; do
+            url="${urls[$i]}"
+            user="${users[$i]}"
+            token="${tokens[$i]}"
+            namespace="${namespaces[$i]}"
+            imagename="$url/$namespace:$TAG"
+            echo "$token" | docker login "$url" -u "$user" --password-stdin
+            docker tag tmpimg:${TAG} "$imagename"
+            docker push "$imagename"
+            # 如果是release，额外推送latest标签
+            if [[ "${{ steps.version.outputs.nightly }}" == "false" ]]; then
+              docker tag tmpimg:${TAG} "$url/$namespace:latest"
+              docker push "$url/$namespace:latest"
+            fi
+          done
 
       - name: Publish GitHub Release
         if: ${{ steps.version.outputs.nightly == 'false' }}
