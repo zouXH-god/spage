@@ -87,6 +87,12 @@ jobs:
           pattern: ${{ env.BIN_NAME }}-linux-*
           path: ${{ env.BIN_OUT }}
 
+      - name: Prepare binaries for Docker build
+        run: |
+          mkdir -p build/linux-amd64 build/linux-arm64
+          mv build/spage-linux-amd64/${{ env.BIN_NAME }} build/linux-amd64/${{ env.BIN_NAME }}
+          mv build/spage-linux-arm64/${{ env.BIN_NAME }} build/linux-arm64/${{ env.BIN_NAME }}
+
       - name: Set version/tag
         id: version
         run: |
