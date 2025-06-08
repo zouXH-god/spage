@@ -70,6 +70,9 @@ jobs:
     needs: build
     steps:
       # 下载所有产物用于 Release
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
       - name: Download all artifacts for release
         uses: actions/download-artifact@v4
         with:
