@@ -13,6 +13,10 @@ env:
   BIN_OUT: build
   DOCKERFILE: ./Dockerfile
 
+concurrency:
+  group: 'build-aio'
+  cancel-in-progress: true
+
 jobs:
   build:
     name: Build
