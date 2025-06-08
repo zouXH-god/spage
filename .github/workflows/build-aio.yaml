@@ -36,7 +36,7 @@ jobs:
       - name: Build frontend
         run: |
           cd web-src
-          npm install pnpm
+          npm install pnpm -g
           pnpm install
           pnpm build
           cp -r out/* ../static/dist/
