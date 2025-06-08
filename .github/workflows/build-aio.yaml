@@ -9,10 +9,10 @@ env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   BIN_NAME: spage
   BIN_OUT: build
-  REGISTRY_URLS: ghcr.io docker.io reg.liteyuki.org
-  REGISTRY_USERS: ${{ secrets.GHCR_USER }} ${{ secrets.DOCKERHUB_USER }} ${{ secrets.LITEYUKIHARBOR_USER }}
-  REGISTRY_TOKENS: ${{ secrets.GHCR_TOKEN }} ${{ secrets.DOCKERHUB_TOKEN }} ${{ secrets.LITEYUKIHARBOR_TOKEN }}
-  REGISTRY_NAMESPACES: liteyukistudio/spage liteyukistudio/spage spage/spage
+  REGISTRY_URLS: reg.liteyuki.org
+  REGISTRY_USERS: ${{ secrets.LITEYUKIHARBOR_USER }}
+  REGISTRY_TOKENS: ${{ secrets.LITEYUKIHARBOR_TOKEN }}
+  REGISTRY_NAMESPACES: spage/spage
 
 concurrency:
   group: 'build-aio'
