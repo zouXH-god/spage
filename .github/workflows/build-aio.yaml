@@ -122,6 +122,13 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USER }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Login to Gitea
+        uses: docker/login-action@v3
+        with:
+          registry: git.liteyuki.org
+          username: ${{ secrets.LITEYUKIGITEA_USER }}
+          password: ${{ secrets.LITEYUKIGITEA_TOKEN }}
+
       - name: Login to Harbor
         uses: docker/login-action@v3
         with:
@@ -145,12 +152,12 @@ jobs:
           tags: docker.io/liteyukistudio/spage:${{ steps.version.outputs.tag }}
           platforms: linux/amd64,linux/arm64
 
-      - name: Build & Push to Harbor (amd64 only)
+      - name: Build & Push to Gitea
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
-          tags: reg.liteyuki.org/spage/spage:${{ steps.version.outputs.tag }}
+          tags: git.liteyuki.org/spage/spage:${{ steps.version.outputs.tag }}
           platforms: linux/amd64,linux/arm64
 
       - name: Publish GitHub Release
