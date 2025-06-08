@@ -6,12 +6,8 @@ on:
     tags: [v*]
 
 env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: <your-image-name>
-  REPO_OWNER: ${{ github.repository_owner }}
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   BIN_OUT: build
-
   REGISTRY_URLS: ghcr.io docker.io reg.liteyuki.org
   REGISTRY_USERS: ${{ secrets.GHCR_USER }} ${{ secrets.DOCKERHUB_USER }} ${{ secrets.LITEYUKIHARBOR_USER }}
   REGISTRY_TOKENS: ${{ secrets.GHCR_TOKEN }} ${{ secrets.DOCKERHUB_TOKEN }} ${{ secrets.LITEYUKIHARBOR_TOKEN }}
@@ -66,17 +62,25 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: spage-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: ${{ env.BIN_OUT }}/${{ matrix.goos }}-${{ matrix.goarch }}/spage
+          path: ${{ env.BIN_OUT }}/${{ matrix.goos }}-${{ matrix.goarch }}/spage*
 
   publish:
     name: Publish Artifacts & Images
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - name: Download all artifacts
+      # 下载所有产物用于 Release
+      - name: Download all artifacts for release
         uses: actions/download-artifact@v4
         with:
           pattern: spage-*
+          path: ${{ env.BIN_OUT }}
+
+      # 只下载 linux 产物用于镜像构建
+      - name: Download linux artifacts for image
+        uses: actions/download-artifact@v4
+        with:
+          pattern: spage-linux-*
           path: ${{ env.BIN_OUT }}
 
       - name: Set version/tag
@@ -108,7 +112,7 @@ jobs:
           IFS=' ' read -r -a tokens <<< "$REGISTRY_TOKENS"
           IFS=' ' read -r -a namespaces <<< "$REGISTRY_NAMESPACES"
 
-          # 只build一次镜像
+          # 只build一次镜像，Dockerfile 只 COPY linux 产物
           docker build -t tmpimg:${TAG} .
 
           for i in "${!urls[@]}"; do
@@ -137,4 +141,4 @@ jobs:
             Release ${{ steps.version.outputs.tag }}
             Built from tag ${{ steps.version.outputs.tag }}
           files: |
-            ${{ env.BIN_OUT }}/**/spage
+            ${{ env.BIN_OUT }}/**/spage*

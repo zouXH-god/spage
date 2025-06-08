@@ -1,32 +1,17 @@
-# build
-FROM golang:1.24.2-alpine3.21 AS builder
-
-WORKDIR /app
-
-RUN apk --no-cache add build-base git tzdata
-
-COPY go.mod go.sum ./
-
-RUN go mod download
-
-COPY . .
-
-RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o server \
-    -ldflags="-X './config.CommitHash=$(git rev-parse HEAD)'  \
-    -X './config.BuildTime=$(date "+%Y-%m-%d %H:%M:%S")'"  \
-    ./cmd/server
-
-# production
-FROM alpine:latest AS prod
+FROM alpine:latest
 
 WORKDIR /app
 
 RUN apk --no-cache add tzdata ca-certificates
 
-COPY --from=builder /app/server /app/server
+# 使用 buildx 时自动注入 TARGETARCH 变量
+ARG TARGETARCH
+
+# 复制对应架构的二进制
+COPY build/linux-${TARGETARCH}/spage /app/server
 
 EXPOSE 8888
 
-RUN chmod +x ./server
+RUN chmod +x /app/server
 
-ENTRYPOINT ["./server"]
+ENTRYPOINT ["/app/server"]
