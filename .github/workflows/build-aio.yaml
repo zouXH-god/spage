@@ -11,7 +11,7 @@ env:
   REGISTRY_URLS: ghcr.io docker.io reg.liteyuki.org
   REGISTRY_USERS: ${{ secrets.GHCR_USER }} ${{ secrets.DOCKERHUB_USER }} ${{ secrets.LITEYUKIHARBOR_USER }}
   REGISTRY_TOKENS: ${{ secrets.GHCR_TOKEN }} ${{ secrets.DOCKERHUB_TOKEN }} ${{ secrets.LITEYUKIHARBOR_TOKEN }}
-  REGISTRY_NAMESPACES: ${{ github.repository_owner }}/spage liteyukistudio/spage spage/spage
+  REGISTRY_NAMESPACES: liteyukistudio/spage liteyukistudio/spage spage/spage
 
 concurrency:
   group: 'build-aio'
@@ -31,19 +31,19 @@ jobs:
 
       - name: Setup Go
         uses: actions/setup-go@v5
+      # 调试期间关掉前端构建
+      # - name: Setup Node.js
+      #   uses: actions/setup-node@v4
+      #   with:
+      #     node-version: 22
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Build frontend
-        run: |
-          cd web-src
-          npm install pnpm -g
-          pnpm install
-          pnpm build
-          cp -r out/* ../static/dist/
+      # - name: Build frontend
+      #   run: |
+      #     cd web-src
+      #     npm install pnpm -g
+      #     pnpm install
+      #     pnpm build
+      #     cp -r out/* ../static/dist/
 
       - name: Build Go binary
         env:
