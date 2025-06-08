@@ -10,7 +10,6 @@ env:
   IMAGE_NAME: <your-image-name>
   REPO_OWNER: ${{ github.repository_owner }}
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  NODE_VERSION: 20
   BIN_OUT: build
   DOCKERFILE: ./Dockerfile
 
@@ -32,8 +31,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          node-version: 22
 
       - name: Build frontend
         run: |
