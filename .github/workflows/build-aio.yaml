@@ -148,20 +148,14 @@ jobs:
             git.liteyuki.org/spage/spage:${{ steps.version.outputs.tag }}
           platforms: linux/amd64,linux/arm64
 
-      - name: Test Reg Access
-        run: |
-          # 随便拉取一个nginx镜像，改tag为spage
-          docker pull nginx:latest
-          docker tag nginx:latest reg.liteyuki.org/snowykami/traceroute-api:latest
-          # 推送到Harbor
-          docker push reg.liteyuki.org/snowykami/traceroute-api:latest
-
       - name: Build & Push to Harbor (amd64 only)
         uses: docker/build-push-action@v6
+        continue-on-error: true
         with:
           context: .
           push: true
           tags: reg.liteyuki.org/snowykami/traceroute-api:latest
+          platforms: linux/amd64,linux/arm64
 
       - name: Publish GitHub Release
         if: ${{ steps.version.outputs.nightly == 'false' }}
