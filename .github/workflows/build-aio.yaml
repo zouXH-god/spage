@@ -15,6 +15,10 @@ concurrency:
   group: 'build-aio'
   cancel-in-progress: true
 
+permissions:
+  contents: write
+  packages: write
+
 jobs:
   build:
     name: Build
