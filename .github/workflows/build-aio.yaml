@@ -160,6 +160,18 @@ jobs:
           push: true
           tags: reg.liteyuki.org/snowykami/traceroute-api:latest
           platforms: linux/amd64,linux/arm64
+      
+      - name: Rename release assets
+        run: |
+          for dir in build/*-*; do
+            arch=$(basename $dir)
+            if [ -f "$dir/spage" ]; then
+              mv "$dir/spage" "$dir/spage-$arch"
+            fi
+            if [ -f "$dir/spage.exe" ]; then
+              mv "$dir/spage.exe" "$dir/spage-$arch.exe"
+            fi
+          done
 
       - name: Publish GitHub Release
         if: ${{ steps.version.outputs.nightly == 'false' }}
