@@ -33,6 +33,10 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
+      nightly: ${{ steps.version.outputs.nightly }}
     strategy:
       matrix:
         include:
