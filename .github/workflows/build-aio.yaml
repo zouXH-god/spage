@@ -30,8 +30,31 @@ permissions:
   packages: write
 
 jobs:
-  build:
-    name: Build
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Build frontend
+        run: |
+          cd web-src
+          npm install pnpm -g
+          pnpm install
+          pnpm build
+
+      - name: Upload frontend artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: web-src/out
+
+  backend:
+    name: Build Backend
+    needs: frontend
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
@@ -119,11 +142,6 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
       - name: Set version/tag
         id: version
         run: |
@@ -140,13 +158,11 @@ jobs:
           echo "tag=${TAG}" >> $GITHUB_OUTPUT
           echo "nightly=${NIGHTLY}" >> $GITHUB_OUTPUT
 
-      - name: Build frontend
-        run: |
-          cd web-src
-          npm install pnpm -g
-          pnpm install
-          pnpm build
-          cp -r out/* ../static/dist/
+      - name: Download frontend artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: static/dist/
 
       - name: Build Go binary
         env:
@@ -156,17 +172,18 @@ jobs:
           GOARM: ${{ matrix.goarm }}
           GO386: ${{ matrix.go386 }}
         run: |
-          mkdir -p ${{ env.BIN_OUT }}
-          OUTNAME="${{ env.BIN_NAME }}-${{ matrix.goos }}-${{ matrix.output }}"
+          OUTDIR=${{ env.BIN_OUT }}/${{ matrix.goos }}-${{ matrix.output }}
+          mkdir -p $OUTDIR
+          OUTNAME=${{ env.BIN_NAME }}
           if [ "${{ matrix.goos }}" = "windows" ]; then
-            OUTNAME="${OUTNAME}.exe"
+            OUTNAME=${{ env.BIN_NAME }}.exe
           fi
           go build \
             -trimpath \
             -ldflags "-X '${{ env.GO_PKG_ROOT }}/config.CommitHash=${{ github.sha }}' \
               -X '${{ env.GO_PKG_ROOT }}/config.BuildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)' \
               -X '${{ env.GO_PKG_ROOT }}/config.Version=${{ steps.version.outputs.version }}'" \
-            -o ${{ env.BIN_OUT }}/$OUTNAME ./cmd/server
+            -o $OUTDIR/$OUTNAME ./cmd/server
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -177,7 +194,7 @@ jobs:
   publish:
     name: Publish Artifacts & Images
     runs-on: ubuntu-latest
-    needs: build
+    needs: [frontend, backend]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -220,26 +237,26 @@ jobs:
 
       # 有 tag 时推送 版本号、latest、nightly 三个标签
       - name: Build & Push Docker Images (tag & latest)
-        if: ${{ needs.build.outputs.nightly == 'false' }}
+        if: ${{ needs.backend.outputs.nightly == 'false' }}
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
           tags: |
-            ${{ env.NAMESPACE_DOCKERHUB }}/${{ env.BIN_NAME }}:${{ needs.build.outputs.tag }}
+            ${{ env.NAMESPACE_DOCKERHUB }}/${{ env.BIN_NAME }}:${{ needs.backend.outputs.tag }}
             ${{ env.NAMESPACE_DOCKERHUB }}/${{ env.BIN_NAME }}:latest
             ${{ env.NAMESPACE_DOCKERHUB }}/${{ env.BIN_NAME }}:nightly
-            ${{ env.REG_GHCR }}/${{ env.NAMESPACE_GHCR }}/${{ env.BIN_NAME }}:${{ needs.build.outputs.tag }}
+            ${{ env.REG_GHCR }}/${{ env.NAMESPACE_GHCR }}/${{ env.BIN_NAME }}:${{ needs.backend.outputs.tag }}
             ${{ env.REG_GHCR }}/${{ env.NAMESPACE_GHCR }}/${{ env.BIN_NAME }}:latest
             ${{ env.REG_GHCR }}/${{ env.NAMESPACE_GHCR }}/${{ env.BIN_NAME }}:nightly
-            ${{ env.REG_LCR }}/${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME }}:${{ needs.build.outputs.tag }}
+            ${{ env.REG_LCR }}/${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME }}:${{ needs.backend.outputs.tag }}
             ${{ env.REG_LCR }}/${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME }}:latest
             ${{ env.REG_LCR }}/${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME }}:nightly
           platforms: ${{ env.CONTAINER_PLATFORMS }}
 
       # nightly 时只推送 nightly
       - name: Build & Push Docker Images (nightly only)
-        if: ${{ needs.build.outputs.nightly == 'true' }}
+        if: ${{ needs.backend.outputs.nightly == 'true' }}
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -251,12 +268,12 @@ jobs:
           platforms: ${{ env.CONTAINER_PLATFORMS }}
 
       - name: Publish GitHub Release
-        if: ${{ needs.build.outputs.nightly == 'false' }}
+        if: ${{ needs.backend.outputs.nightly == 'false' }}
         uses: softprops/action-gh-release@v2.3.0
         with:
-          tag_name: ${{ needs.build.outputs.tag }}
-          name: Release ${{ needs.build.outputs.tag }}
+          tag_name: ${{ needs.backend.outputs.tag }}
+          name: Release ${{ needs.backend.outputs.tag }}
           body: |
-            Release ${{ needs.build.outputs.tag }}
-            Built from tag ${{ needs.build.outputs.tag }}
+            Release ${{ needs.backend.outputs.tag }}
+            Built from tag ${{ needs.backend.outputs.tag }}
           files: release-assets/*
