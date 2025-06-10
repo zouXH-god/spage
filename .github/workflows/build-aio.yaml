@@ -224,7 +224,7 @@ jobs:
             key=$(echo "$line" | cut -d: -f1)
             val=$(echo "$line" | cut -d: -f2)
             src="build/${{ env.BIN_NAME }}-linux-$val"
-            dst="build/linux-$key/${{ env.BIN_NAME }}"
+            dst="build/linux-$key-${{ env.BIN_NAME }}"
             if [ -f "$src" ]; then
               cp "$src" "$dst"
               echo "Copied $src -> $dst"
