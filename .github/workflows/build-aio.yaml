@@ -287,28 +287,12 @@ jobs:
             ${{ env.REG_LCR }}/${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME }}:nightly
           platforms: ${{ env.CONTAINER_PLATFORMS }}
 
-  release:
-    name: Publish GitHub Release
-    runs-on: ubuntu-latest
-    needs: backend
-    steps:
-      
-      - name: Download all artifacts for release
-        uses: actions/download-artifact@v4
-        with:
-          pattern: ${{ env.BIN_NAME }}-*
-          path: bin/
-          merge-multiple: true
-
-      - name: list artifacts
-        run: ls -lh bin/
-
       - name: Publish GitHub Release
         if: ${{ needs.backend.outputs.nightly == 'false' }}
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ needs.backend.outputs.tag }}
-          artifacts: bin/${{ env.BIN_NAME }}-*
+          artifacts: build/${{ env.BIN_NAME }}-*
           releaseName: "Release ${{ needs.backend.outputs.tag }}"
           releaseBody: |
             ## Release Notes
