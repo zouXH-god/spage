@@ -174,7 +174,7 @@ jobs:
             ghcr.io/liteyukistudio/${{ env.BIN_NAME }}:${{ steps.version.outputs.tag }}
             docker.io/liteyukistudio/${{ env.BIN_NAME }}:${{ steps.version.outputs.tag }}
             reg.liteyuki.org/${{ env.BIN_NAME }}/${{ env.BIN_NAME }}:${{ steps.version.outputs.tag }}
-          platforms: linux/amd64,linux/arm64,linux/386,linux/arm
+          platforms: linux/amd64,linux/arm64,linux/386,linux/arm,linux/ppc64le,linux/s390x
 
       - name: Publish GitHub Release
         if: ${{ steps.version.outputs.nightly == 'false' }}
