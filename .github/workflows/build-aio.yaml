@@ -78,32 +78,31 @@ jobs:
           cp -r out/* ../static/dist/
 
       - name: Build Go binary
-        # 错误时跳过
         continue-on-error: true
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
         run: |
-          mkdir -p ${{ env.BIN_OUT }}/${{ matrix.goos }}-${{ matrix.goarch }}
+          mkdir -p ${{ env.BIN_OUT }}
           if [ "${{ matrix.goos }}" = "windows" ]; then
-            BIN_NAME="${{ env.BIN_NAME }}.exe"
+            BIN_OUT="${{ env.BIN_OUT }}/${{ env.BIN_NAME }}-${{ matrix.goos }}-${{ matrix.goarch }}.exe"
           else
-            BIN_NAME="${{ env.BIN_NAME }}"
+            BIN_OUT="${{ env.BIN_OUT }}/${{ env.BIN_NAME }}-${{ matrix.goos }}-${{ matrix.goarch }}"
           fi
-          go build -o ${{ env.BIN_OUT }}/${{ matrix.goos }}-${{ matrix.goarch }}/$BIN_NAME ./cmd/server
+          go build -o $BIN_OUT ./cmd/server
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.BIN_NAME }}-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: ${{ env.BIN_OUT }}/${{ matrix.goos }}-${{ matrix.goarch }}/${{ env.BIN_NAME }}*
-
+          path: |
+            ${{ env.BIN_OUT }}/${{ env.BIN_NAME }}-${{ matrix.goos }}-${{ matrix.goarch }}*
+  
   publish:
     name: Publish Artifacts & Images
     runs-on: ubuntu-latest
     needs: build
     steps:
-      # 下载所有产物用于 Release
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -112,21 +111,13 @@ jobs:
         with:
           pattern: ${{ env.BIN_NAME }}-*
           path: ${{ env.BIN_OUT }}
-
-      # 只下载 linux 产物用于镜像构建
-      - name: Download linux artifacts for image
-        uses: actions/download-artifact@v4
-        with:
-          pattern: ${{ env.BIN_NAME }}-linux-*
-          path: ${{ env.BIN_OUT }}
-
       - name: Prepare binaries for Docker build
         run: |
           mkdir -p build/linux-amd64 build/linux-arm64 build/linux-386 build/linux-arm
-          mv build/spage-linux-amd64/${{ env.BIN_NAME }} build/linux-amd64/${{ env.BIN_NAME }}
-          mv build/spage-linux-arm64/${{ env.BIN_NAME }} build/linux-arm64/${{ env.BIN_NAME }}
-          mv build/spage-linux-386/${{ env.BIN_NAME }} build/linux-386/${{ env.BIN_NAME }}
-          mv build/spage-linux-arm/${{ env.BIN_NAME }} build/linux-arm/${{ env.BIN_NAME }}
+          cp build/${{ env.BIN_NAME }}-linux-amd64 build/linux-amd64/${{ env.BIN_NAME }} || true
+          cp build/${{ env.BIN_NAME }}-linux-arm64 build/linux-arm64/${{ env.BIN_NAME }} || true
+          cp build/${{ env.BIN_NAME }}-linux-386 build/linux-386/${{ env.BIN_NAME }} || true
+          cp build/${{ env.BIN_NAME }}-linux-arm build/linux-arm/${{ env.BIN_NAME }} || true
 
       - name: Set version/tag
         id: version
@@ -174,22 +165,10 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/liteyukistudio/spage:${{ steps.version.outputs.tag }}
-            docker.io/liteyukistudio/spage:${{ steps.version.outputs.tag }}
-            reg.liteyuki.org/spage/spage:${{ steps.version.outputs.tag }}
+            ghcr.io/liteyukistudio/${{ env.BIN_NAME }}:${{ steps.version.outputs.tag }}
+            docker.io/liteyukistudio/${{ env.BIN_NAME }}:${{ steps.version.outputs.tag }}
+            reg.liteyuki.org/${{ env.BIN_NAME }}/${{ env.BIN_NAME }}:${{ steps.version.outputs.tag }}
           platforms: linux/amd64,linux/arm64,linux/386,linux/arm
-      
-      - name: Rename release assets
-        run: |
-          for dir in build/*-*; do
-            arch=$(basename $dir)
-            if [ -f "$dir/spage" ]; then
-              mv "$dir/spage" "$dir/spage-$arch"
-            fi
-            if [ -f "$dir/spage.exe" ]; then
-              mv "$dir/spage.exe" "$dir/spage-$arch.exe"
-            fi
-          done
 
       - name: Publish GitHub Release
         if: ${{ steps.version.outputs.nightly == 'false' }}
@@ -201,4 +180,5 @@ jobs:
             Release ${{ steps.version.outputs.tag }}
             Built from tag ${{ steps.version.outputs.tag }}
           files: |
-            ${{ env.BIN_OUT }}/**/${{ env.BIN_NAME }}*
+            ${{ env.BIN_OUT }}/${{ env.BIN_NAME }}-*
+            ${{ env.BIN_OUT }}/${{ env.BIN_NAME }}-*.exe
