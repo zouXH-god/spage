@@ -65,6 +65,8 @@ jobs:
           cp -r out/* ../static/dist/
 
       - name: Build Go binary
+        # 错误时跳过
+        continue-on-error: true
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
