@@ -22,7 +22,7 @@ env:
   NAMESPACE_DOCKERHUB: liteyukistudio
   NAMESPACE_LCR: spage
   ARCH_MAP: |
-    amd64:amd64-v3
+    amd64:amd64-v1
     arm64:arm64
     arm:armv7
     386:386-sse2
