@@ -311,5 +311,5 @@ jobs:
           tag: ${{ needs.backend.outputs.tag }}
           artifacts: build/${{ env.BIN_NAME }}-*
           name: "Release ${{ needs.backend.outputs.tag }}"
-          generate_release_notes: true
+          generateReleaseNotes: true
           allowUpdates: true
