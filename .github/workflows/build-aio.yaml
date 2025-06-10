@@ -215,7 +215,7 @@ jobs:
             val=$(echo "$line" | cut -d: -f2)
             if [ "$val" = "${{ matrix.output }}" ]; then
               mkdir -p ${{ env.BIN_OUT }}/linux-$key
-              cp "$OUTDIR/$OUTNAME" "${{ env.BIN_OUT }}/linux-$key/$OUTNAME"
+              cp "$OUTDIR/$OUTNAME" "${{ env.BIN_OUT }}/linux-$key/$OUTNAME" || true
               echo "Copied $OUTDIR/$OUTNAME -> ${{ env.BIN_OUT }}/linux-$key/$OUTNAME"
             fi
           done <<< "${ARCH_MAP}"
