@@ -1,7 +1,7 @@
 import client from "./client";
 import type { BaseResponse } from "./base.models";
 import type {
-    captchaConfig,
+    CaptchaConfig,
     LoginRequest,
     LoginResponse,
     RegisterRequest,
@@ -41,6 +41,6 @@ export function getUserOrganizations(userId: number): Promise<AxiosResponse<User
     return client.get<UserOrganizationsResponse>(`/user/${userId}/organizations`);
 }
 
-export function getCaptchaConfig(): Promise<AxiosResponse<captchaConfig, unknown>> {
-    return client.get<captchaConfig>("/user/captcha/config");
+export function getCaptchaConfig(): Promise<AxiosResponse<CaptchaConfig, unknown>> {
+    return client.get<CaptchaConfig>("/user/captcha");
 }

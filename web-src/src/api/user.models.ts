@@ -61,7 +61,7 @@ export interface UserOrganizationsResponse extends BaseResponse {
     organizations: Org[];
 }
 
-export interface captchaConfig extends BaseResponse {
+export interface CaptchaConfig extends BaseResponse {
     provider: "disable" | "turnstile" | "recaptcha" | "hcaptcha" | "dev-captcha";
     siteKey: string;
     url?: string;
