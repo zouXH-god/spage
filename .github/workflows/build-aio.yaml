@@ -229,10 +229,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Download all artifacts for docker
+      - name: Download all linux artifacts for docker
         uses: actions/download-artifact@v4
         with:
-          path: bin/
+          pattern: ${{ env.BIN_NAME }}-linux-*
+          path: build/
           merge-multiple: true
 
       - name: Set up Docker Buildx
