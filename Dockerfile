@@ -8,7 +8,7 @@ RUN apk --no-cache add tzdata ca-certificates
 ARG TARGETARCH
 
 # 复制对应架构的二进制
-COPY build/linux-${TARGETARCH}/spage /app/server
+COPY build/linux-${TARGETARCH}-spage /app/server
 
 EXPOSE 8888
 
