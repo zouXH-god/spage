@@ -12,6 +12,7 @@ env:
   BIN_OUT: build
   # for Go build
   GO_PKG_ROOT: github.com/LiteyukiStudio/spage
+  GO_ENTRYPOINT_SERVER: ./cmd/server
   # for container build
   CONTAINER_PLATFORMS: linux/amd64,linux/arm64,linux/386,linux/arm,linux/ppc64le,linux/s390x
   REG_GHCR: ghcr.io
@@ -173,7 +174,7 @@ jobs:
           name: web
           path: static/dist/
 
-      - name: Build Go binary
+      - name: Build Go Server binary
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
@@ -199,7 +200,7 @@ jobs:
             -ldflags "-X '${{ env.GO_PKG_ROOT }}/config.CommitHash=${{ github.sha }}' \
               -X '${{ env.GO_PKG_ROOT }}/config.BuildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)' \
               -X '${{ env.GO_PKG_ROOT }}/config.Version=${{ steps.version.outputs.version }}'" \
-            -o $OUTDIR/$OUTNAME ./cmd/server
+            -o $OUTDIR/$OUTNAME ${{ env.GO_ENTRYPOINT_SERVER }}
 
       - name: Copy binary for main arch (for Docker buildx)
         if: matrix.goos == 'linux'
