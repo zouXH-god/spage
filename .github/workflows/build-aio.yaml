@@ -170,10 +170,10 @@ jobs:
       - name: Download frontend artifact
         uses: actions/download-artifact@v4
         with:
-          name: web
+          name: ${{ env.BIN_NAME }}-web
           path: static/dist/
 
-      - name: Build Go binary (single file naming)
+      - name: Build Go binary
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
@@ -181,32 +181,50 @@ jobs:
           GOARM: ${{ matrix.goarm }}
           GO386: ${{ matrix.go386 }}
         run: |
-          mkdir -p build
-          OUTNAME="${{ env.BIN_NAME }}-${{ matrix.goos }}-${{ matrix.goarch }}"
-          if [ -n "${{ matrix.goamd64 }}" ]; then
-            OUTNAME="${OUTNAME}-${{ matrix.goamd64 }}"
-          fi
-          if [ -n "${{ matrix.goarm }}" ]; then
-            OUTNAME="${OUTNAME}v${{ matrix.goarm }}"
-          fi
-          if [ -n "${{ matrix.go386 }}" ]; then
-            OUTNAME="${OUTNAME}-${{ matrix.go386 }}"
-          fi
+          OUTDIR=${{ env.BIN_OUT }}/linux-${{ matrix.output }}
           if [ "${{ matrix.goos }}" = "windows" ]; then
-            OUTNAME="${OUTNAME}.exe"
+            OUTDIR=${{ env.BIN_OUT }}/windows-${{ matrix.output }}
+          elif [ "${{ matrix.goos }}" = "darwin" ]; then
+            OUTDIR=${{ env.BIN_OUT }}/darwin-${{ matrix.output }}
+          elif [ "${{ matrix.goos }}" = "freebsd" ]; then
+            OUTDIR=${{ env.BIN_OUT }}/freebsd-${{ matrix.output }}
+          fi
+          mkdir -p $OUTDIR
+          OUTNAME=${{ env.BIN_NAME }}
+          if [ "${{ matrix.goos }}" = "windows" ]; then
+            OUTNAME="${{ env.BIN_NAME }}.exe"
           fi
           go build \
             -trimpath \
             -ldflags "-X '${{ env.GO_PKG_ROOT }}/config.CommitHash=${{ github.sha }}' \
               -X '${{ env.GO_PKG_ROOT }}/config.BuildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)' \
               -X '${{ env.GO_PKG_ROOT }}/config.Version=${{ steps.version.outputs.version }}'" \
-            -o build/$OUTNAME ./cmd/server
+            -o $OUTDIR/$OUTNAME ./cmd/server
 
-      - name: Upload all backend binaries
+      - name: Copy binary for main arch (for Docker buildx)
+        if: matrix.goos == 'linux'
+        env:
+          ARCH_MAP: ${{ env.ARCH_MAP }}
+        run: |
+          STD_ARCH="${{ matrix.goarch }}"
+          OUTDIR=${{ env.BIN_OUT }}/linux-${{ matrix.output }}
+          OUTNAME=${{ env.BIN_NAME }}
+          # 处理主流架构映射
+          while read -r line; do
+            key=$(echo "$line" | cut -d: -f1)
+            val=$(echo "$line" | cut -d: -f2)
+            if [ "$val" = "${{ matrix.output }}" ]; then
+              mkdir -p ${{ env.BIN_OUT }}/linux-$key
+              cp "$OUTDIR/$OUTNAME" "${{ env.BIN_OUT }}/linux-$key/$OUTNAME" || true
+              echo "Copied $OUTDIR/$OUTNAME -> ${{ env.BIN_OUT }}/linux-$key/$OUTNAME"
+            fi
+          done <<< "${ARCH_MAP}"
+
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.BIN_NAME }}-all
-          path: build/*
+          name: ${{ env.BIN_NAME }}-${{ matrix.goos }}-${{ matrix.output }}
+          path: ${{ env.BIN_OUT }}/${{ matrix.goos }}-${{ matrix.output }}/*
 
   docker:
     name: Build & Push Docker Images
@@ -222,6 +240,25 @@ jobs:
           pattern: ${{ env.BIN_NAME }}-linux-*
           path: build/
           merge-multiple: true
+
+      - name: Prepare main arch binaries for Docker buildx
+        env:
+          ARCH_MAP: ${{ env.ARCH_MAP }}
+        run: |
+          mkdir -p build/linux-amd64 build/linux-arm64 build/linux-arm build/linux-386 build/linux-ppc64le build/linux-s390x
+          for line in $(echo "${ARCH_MAP}"); do
+            key=$(echo "$line" | cut -d: -f1)
+            val=$(echo "$line" | cut -d: -f2)
+            src="build/${{ env.BIN_NAME }}-linux-$val"
+            dst="build/linux-$key/${{ env.BIN_NAME }}"
+            if [ -f "$src" ]; then
+              cp "$src" "$dst"
+              echo "Copied $src -> $dst"
+            else
+              echo "Warning: $src not found, skip $key"
+            fi
+          done
+          ls -lhR build/
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
