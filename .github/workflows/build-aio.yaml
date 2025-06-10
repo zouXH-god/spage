@@ -22,7 +22,7 @@ env:
   NAMESPACE_DOCKERHUB: liteyukistudio
   NAMESPACE_LCR: spage
   ARCH_MAP: |
-    amd64:amd64-v1
+    amd64:amd64-v3
     arm64:arm64
     arm:armv7
     386:386-sse2
@@ -220,12 +220,12 @@ jobs:
           ARCH_MAP: ${{ env.ARCH_MAP }}
         run: |
           for line in $(echo "${ARCH_MAP}"); do
-            key=$(echo "$line" | cut -d: -f1)
-            val=$(echo "$line" | cut -d: -f2)
-            src="build/${{ env.BIN_NAME }}-linux-$val"
-            dst="build/${{ env.BIN_NAME }}-linux-$key"
+            short=$(echo "$line" | cut -d: -f1)
+            long=$(echo "$line" | cut -d: -f2)
+            src="build/${{ env.BIN_NAME }}-linux-$long"
+            dst="build/${{ env.BIN_NAME }}-linux-$short"
             if [ -f "$src" ]; then
-              cp "$src" "$dst"
+              cp "$src" "$dst" || true
               echo "Copied $src -> $dst"
             else
               echo "Warning: $src not found, skip $key"
