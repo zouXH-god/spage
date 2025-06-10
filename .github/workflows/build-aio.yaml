@@ -173,7 +173,7 @@ jobs:
           name: web
           path: static/dist/
 
-      - name: Build Go binary
+      - name: Build Go binary (single file naming)
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
@@ -181,50 +181,32 @@ jobs:
           GOARM: ${{ matrix.goarm }}
           GO386: ${{ matrix.go386 }}
         run: |
-          OUTDIR=${{ env.BIN_OUT }}/linux-${{ matrix.output }}
-          if [ "${{ matrix.goos }}" = "windows" ]; then
-            OUTDIR=${{ env.BIN_OUT }}/windows-${{ matrix.output }}
-          elif [ "${{ matrix.goos }}" = "darwin" ]; then
-            OUTDIR=${{ env.BIN_OUT }}/darwin-${{ matrix.output }}
-          elif [ "${{ matrix.goos }}" = "freebsd" ]; then
-            OUTDIR=${{ env.BIN_OUT }}/freebsd-${{ matrix.output }}
+          mkdir -p build
+          OUTNAME="${{ env.BIN_NAME }}-${{ matrix.goos }}-${{ matrix.goarch }}"
+          if [ -n "${{ matrix.goamd64 }}" ]; then
+            OUTNAME="${OUTNAME}-${{ matrix.goamd64 }}"
           fi
-          mkdir -p $OUTDIR
-          OUTNAME=${{ env.BIN_NAME }}
+          if [ -n "${{ matrix.goarm }}" ]; then
+            OUTNAME="${OUTNAME}v${{ matrix.goarm }}"
+          fi
+          if [ -n "${{ matrix.go386 }}" ]; then
+            OUTNAME="${OUTNAME}-${{ matrix.go386 }}"
+          fi
           if [ "${{ matrix.goos }}" = "windows" ]; then
-            OUTNAME="${{ env.BIN_NAME }}.exe"
+            OUTNAME="${OUTNAME}.exe"
           fi
           go build \
             -trimpath \
             -ldflags "-X '${{ env.GO_PKG_ROOT }}/config.CommitHash=${{ github.sha }}' \
               -X '${{ env.GO_PKG_ROOT }}/config.BuildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)' \
               -X '${{ env.GO_PKG_ROOT }}/config.Version=${{ steps.version.outputs.version }}'" \
-            -o $OUTDIR/$OUTNAME ./cmd/server
+            -o build/$OUTNAME ./cmd/server
 
-      - name: Copy binary for main arch (for Docker buildx)
-        if: matrix.goos == 'linux'
-        env:
-          ARCH_MAP: ${{ env.ARCH_MAP }}
-        run: |
-          STD_ARCH="${{ matrix.goarch }}"
-          OUTDIR=${{ env.BIN_OUT }}/linux-${{ matrix.output }}
-          OUTNAME=${{ env.BIN_NAME }}
-          # 处理主流架构映射
-          while read -r line; do
-            key=$(echo "$line" | cut -d: -f1)
-            val=$(echo "$line" | cut -d: -f2)
-            if [ "$val" = "${{ matrix.output }}" ]; then
-              mkdir -p ${{ env.BIN_OUT }}/linux-$key
-              cp "$OUTDIR/$OUTNAME" "${{ env.BIN_OUT }}/linux-$key/$OUTNAME" || true
-              echo "Copied $OUTDIR/$OUTNAME -> ${{ env.BIN_OUT }}/linux-$key/$OUTNAME"
-            fi
-          done <<< "${ARCH_MAP}"
-
-      - name: Upload artifact
+      - name: Upload all backend binaries
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.BIN_NAME }}-${{ matrix.goos }}-${{ matrix.output }}
-          path: ${{ env.BIN_OUT }}/${{ matrix.goos }}-${{ matrix.output }}/*
+          name: ${{ env.BIN_NAME }}-all
+          path: build/*
 
   docker:
     name: Build & Push Docker Images
