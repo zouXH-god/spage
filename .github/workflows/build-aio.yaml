@@ -25,8 +25,27 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        goos: [linux, darwin, windows]
-        goarch: [amd64, arm64]
+        include:
+          - goos: linux
+            goarch: amd64
+          - goos: linux
+            goarch: arm64
+          - goos: linux
+            goarch: 386
+          - goos: linux
+            goarch: arm
+          - goos: windows
+            goarch: amd64
+          - goos: windows
+            goarch: arm64
+          - goos: windows
+            goarch: 386
+          - goos: windows
+            goarch: arm
+          - goos: darwin
+            goarch: amd64
+          - goos: darwin
+            goarch: arm64
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -90,9 +109,11 @@ jobs:
 
       - name: Prepare binaries for Docker build
         run: |
-          mkdir -p build/linux-amd64 build/linux-arm64
+          mkdir -p build/linux-amd64 build/linux-arm64 build/linux-386 build/linux-arm
           mv build/spage-linux-amd64/${{ env.BIN_NAME }} build/linux-amd64/${{ env.BIN_NAME }}
           mv build/spage-linux-arm64/${{ env.BIN_NAME }} build/linux-arm64/${{ env.BIN_NAME }}
+          mv build/spage-linux-386/${{ env.BIN_NAME }} build/linux-386/${{ env.BIN_NAME }}
+          mv build/spage-linux-arm/${{ env.BIN_NAME }} build/linux-arm/${{ env.BIN_NAME }}
 
       - name: Set version/tag
         id: version
@@ -134,7 +155,7 @@ jobs:
           username: ${{ secrets.LITEYUKIREG_USER }}
           password: ${{ secrets.LITEYUKIREG_TOKEN }}
 
-      - name: Build & Push to GHCR & DockerHub & LRC
+      - name: Build & Push to GHCR & DockerHub & LCR
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -143,7 +164,7 @@ jobs:
             ghcr.io/liteyukistudio/spage:${{ steps.version.outputs.tag }}
             docker.io/liteyukistudio/spage:${{ steps.version.outputs.tag }}
             reg.liteyuki.org/spage/spage:${{ steps.version.outputs.tag }}
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64,linux/arm64,linux/386,linux/arm
       
       - name: Rename release assets
         run: |
