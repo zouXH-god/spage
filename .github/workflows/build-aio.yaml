@@ -119,7 +119,7 @@ jobs:
             -ldflags \
               "-X '${{ env.GO_PKG_ROOT }}/config.CommitHash=${{ github.sha }}' \
               -X '${{ env.GO_PKG_ROOT }}/config.BuildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)' \
-              -X '${{ env.GO_PKG_ROOT }}/config.Version=${{ steps.version.outputs.version }}' \
+              -X '${{ env.GO_PKG_ROOT }}/config.Version=${{ steps.version.outputs.version }}'" \
             -o $BIN_OUT ./cmd/server
 
       - name: Upload artifact
