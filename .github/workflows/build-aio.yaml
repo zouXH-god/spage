@@ -215,7 +215,10 @@ jobs:
             ${{ env.REG_GHCR }}/${{ env.NAMESPACE_GHCR }}/${{ env.BIN_NAME }}:nightly
             ${{ env.REG_LCR }}/${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME }}:nightly
           platforms: ${{ env.CONTAINER_PLATFORMS }}
-
+      - name: Prepare release assets
+        run: |
+          mkdir -p release-assets
+          find build -type f -name "${{ env.BIN_NAME }}-*" -exec cp {} release-assets/ \;
       - name: Publish GitHub Release
         if: ${{ needs.build.outputs.nightly == 'false' }}
         uses: softprops/action-gh-release@v2.3.0
@@ -225,5 +228,4 @@ jobs:
           body: |
             Release ${{ needs.build.outputs.tag }}
             Built from tag ${{ needs.build.outputs.tag }}
-          files: |
-            ${{ env.BIN_OUT }}/**/${{ env.BIN_NAME }}-*
+          files: release-assets/*
