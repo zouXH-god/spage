@@ -31,6 +31,7 @@ permissions:
 
 jobs:
   frontend:
+    name: Build Frontend
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -172,11 +173,18 @@ jobs:
           GOARM: ${{ matrix.goarm }}
           GO386: ${{ matrix.go386 }}
         run: |
-          OUTDIR=${{ env.BIN_OUT }}/${{ matrix.goos }}-${{ matrix.output }}
-          mkdir -p $OUTDIR
-          OUTNAME=${{ env.BIN_NAME }}
+          OUTDIR=${{ env.BIN_OUT }}/linux-${{ matrix.output }}
           if [ "${{ matrix.goos }}" = "windows" ]; then
-            OUTNAME=${{ env.BIN_NAME }}.exe
+            OUTDIR=${{ env.BIN_OUT }}/windows-${{ matrix.output }}
+          elif [ "${{ matrix.goos }}" = "darwin" ]; then
+            OUTDIR=${{ env.BIN_OUT }}/darwin-${{ matrix.output }}
+          elif [ "${{ matrix.goos }}" = "freebsd" ]; then
+            OUTDIR=${{ env.BIN_OUT }}/freebsd-${{ matrix.output }}
+          fi
+          mkdir -p $OUTDIR
+          OUTNAME=spage
+          if [ "${{ matrix.goos }}" = "windows" ]; then
+            OUTNAME=spage.exe
           fi
           go build \
             -trimpath \
