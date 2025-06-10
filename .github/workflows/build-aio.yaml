@@ -12,7 +12,7 @@ env:
   BIN_OUT: build
 
 concurrency:
-  group: 'build-aio'
+  group: "build-aio"
   cancel-in-progress: true
 
 permissions:
@@ -97,7 +97,7 @@ jobs:
           name: ${{ env.BIN_NAME }}-${{ matrix.goos }}-${{ matrix.goarch }}
           path: |
             ${{ env.BIN_OUT }}/${{ env.BIN_NAME }}-${{ matrix.goos }}-${{ matrix.goarch }}*
-  
+
   publish:
     name: Publish Artifacts & Images
     runs-on: ubuntu-latest
@@ -116,10 +116,10 @@ jobs:
           set -e
           ls -l build/
           mkdir -p build/linux-amd64 build/linux-arm64 build/linux-386 build/linux-arm
-          cp build/spage-linux-amd64 build/linux-amd64/spage
-          cp build/spage-linux-arm64 build/linux-arm64/spage
-          cp build/spage-linux-386 build/linux-386/spage
-          cp build/spage-linux-arm build/linux-arm/spage
+          cp build/spage-linux-amd64/spage build/linux-amd64/spage
+          cp build/spage-linux-arm64/spage build/linux-arm64/spage
+          cp build/spage-linux-386/spage build/linux-386/spage
+          cp build/spage-linux-arm/spage build/linux-arm/spage
           ls -l build/linux-amd64/
 
       - name: Set version/tag
