@@ -226,5 +226,5 @@ jobs:
             Release ${{ needs.build.outputs.tag }}
             Built from tag ${{ needs.build.outputs.tag }}
           files: |
-            ${{ env.BIN_OUT }}/${{ env.BIN_NAME }}-*
-            ${{ env.BIN_OUT }}/${{ env.BIN_NAME }}-*.exe
+            ${{ env.BIN_OUT }}/**/${{ env.BIN_NAME }}-*
+            ${{ env.BIN_OUT }}/**/${{ env.BIN_NAME }}-*.exe
