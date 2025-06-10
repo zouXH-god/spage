@@ -304,12 +304,6 @@ jobs:
           path: bin/
           merge-multiple: true
 
-      - name: Prepare release assets
-        run: |
-          mkdir -p release-assets
-          find bin -type f -name "${{ env.BIN_NAME }}*" -exec cp {} release-assets/ \;
-          ls -lh release-assets/
-
       - name: Publish GitHub Release
         if: ${{ needs.backend.outputs.nightly == 'false' }}
         uses: softprops/action-gh-release@v2.3.0
@@ -319,4 +313,4 @@ jobs:
           body: |
             Release ${{ needs.backend.outputs.tag }}
             Built from tag ${{ needs.backend.outputs.tag }}
-          files: release-assets/*
+          files: bin/**
