@@ -70,7 +70,7 @@ var (
 	// git commit hash injected at build time
 
 	BuildTime = "0000-00-00 00:00:00" // 构建时间 Build Time
-	Version   = "0.0.0"         // 版本号 Version
+	Version   = "0.0.0"               // 版本号 Version
 
 	ReleaseSavePath = "data/releases"
 
@@ -83,10 +83,8 @@ var (
 func InitConfig() error {
 	configPath := "config.yaml"
 	// 目标配置文件路径
-	// Target configuration file path
 
 	// 如果 config.yaml 已存在，直接返回
-	// If config.yaml already exists, return directly
 	if _, err := os.Stat(configPath); err == nil {
 		return nil
 	}
@@ -130,7 +128,6 @@ func Init() error {
 			if err != nil {
 				return err
 			}
-			return errors.New("config file not found")
 		}
 	}
 	// 初始化配置常量
