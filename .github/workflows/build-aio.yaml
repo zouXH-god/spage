@@ -200,8 +200,8 @@ jobs:
           name: ${{ env.BIN_NAME }}-${{ matrix.goos }}-${{ matrix.output }}
           path: build/*
 
-  docker:
-    name: Build & Push Docker Images
+  publish:
+    name: Publish Container Images & GitHub Release
     runs-on: ubuntu-latest
     needs: backend
     steps:
