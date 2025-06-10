@@ -113,11 +113,14 @@ jobs:
           path: ${{ env.BIN_OUT }}
       - name: Prepare binaries for Docker build
         run: |
+          set -e
+          ls -l build/
           mkdir -p build/linux-amd64 build/linux-arm64 build/linux-386 build/linux-arm
-          cp build/${{ env.BIN_NAME }}-linux-amd64 build/linux-amd64/${{ env.BIN_NAME }} || true
-          cp build/${{ env.BIN_NAME }}-linux-arm64 build/linux-arm64/${{ env.BIN_NAME }} || true
-          cp build/${{ env.BIN_NAME }}-linux-386 build/linux-386/${{ env.BIN_NAME }} || true
-          cp build/${{ env.BIN_NAME }}-linux-arm build/linux-arm/${{ env.BIN_NAME }} || true
+          cp build/spage-linux-amd64 build/linux-amd64/spage
+          cp build/spage-linux-arm64 build/linux-arm64/spage
+          cp build/spage-linux-386 build/linux-386/spage
+          cp build/spage-linux-arm build/linux-arm/spage
+          ls -l build/linux-amd64/
 
       - name: Set version/tag
         id: version
