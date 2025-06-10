@@ -301,6 +301,9 @@ jobs:
           path: bin/
           merge-multiple: true
 
+      - name: list artifacts
+        run: ls -lh bin/
+
       - name: Publish GitHub Release
         if: ${{ needs.backend.outputs.nightly == 'false' }}
         uses: softprops/action-gh-release@v2.3.0
