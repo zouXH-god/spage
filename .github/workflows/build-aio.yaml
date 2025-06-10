@@ -197,7 +197,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.BIN_NAME }}-${{ matrix.goos }}-${{ matrix.output }}
-          path: ${{ env.BIN_OUT }}/${{ env.BIN_NAME }}-${{ matrix.goos }}-${{ matrix.output }}*
+          path: ${{ env.BIN_OUT }}/${{ matrix.goos }}-${{ matrix.output }}/*
 
   publish:
     name: Publish Artifacts & Images
