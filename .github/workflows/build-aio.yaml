@@ -58,7 +58,7 @@ jobs:
       - name: Upload frontend artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.BIN_NAME }}-web
+          name: web
           path: web-src/out
 
   backend:
@@ -170,7 +170,7 @@ jobs:
       - name: Download frontend artifact
         uses: actions/download-artifact@v4
         with:
-          name: ${{ env.BIN_NAME }}-web
+          name: web
           path: static/dist/
 
       - name: Build Go binary
@@ -306,6 +306,8 @@ jobs:
       - name: Download all artifacts for release
         uses: actions/download-artifact@v4
         with:
+          pattern: |
+            ${{ env.BIN_NAME }}-*
           path: bin/
           merge-multiple: true
 
