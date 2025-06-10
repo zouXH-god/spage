@@ -287,16 +287,12 @@ jobs:
             ${{ env.REG_LCR }}/${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME }}:nightly
           platforms: ${{ env.CONTAINER_PLATFORMS }}
 
-      - name: Publish GitHub Release
+      - name: Publish GitHub Release(tag & latest)
         if: ${{ needs.backend.outputs.nightly == 'false' }}
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ needs.backend.outputs.tag }}
           artifacts: build/${{ env.BIN_NAME }}-*
           name: "Release ${{ needs.backend.outputs.tag }}"
-          body: |
-            ## Release Notes
-            - Version: ${{ needs.backend.outputs.version }}
-            - Commit: `${{ github.sha }}`
-            - Build Time: `${{ steps.version.outputs.build_time }}`
+          generate_release_notes: true
           allowUpdates: true
