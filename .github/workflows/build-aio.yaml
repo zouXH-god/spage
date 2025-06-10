@@ -165,14 +165,14 @@ jobs:
           username: ${{ secrets.LITEYUKIREG_USER }}
           password: ${{ secrets.LITEYUKIREG_TOKEN }}
 
-      - name: Build & Push to GHCR & DockerHub & LCR
+      - name: Build & Push to DockerHub & GHCR & LCR
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
           tags: |
+            liteyukistudio/${{ env.BIN_NAME }}:${{ steps.version.outputs.tag }}
             ghcr.io/liteyukistudio/${{ env.BIN_NAME }}:${{ steps.version.outputs.tag }}
-            docker.io/liteyukistudio/${{ env.BIN_NAME }}:${{ steps.version.outputs.tag }}
             reg.liteyuki.org/${{ env.BIN_NAME }}/${{ env.BIN_NAME }}:${{ steps.version.outputs.tag }}
           platforms: linux/amd64,linux/arm64,linux/386,linux/arm,linux/ppc64le,linux/s390x
 
