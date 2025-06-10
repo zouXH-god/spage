@@ -29,10 +29,7 @@ liteyukistudio/spage:latest
 # GitHub Container Registry源
 ghcr.io/liteyukistudio/spage:latest
 
-# Liteyuki Gitea Container Registry源
-git.liteyuki.org/spage/spage:latest
-
-# Liteyuki Container Registry源 amd64 architecture only
+# Liteyuki Container Registry源
 reg.liteyuki.org/spage/spage:latest
 ```
 
