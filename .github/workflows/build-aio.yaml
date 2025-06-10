@@ -293,8 +293,8 @@ jobs:
         with:
           tag: ${{ needs.backend.outputs.tag }}
           artifacts: build/${{ env.BIN_NAME }}-*
-          releaseName: "Release ${{ needs.backend.outputs.tag }}"
-          releaseBody: |
+          name: "Release ${{ needs.backend.outputs.tag }}"
+          body: |
             ## Release Notes
             - Version: ${{ needs.backend.outputs.version }}
             - Commit: `${{ github.sha }}`
