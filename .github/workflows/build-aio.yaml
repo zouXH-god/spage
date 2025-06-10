@@ -219,12 +219,11 @@ jobs:
         env:
           ARCH_MAP: ${{ env.ARCH_MAP }}
         run: |
-          mkdir -p build/linux-amd64 build/linux-arm64 build/linux-arm build/linux-386 build/linux-ppc64le build/linux-s390x
           for line in $(echo "${ARCH_MAP}"); do
             key=$(echo "$line" | cut -d: -f1)
             val=$(echo "$line" | cut -d: -f2)
             src="build/${{ env.BIN_NAME }}-linux-$val"
-            dst="build/linux-$key-${{ env.BIN_NAME }}"
+            dst="build/${{ env.BIN_NAME }}-linux-$key"
             if [ -f "$src" ]; then
               cp "$src" "$dst"
               echo "Copied $src -> $dst"
@@ -306,11 +305,14 @@ jobs:
 
       - name: Publish GitHub Release
         if: ${{ needs.backend.outputs.nightly == 'false' }}
-        uses: softprops/action-gh-release@v2.3.0
+        uses: ncipollo/release-action@v1
         with:
-          tag_name: ${{ needs.backend.outputs.tag }}
-          name: Release ${{ needs.backend.outputs.tag }}
-          body: |
-            Release ${{ needs.backend.outputs.tag }}
-            Built from tag ${{ needs.backend.outputs.tag }}
-          files: bin/spage-*
+          tag: ${{ needs.backend.outputs.tag }}
+          artifacts: bin/${{ env.BIN_NAME }}-*
+          releaseName: "Release ${{ needs.backend.outputs.tag }}"
+          releaseBody: |
+            ## Release Notes
+            - Version: ${{ needs.backend.outputs.version }}
+            - Commit: `${{ github.sha }}`
+            - Build Time: `${{ steps.version.outputs.build_time }}`
+          allowUpdates: true
