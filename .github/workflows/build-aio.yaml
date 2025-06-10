@@ -42,35 +42,76 @@ jobs:
         include:
           - goos: darwin
             goarch: amd64
+            goamd64: v1
+            output: amd64-v1
+          - goos: darwin
+            goarch: amd64
+            goamd64: v3
+            output: amd64-v3
           - goos: darwin
             goarch: arm64
-
+            output: arm64
           - goos: freebsd
             goarch: amd64
+            goamd64: v1
+            output: amd64-v1
+          - goos: freebsd
+            goarch: amd64
+            goamd64: v3
+            output: amd64-v3
           - goos: freebsd
             goarch: arm64
+            output: arm64
           - goos: freebsd
             goarch: 386
+            output: 386
           - goos: freebsd
             goarch: arm
-
+            output: arm
           - goos: linux
             goarch: amd64
+            goamd64: v1
+            output: amd64-v1
+          - goos: linux
+            goarch: amd64
+            goamd64: v3
+            output: amd64-v3
           - goos: linux
             goarch: arm64
+            output: arm64
           - goos: linux
             goarch: 386
+            go386: sse2
+            output: 386-sse2
           - goos: linux
             goarch: arm
+            goarm: 7
+            output: armv7
+          - goos: linux
+            goarch: arm
+            goarm: 6
+            output: armv6
+          - goos: linux
+            goarch: arm
+            goarm: 5
+            output: armv5
           - goos: linux
             goarch: ppc64le
+            output: ppc64le
           - goos: linux
             goarch: s390x
-
+            output: s390x
           - goos: windows
             goarch: amd64
+            goamd64: v1
+            output: amd64-v1
+          - goos: windows
+            goarch: amd64
+            goamd64: v3
+            output: amd64-v3
           - goos: windows
             goarch: arm64
+            output: arm64
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -81,7 +122,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
 
       - name: Set version/tag
         id: version
@@ -111,26 +152,27 @@ jobs:
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
+          GOAMD64: ${{ matrix.goamd64 }}
+          GOARM: ${{ matrix.goarm }}
+          GO386: ${{ matrix.go386 }}
         run: |
           mkdir -p ${{ env.BIN_OUT }}
+          OUTNAME="${{ env.BIN_NAME }}-${{ matrix.goos }}-${{ matrix.output }}"
           if [ "${{ matrix.goos }}" = "windows" ]; then
-            BIN_OUT="${{ env.BIN_OUT }}/${{ env.BIN_NAME }}-${{ matrix.goos }}-${{ matrix.goarch }}.exe"
-          else
-            BIN_OUT="${{ env.BIN_OUT }}/${{ env.BIN_NAME }}-${{ matrix.goos }}-${{ matrix.goarch }}"
+            OUTNAME="${OUTNAME}.exe"
           fi
           go build \
-            -ldflags \
-              "-X '${{ env.GO_PKG_ROOT }}/config.CommitHash=${{ github.sha }}' \
+            -trimpath \
+            -ldflags "-X '${{ env.GO_PKG_ROOT }}/config.CommitHash=${{ github.sha }}' \
               -X '${{ env.GO_PKG_ROOT }}/config.BuildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)' \
               -X '${{ env.GO_PKG_ROOT }}/config.Version=${{ steps.version.outputs.version }}'" \
-            -o $BIN_OUT ./cmd/server
+            -o ${{ env.BIN_OUT }}/$OUTNAME ./cmd/server
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.BIN_NAME }}-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: |
-            ${{ env.BIN_OUT }}/${{ env.BIN_NAME }}-${{ matrix.goos }}-${{ matrix.goarch }}*
+          name: ${{ env.BIN_NAME }}-${{ matrix.goos }}-${{ matrix.output }}
+          path: ${{ env.BIN_OUT }}/${{ env.BIN_NAME }}-${{ matrix.goos }}-${{ matrix.output }}*
 
   publish:
     name: Publish Artifacts & Images
@@ -143,21 +185,14 @@ jobs:
       - name: Download all artifacts for release
         uses: actions/download-artifact@v4
         with:
-          pattern: ${{ env.BIN_NAME }}-*
-          path: ${{ env.BIN_OUT }}
-      
-      # Linux Container
-      - name: Prepare binaries for Docker build
+          path: bin/
+          merge-multiple: true
+
+      - name: Prepare release assets
         run: |
-          set -e
-          ls -l build/
-          for arch in amd64 arm64 386 arm ppc64le s390x; do
-            if [ -f build/${{ env.BIN_NAME }}-linux-$arch/${{ env.BIN_NAME }}-linux-$arch ]; then
-              mkdir -p build/linux-$arch
-              cp build/${{ env.BIN_NAME }}-linux-$arch/${{ env.BIN_NAME }}-linux-$arch build/linux-$arch/${{ env.BIN_NAME }}
-            fi
-          done
-          ls -l build/linux-amd64/
+          mkdir -p release-assets
+          find bin -type f -name "${{ env.BIN_NAME }}-*" -exec cp {} release-assets/ \;
+          ls -lh release-assets/
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -214,12 +249,7 @@ jobs:
             ${{ env.REG_GHCR }}/${{ env.NAMESPACE_GHCR }}/${{ env.BIN_NAME }}:nightly
             ${{ env.REG_LCR }}/${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME }}:nightly
           platforms: ${{ env.CONTAINER_PLATFORMS }}
-      - name: Prepare release assets
-        run: |
-          mkdir -p release-assets
-          find build -type f -name "${{ env.BIN_NAME }}-*" -exec cp {} release-assets/ \;
-          ls -lh release-assets/
-          
+
       - name: Publish GitHub Release
         if: ${{ needs.build.outputs.nightly == 'false' }}
         uses: softprops/action-gh-release@v2.3.0
