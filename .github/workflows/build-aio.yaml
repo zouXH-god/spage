@@ -162,7 +162,7 @@ jobs:
       - name: Download frontend artifact
         uses: actions/download-artifact@v4
         with:
-          name: frontend-dist
+          name: ${{ env.BIN_NAME }}-web
           path: static/dist/
 
       - name: Build Go binary
