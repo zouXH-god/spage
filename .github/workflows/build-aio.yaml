@@ -40,19 +40,19 @@ jobs:
     strategy:
       matrix:
         include:
-          # - goos: darwin
-          #   goarch: amd64
-          # - goos: darwin
-          #   goarch: arm64
+          - goos: darwin
+            goarch: amd64
+          - goos: darwin
+            goarch: arm64
 
-          # - goos: freebsd
-          #   goarch: amd64
-          # - goos: freebsd
-          #   goarch: arm64
-          # - goos: freebsd
-          #   goarch: 386
-          # - goos: freebsd
-          #   goarch: arm
+          - goos: freebsd
+            goarch: amd64
+          - goos: freebsd
+            goarch: arm64
+          - goos: freebsd
+            goarch: 386
+          - goos: freebsd
+            goarch: arm
 
           - goos: linux
             goarch: amd64
@@ -62,15 +62,15 @@ jobs:
             goarch: 386
           - goos: linux
             goarch: arm
-          # - goos: linux
-          #   goarch: ppc64le
-          # - goos: linux
-          #   goarch: s390x
+          - goos: linux
+            goarch: ppc64le
+          - goos: linux
+            goarch: s390x
 
-          # - goos: windows
-          #   goarch: amd64
-          # - goos: windows
-          #   goarch: arm64
+          - goos: windows
+            goarch: amd64
+          - goos: windows
+            goarch: arm64
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -108,7 +108,6 @@ jobs:
           cp -r out/* ../static/dist/
 
       - name: Build Go binary
-        continue-on-error: true
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
@@ -148,77 +147,79 @@ jobs:
           path: ${{ env.BIN_OUT }}
       
       # Linux Container
-      # - name: Prepare binaries for Docker build
-      #   run: |
-      #     set -e
-      #     ls -l build/
-      #     for arch in amd64 arm64 386 arm ppc64le s390x; do
-      #       if [ -f build/${{ env.BIN_NAME }}-linux-$arch/${{ env.BIN_NAME }}-linux-$arch ]; then
-      #         mkdir -p build/linux-$arch
-      #         cp build/${{ env.BIN_NAME }}-linux-$arch/${{ env.BIN_NAME }}-linux-$arch build/linux-$arch/${{ env.BIN_NAME }}
-      #       fi
-      #     done
-      #     ls -l build/linux-amd64/
+      - name: Prepare binaries for Docker build
+        run: |
+          set -e
+          ls -l build/
+          for arch in amd64 arm64 386 arm ppc64le s390x; do
+            if [ -f build/${{ env.BIN_NAME }}-linux-$arch/${{ env.BIN_NAME }}-linux-$arch ]; then
+              mkdir -p build/linux-$arch
+              cp build/${{ env.BIN_NAME }}-linux-$arch/${{ env.BIN_NAME }}-linux-$arch build/linux-$arch/${{ env.BIN_NAME }}
+            fi
+          done
+          ls -l build/linux-amd64/
 
-      # - name: Set up Docker Buildx
-      #   uses: docker/setup-buildx-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
-      # - name: Login to GHCR
-      #   uses: docker/login-action@v3
-      #   with:
-      #     registry: ${{ env.REG_GHCR }}
-      #     username: ${{ secrets.GHCR_USER }}
-      #     password: ${{ secrets.GHCR_TOKEN }}
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REG_GHCR }}
+          username: ${{ secrets.GHCR_USER }}
+          password: ${{ secrets.GHCR_TOKEN }}
 
-      # - name: Login to DockerHub
-      #   uses: docker/login-action@v3
-      #   with:
-      #     registry: ${{ env.REG_DOCKERHUB }}
-      #     username: ${{ secrets.DOCKERHUB_USER }}
-      #     password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REG_DOCKERHUB }}
+          username: ${{ secrets.DOCKERHUB_USER }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # - name: Login to LCR
-      #   uses: docker/login-action@v3
-      #   with:
-      #     registry: ${{ env.REG_LCR }}
-      #     username: ${{ secrets.LITEYUKIREG_USER }}
-      #     password: ${{ secrets.LITEYUKIREG_TOKEN }}
+      - name: Login to LCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REG_LCR }}
+          username: ${{ secrets.LITEYUKIREG_USER }}
+          password: ${{ secrets.LITEYUKIREG_TOKEN }}
 
-      # # 有 tag 时推送 版本号、latest、nightly 三个标签
-      # - name: Build & Push Docker Images (tag & latest)
-      #   if: ${{ needs.build.outputs.nightly == 'false' }}
-      #   uses: docker/build-push-action@v6
-      #   with:
-      #     context: .
-      #     push: true
-      #     tags: |
-      #       ${{ env.NAMESPACE_DOCKERHUB }}/${{ env.BIN_NAME }}:${{ needs.build.outputs.tag }}
-      #       ${{ env.NAMESPACE_DOCKERHUB }}/${{ env.BIN_NAME }}:latest
-      #       ${{ env.NAMESPACE_DOCKERHUB }}/${{ env.BIN_NAME }}:nightly
-      #       ${{ env.REG_GHCR }}/${{ env.NAMESPACE_GHCR }}/${{ env.BIN_NAME }}:${{ needs.build.outputs.tag }}
-      #       ${{ env.REG_GHCR }}/${{ env.NAMESPACE_GHCR }}/${{ env.BIN_NAME }}:latest
-      #       ${{ env.REG_GHCR }}/${{ env.NAMESPACE_GHCR }}/${{ env.BIN_NAME }}:nightly
-      #       ${{ env.REG_LCR }}/${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME }}:${{ needs.build.outputs.tag }}
-      #       ${{ env.REG_LCR }}/${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME }}:latest
-      #       ${{ env.REG_LCR }}/${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME }}:nightly
-      #     platforms: ${{ env.CONTAINER_PLATFORMS }}
+      # 有 tag 时推送 版本号、latest、nightly 三个标签
+      - name: Build & Push Docker Images (tag & latest)
+        if: ${{ needs.build.outputs.nightly == 'false' }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.NAMESPACE_DOCKERHUB }}/${{ env.BIN_NAME }}:${{ needs.build.outputs.tag }}
+            ${{ env.NAMESPACE_DOCKERHUB }}/${{ env.BIN_NAME }}:latest
+            ${{ env.NAMESPACE_DOCKERHUB }}/${{ env.BIN_NAME }}:nightly
+            ${{ env.REG_GHCR }}/${{ env.NAMESPACE_GHCR }}/${{ env.BIN_NAME }}:${{ needs.build.outputs.tag }}
+            ${{ env.REG_GHCR }}/${{ env.NAMESPACE_GHCR }}/${{ env.BIN_NAME }}:latest
+            ${{ env.REG_GHCR }}/${{ env.NAMESPACE_GHCR }}/${{ env.BIN_NAME }}:nightly
+            ${{ env.REG_LCR }}/${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME }}:${{ needs.build.outputs.tag }}
+            ${{ env.REG_LCR }}/${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME }}:latest
+            ${{ env.REG_LCR }}/${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME }}:nightly
+          platforms: ${{ env.CONTAINER_PLATFORMS }}
 
-      # # nightly 时只推送 nightly
-      # - name: Build & Push Docker Images (nightly only)
-      #   if: ${{ needs.build.outputs.nightly == 'true' }}
-      #   uses: docker/build-push-action@v6
-      #   with:
-      #     context: .
-      #     push: true
-      #     tags: |
-      #       ${{ env.NAMESPACE_DOCKERHUB }}/${{ env.BIN_NAME }}:nightly
-      #       ${{ env.REG_GHCR }}/${{ env.NAMESPACE_GHCR }}/${{ env.BIN_NAME }}:nightly
-      #       ${{ env.REG_LCR }}/${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME }}:nightly
-      #     platforms: ${{ env.CONTAINER_PLATFORMS }}
+      # nightly 时只推送 nightly
+      - name: Build & Push Docker Images (nightly only)
+        if: ${{ needs.build.outputs.nightly == 'true' }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.NAMESPACE_DOCKERHUB }}/${{ env.BIN_NAME }}:nightly
+            ${{ env.REG_GHCR }}/${{ env.NAMESPACE_GHCR }}/${{ env.BIN_NAME }}:nightly
+            ${{ env.REG_LCR }}/${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME }}:nightly
+          platforms: ${{ env.CONTAINER_PLATFORMS }}
       - name: Prepare release assets
         run: |
           mkdir -p release-assets
           find build -type f -name "${{ env.BIN_NAME }}-*" -exec cp {} release-assets/ \;
+          ls -lh release-assets/
+          
       - name: Publish GitHub Release
         if: ${{ needs.build.outputs.nightly == 'false' }}
         uses: softprops/action-gh-release@v2.3.0
