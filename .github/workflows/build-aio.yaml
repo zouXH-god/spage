@@ -20,6 +20,14 @@ env:
   NAMESPACE_GHCR: liteyukistudio
   NAMESPACE_DOCKERHUB: liteyukistudio
   NAMESPACE_LCR: spage
+  ARCH_MAP: |
+    amd64:amd64-v1
+    arm64:arm64
+    arm:armv7
+    386:386-sse2
+    ppc64le:ppc64le
+    s390x:s390x
+  
 
 concurrency:
   group: "build-aio"
@@ -193,27 +201,24 @@ jobs:
               -X '${{ env.GO_PKG_ROOT }}/config.Version=${{ steps.version.outputs.version }}'" \
             -o $OUTDIR/$OUTNAME ./cmd/server
 
-      - name: Copy binary for docker buildx
+      - name: Copy binary for main arch (for Docker buildx)
         if: matrix.goos == 'linux'
+        env:
+          ARCH_MAP: ${{ env.ARCH_MAP }}
         run: |
           STD_ARCH="${{ matrix.goarch }}"
           OUTDIR=${{ env.BIN_OUT }}/linux-${{ matrix.output }}
           OUTNAME=${{ env.BIN_NAME }}
-          TARGET=${{ env.BIN_OUT }}/linux-$STD_ARCH/${{ env.BIN_NAME }}
-          if [[ "$STD_ARCH" =~ ^(amd64|arm64|arm|386|ppc64le|s390x)$ ]]; then
-            if [[ -f "$OUTDIR/$OUTNAME" ]]; then
-              # 只有源和目标不同才复制
-              if [ ! "$OUTDIR/$OUTNAME" -ef "$TARGET" ]; then
-                mkdir -p ${{ env.BIN_OUT }}/linux-$STD_ARCH
-                cp "$OUTDIR/$OUTNAME" "$TARGET"
-              else
-                echo "Source and target are the same file, skip cp."
-              fi
-            else
-              echo "File $OUTDIR/$OUTNAME not found!"
-              exit 1
+          # 处理主流架构映射
+          while read -r line; do
+            key=$(echo "$line" | cut -d: -f1)
+            val=$(echo "$line" | cut -d: -f2)
+            if [ "$val" = "${{ matrix.output }}" ]; then
+              mkdir -p ${{ env.BIN_OUT }}/linux-$key
+              cp "$OUTDIR/$OUTNAME" "${{ env.BIN_OUT }}/linux-$key/$OUTNAME"
+              echo "Copied $OUTDIR/$OUTNAME -> ${{ env.BIN_OUT }}/linux-$key/$OUTNAME"
             fi
-          fi
+          done <<< "${ARCH_MAP}"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
