@@ -7,7 +7,7 @@ mode: "prod"     # 运行模式，可选：prod/dev/test
 
 # 前端配置
 frontend:
-  url: "http://localhost:5173"  # 前端URL地址
+  url: "http://localhost:3000"  # 前端URL地址
 
 # 日志配置
 log:

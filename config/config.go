@@ -70,6 +70,7 @@ var (
 	// git commit hash injected at build time
 
 	BuildTime = "0000-00-00 00:00:00" // 构建时间 Build Time
+	Version   = "0.0.0"         // 版本号 Version
 
 	ReleaseSavePath = "data/releases"
 

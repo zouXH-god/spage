@@ -10,6 +10,9 @@ env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   BIN_NAME: spage
   BIN_OUT: build
+  # for Go build
+  GO_PKG_ROOT: github.com/LiteyukiStudio/spage
+  # for container build
   CONTAINER_PLATFORMS: linux/amd64,linux/arm64,linux/386,linux/arm,linux/ppc64le,linux/s390x
   REG_GHCR: ghcr.io
   REG_DOCKERHUB: docker.io
@@ -76,6 +79,22 @@ jobs:
         with:
           node-version: 22
 
+      - name: Set version/tag
+        id: version
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/}"
+            TAG="${VERSION}"
+            NIGHTLY="false"
+          else
+            VERSION="${GITHUB_SHA}"
+            TAG="nightly"
+            NIGHTLY="true"
+          fi
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+          echo "nightly=${NIGHTLY}" >> $GITHUB_OUTPUT
+
       - name: Build frontend
         run: |
           cd web-src
@@ -96,7 +115,12 @@ jobs:
           else
             BIN_OUT="${{ env.BIN_OUT }}/${{ env.BIN_NAME }}-${{ matrix.goos }}-${{ matrix.goarch }}"
           fi
-          go build -o $BIN_OUT ./cmd/server
+          go build \
+            -ldflags \
+              "-X '${{ env.GO_PKG_ROOT }}/config.CommitHash=${{ github.sha }}' \
+              -X '${{ env.GO_PKG_ROOT }}/config.BuildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)' \
+              -X '${{ env.GO_PKG_ROOT }}/config.Version=${{ steps.version.outputs.version }}' \
+            -o $BIN_OUT ./cmd/server
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -132,22 +156,6 @@ jobs:
           done
           ls -l build/linux-amd64/
 
-      - name: Set version/tag
-        id: version
-        run: |
-          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
-            VERSION="${GITHUB_REF#refs/tags/}"
-            TAG="${VERSION}"
-            NIGHTLY="false"
-          else
-            VERSION="${GITHUB_SHA}"
-            TAG="nightly"
-            NIGHTLY="true"
-          fi
-          echo "version=${VERSION}" >> $GITHUB_OUTPUT
-          echo "tag=${TAG}" >> $GITHUB_OUTPUT
-          echo "nightly=${NIGHTLY}" >> $GITHUB_OUTPUT
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
@@ -174,26 +182,26 @@ jobs:
 
       # 有 tag 时推送 版本号、latest、nightly 三个标签
       - name: Build & Push Docker Images (tag & latest)
-        if: ${{ steps.version.outputs.nightly == 'false' }}
+        if: ${{ needs.build.outputs.nightly == 'false' }}
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
           tags: |
-            ${{ env.NAMESPACE_DOCKERHUB }}/${{ env.BIN_NAME }}:${{ steps.version.outputs.tag }}
+            ${{ env.NAMESPACE_DOCKERHUB }}/${{ env.BIN_NAME }}:${{ needs.build.outputs.tag }}
             ${{ env.NAMESPACE_DOCKERHUB }}/${{ env.BIN_NAME }}:latest
             ${{ env.NAMESPACE_DOCKERHUB }}/${{ env.BIN_NAME }}:nightly
-            ${{ env.REG_GHCR }}/${{ env.NAMESPACE_GHCR }}/${{ env.BIN_NAME }}:${{ steps.version.outputs.tag }}
+            ${{ env.REG_GHCR }}/${{ env.NAMESPACE_GHCR }}/${{ env.BIN_NAME }}:${{ needs.build.outputs.tag }}
             ${{ env.REG_GHCR }}/${{ env.NAMESPACE_GHCR }}/${{ env.BIN_NAME }}:latest
             ${{ env.REG_GHCR }}/${{ env.NAMESPACE_GHCR }}/${{ env.BIN_NAME }}:nightly
-            ${{ env.REG_LCR }}/${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME }}:${{ steps.version.outputs.tag }}
+            ${{ env.REG_LCR }}/${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME }}:${{ needs.build.outputs.tag }}
             ${{ env.REG_LCR }}/${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME }}:latest
             ${{ env.REG_LCR }}/${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME }}:nightly
           platforms: ${{ env.CONTAINER_PLATFORMS }}
 
       # nightly 时只推送 nightly
       - name: Build & Push Docker Images (nightly only)
-        if: ${{ steps.version.outputs.nightly == 'true' }}
+        if: ${{ needs.build.outputs.nightly == 'true' }}
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -205,14 +213,14 @@ jobs:
           platforms: ${{ env.CONTAINER_PLATFORMS }}
 
       - name: Publish GitHub Release
-        if: ${{ steps.version.outputs.nightly == 'false' }}
+        if: ${{ needs.build.outputs.nightly == 'false' }}
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.version.outputs.tag }}
-          name: Release ${{ steps.version.outputs.tag }}
+          tag_name: ${{ needs.build.outputs.tag }}
+          name: Release ${{ needs.build.outputs.tag }}
           body: |
-            Release ${{ steps.version.outputs.tag }}
-            Built from tag ${{ steps.version.outputs.tag }}
+            Release ${{ needs.build.outputs.tag }}
+            Built from tag ${{ needs.build.outputs.tag }}
           files: |
             ${{ env.BIN_OUT }}/${{ env.BIN_NAME }}-*
             ${{ env.BIN_OUT }}/${{ env.BIN_NAME }}-*.exe
