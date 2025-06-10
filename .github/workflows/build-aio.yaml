@@ -187,7 +187,7 @@ jobs:
           if [ "${{ matrix.goos }}" = "windows" ]; then
             OUTNAME="${OUTNAME}.exe"
           fi
-          go build \
+          CGO_ENABLE=0 go build \
             -trimpath \
             -ldflags "-X '${{ env.GO_PKG_ROOT }}/config.CommitHash=${{ github.sha }}' \
               -X '${{ env.GO_PKG_ROOT }}/config.BuildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)' \
