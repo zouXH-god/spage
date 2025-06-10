@@ -39,8 +39,6 @@ jobs:
             goarch: 386
           - goos: freebsd
             goarch: arm
-          - goos: freebsd
-            goarch: riscv64
 
           - goos: linux
             goarch: amd64
