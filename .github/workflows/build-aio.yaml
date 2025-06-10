@@ -116,11 +116,13 @@ jobs:
         run: |
           set -e
           ls -l build/
-          mkdir -p build/linux-amd64 build/linux-arm64 build/linux-386 build/linux-arm
-          cp build/spage-linux-amd64/spage build/linux-amd64/spage
-          cp build/spage-linux-arm64/spage build/linux-arm64/spage
-          cp build/spage-linux-386/spage build/linux-386/spage
-          cp build/spage-linux-arm/spage build/linux-arm/spage
+          # 支持的 Docker 架构
+          for arch in amd64 arm64 386 arm ppc64le s390x; do
+            if [ -f build/spage-linux-$arch/spage-linux-$arch ]; then
+              mkdir -p build/linux-$arch
+              cp build/spage-linux-$arch/spage-linux-$arch build/linux-$arch/spage
+            fi
+          done
           ls -l build/linux-amd64/
 
       - name: Set version/tag
