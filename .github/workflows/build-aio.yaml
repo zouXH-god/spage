@@ -111,6 +111,7 @@ jobs:
         with:
           pattern: ${{ env.BIN_NAME }}-*
           path: ${{ env.BIN_OUT }}
+
       - name: Prepare binaries for Docker build
         run: |
           set -e
