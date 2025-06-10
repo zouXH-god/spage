@@ -199,21 +199,16 @@ jobs:
           STD_ARCH="${{ matrix.goarch }}"
           OUTDIR=${{ env.BIN_OUT }}/linux-${{ matrix.output }}
           OUTNAME=${{ env.BIN_NAME }}
-          if [ "${{ matrix.goos }}" = "windows" ]; then
-            OUTDIR=${{ env.BIN_OUT }}/windows-${{ matrix.output }}
-            OUTNAME="${{ env.BIN_NAME }}.exe"
-          elif [ "${{ matrix.goos }}" = "darwin" ]; then
-            OUTDIR=${{ env.BIN_OUT }}/darwin-${{ matrix.output }}
-          elif [ "${{ matrix.goos }}" = "freebsd" ]; then
-            OUTDIR=${{ env.BIN_OUT }}/freebsd-${{ matrix.output }}
-          fi
-          echo "OUTDIR=$OUTDIR"
-          echo "OUTNAME=$OUTNAME"
-          ls -lh $OUTDIR/
+          TARGET=${{ env.BIN_OUT }}/linux-$STD_ARCH/${{ env.BIN_NAME }}
           if [[ "$STD_ARCH" =~ ^(amd64|arm64|arm|386|ppc64le|s390x)$ ]]; then
             if [[ -f "$OUTDIR/$OUTNAME" ]]; then
-              mkdir -p ${{ env.BIN_OUT }}/linux-$STD_ARCH
-              cp "$OUTDIR/$OUTNAME" "${{ env.BIN_OUT }}/linux-$STD_ARCH/${{ env.BIN_NAME }}"
+              # 只有源和目标不同才复制
+              if [ ! "$OUTDIR/$OUTNAME" -ef "$TARGET" ]; then
+                mkdir -p ${{ env.BIN_OUT }}/linux-$STD_ARCH
+                cp "$OUTDIR/$OUTNAME" "$TARGET"
+              else
+                echo "Source and target are the same file, skip cp."
+              fi
             else
               echo "File $OUTDIR/$OUTNAME not found!"
               exit 1
