@@ -299,6 +299,11 @@ jobs:
           path: build/
           merge-multiple: true
 
+      - name: Set git user
+        run: |
+          git config --global user.name "liteyuki-flow"
+          git config --global user.email "liteyuki-flow@liteyuki.org"
+
       - name: Publish GitHub Release(tag & latest)
         if: ${{ needs.backend.outputs.nightly == 'false' }}
         uses: ncipollo/release-action@v1
