@@ -2,6 +2,7 @@ import { CaptchaProvider, type CaptchaProps } from "@/types/captcha";
 import HCaptchaWidget from "./HCaptcha";
 import ReCaptchaWidget from "./ReCaptcha";
 import TurnstileWidget from "./Turnstile";
+import NoCaptchaWidget from "./NoCaptcha";
 
 
 export default function AIOCaptchaWidget(props: CaptchaProps) {
@@ -13,7 +14,7 @@ export default function AIOCaptchaWidget(props: CaptchaProps) {
         case CaptchaProvider.TURNSTILE:
             return <TurnstileWidget {...props} />;
         case CaptchaProvider.DISABLE:
-            return null;
+            return <NoCaptchaWidget {...props} />;
         default:
             throw new Error(`Unsupported captcha provider: ${props.provider}`);
     }

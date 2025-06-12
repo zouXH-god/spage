@@ -77,8 +77,8 @@ export default function LoginPage() {
               provider: CaptchaProvider.DISABLE,
               siteKey: "",
               url: "",
-              onSuccess: () => {},
-              onError: () => {},
+              onSuccess: () => { },
+              onError: () => { },
             })}
           />
         </div>
@@ -87,7 +87,13 @@ export default function LoginPage() {
         )}
         <button
           type="submit"
-          className="w-full py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-lg transition-colors mt-2"
+          disabled={!captchaToken}
+          className={
+            "w-full py-2 rounded-lg font-semibold text-lg transition-colors mt-2 " +
+            (captchaToken
+              ? "bg-blue-600 hover:bg-blue-700 text-white cursor-pointer"
+              : "bg-blue-200 text-white cursor-not-allowed")
+          }
         >
           {t("login.login")}
         </button>
