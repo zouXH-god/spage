@@ -49,8 +49,11 @@ reg.liteyuki.org/spage/spage:latest
 ### 二进制部署
 
 如果不想容器化，也可以直接跑二进制，支持，可以在[Release](./releases)界面找到大部分平台和架构的二进制文件
+
 支持Linux，macOS(Darwin)，Windows，FreeBSD等操作系统
+
 AMD64兼容性：v1支持所有AMD64架构的CPU，v3支持2013年及以后的AMD64架构CPU
+
 如果找不到你目标平台的二进制文件，可以尝试从源代码构建
     `go build ./cmd/server`
 
