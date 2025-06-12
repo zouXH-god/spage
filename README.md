@@ -138,3 +138,5 @@ CLI将输出文件夹压缩后使用指定接口上传到服务器
 后端`http://localhost:8888`，后端配置了默认的frontend.url，来确保跨域请求及Cookie正常工作，若自定义了端口，请确保前端配置的URL与后端配置的frontend.url一致
 
 - 开发模式下，在测试captcha时，需要将localhost（或其他域）加入到平台的白名单中
+
+- 暂不支持mcaptcha，后续会支持
