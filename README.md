@@ -1,9 +1,7 @@
-# Spage - 自托管静态页面托管服务
 
-> 项目处于开发阶段，暂未发布第一个版本，感兴趣的可以先订阅一下
 
-<!-- <center><img src="https://socialify.git.ci/Nanaloveyuki/spage/image?description=1&font=Bitter&forks=1&issues=1&logo=https%3A%2F%2Fcdn.liteyuki.icu%2Flogos%2Fapage.png&name=1&pattern=Overlapping+Hexagons&pulls=1&stargazers=1&theme=Auto" alt="spage" width="780" height="320" />
-    <a href="./README.md">简体中文</a>
+<center><img src="https://socialify.git.ci/LiteyukiStudio/spage/image?description=1&font=Bitter&forks=1&issues=1&logo=https%3A%2F%2Fcdn.liteyuki.org%2Flogos%2Fapage.png&name=1&pattern=Overlapping+Hexagons&pulls=1&stargazers=1&theme=Auto" alt="spage" width="780" height="320" />
+    <!-- <a href="./README.md">简体中文</a>
     |
     <a href="./README/en.md">English</a>
     |
@@ -11,10 +9,12 @@
     |
     <a href="./README/ja.md">日本語</a>
     |
-    <a href="./README/ko.md">한국어</a>
-</center> -->
+    <a href="./README/ko.md">한국어</a> -->
+</center>
 
----
+# Spage - 自托管静态页面托管服务
+
+> 项目处于开发阶段，暂未发布第一个版本，感兴趣的可以先订阅一下
 
 ## 简介
 
