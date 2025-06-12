@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { login } from "@/api/user.api";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -9,15 +10,13 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // 简单示例：用户名和密码都为 admin 时通过
-    if (username === "admin" && password === "admin") {
-      localStorage.setItem("token", "mock-token");
-      router.replace("/dashboard");
-    } else {
-      setError("用户名或密码错误");
-    }
+    login({ username, password, captchaToken: "" })
+      .then((response) => {
+        console.log("登录成功:", response.data);
+        response.data.refreshToken
+      })
   };
 
   return (

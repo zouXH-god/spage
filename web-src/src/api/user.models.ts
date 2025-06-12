@@ -23,7 +23,7 @@ export interface User {
     [property: string]: unknown;
 }
 
-export interface LoginRequest extends BaseResponse {
+export interface LoginRequest {
     username: string;
     password: string;
     captchaToken: string;
@@ -35,7 +35,7 @@ export interface LoginResponse extends BaseResponse {
     userId: number;
 }
 
-export interface RegisterRequest extends BaseResponse {
+export interface RegisterRequest {
     username: string;
     password: string;
     email: string;

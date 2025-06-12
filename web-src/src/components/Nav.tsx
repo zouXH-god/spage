@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import DropdownMenu, { DropdownMenuItem } from "@/components/reusable/DropdownMenu";
 
+
 const teams = [
     {
         id: "team1",
@@ -87,7 +88,6 @@ const menuTree: DropdownMenuItem[] = [
 export default function Nav() {
     const [selectedTeam] = useState(teams[0]);
     const [selectedProject, setSelectedProject] = useState(teams[0].projects[0]);
-
     return (
         <nav className="pt-4 px-4 w-full border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
             {/* 顶部栏 */}
