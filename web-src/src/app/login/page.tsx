@@ -6,10 +6,11 @@ import AIOCaptchaWidget from "@/components/captcha/AIOCaptcha";
 import { CaptchaProps, CaptchaProvider } from "@/types/captcha";
 import { t } from "i18next";
 import { useDevice } from "@/contexts/DeviceContext";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const { isMobile } = useDevice();
-
+  const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -25,10 +26,10 @@ export default function LoginPage() {
           siteKey: config.siteKey || "",
           url: config.url || "",
           onSuccess: (token: string) => setCaptchaToken(token),
-          onError: () => setError("验证码验证失败，请重试"),
+          onError: () => setError("login.captcha.failed"),
         });
       })
-      .catch(() => setError("获取验证码配置失败，请稍后再试"));
+      .catch(() => setError("login.captcha.fetchFailed"));
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -36,9 +37,10 @@ export default function LoginPage() {
     login({ username, password, captchaToken })
       .then((response) => {
         console.log("登录成功:", response.data);
-        // 处理登录成功逻辑
+        // 路由跳转
+        router.push("/");
       })
-      .catch(() => setError("登录失败，请检查信息后重试"));
+      .catch((err) => setError(t("login.failed") + ": " + err.response?.data?.message || err.message));
   };
 
   return (
@@ -71,7 +73,7 @@ export default function LoginPage() {
             className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
-        <div className="flex justify-center my-4">
+        <div className={`flex justify-center (${ ![CaptchaProvider.DISABLE, CaptchaProvider.RECAPTCHA].includes(captchaProps?.provider ?? CaptchaProvider.DISABLE)  ? "my-4" : ""})`}>
           <AIOCaptchaWidget
             {...(captchaProps || {
               provider: CaptchaProvider.DISABLE,
@@ -83,7 +85,7 @@ export default function LoginPage() {
           />
         </div>
         {error && (
-          <div className="text-red-500 text-sm text-center mb-2">{error}</div>
+          <div className="text-red-500 text-sm text-center mb-2">{t(error)}</div>
         )}
         <button
           type="submit"
@@ -95,7 +97,7 @@ export default function LoginPage() {
               : "bg-blue-200 text-white cursor-not-allowed")
           }
         >
-          {t("login.login")}
+          {t("login.login")} {captchaToken ? "" : t("login.captcha.processing")}
         </button>
       </form>
     </div>

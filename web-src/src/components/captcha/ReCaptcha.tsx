@@ -5,6 +5,7 @@ import {
 import { CaptchaProps } from '@/types/captcha';
 
 export default function ReCaptchaWidget(props: CaptchaProps) {
+
   return (
     <GoogleReCaptchaProvider
       reCaptchaKey={props.siteKey}

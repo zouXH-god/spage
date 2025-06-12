@@ -21,16 +21,15 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        {/* ThemeProvider 只包裹 body 内容 */}
         <DeviceProvider>
-          <I18nProvider>{children}</I18nProvider>
+          <I18nProvider>
+            {children}
+          </I18nProvider>
         </DeviceProvider>
       </body>
     </html>
