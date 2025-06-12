@@ -23,6 +23,25 @@ func (captchaType) VerifyCaptcha(restyClient *resty.Client, captchaConfig *Captc
 	switch captchaConfig.Type {
 	case constants.CaptchaTypeDisable:
 		return true, nil
+	case constants.CaptchaTypeHCaptcha:
+		result := make(map[string]any)
+		resp, err := restyClient.R().
+			SetFormData(map[string]string{
+				"secret":   captchaConfig.SecretKey,
+				"response": captchaToken,
+			}).SetResult(&result).Post("https://hcaptcha.com/siteverify")
+		if err != nil {
+			return false, err
+		}
+		if resp.IsError() {
+			return false, nil
+		}
+		fmt.Printf("%#v\n", result)
+		if success, ok := result["success"].(bool); ok && success {
+			return true, nil
+		} else {
+			return false, nil
+		}
 	case constants.CaptchaTypeTurnstile:
 		result := make(map[string]any)
 		resp, err := restyClient.R().
@@ -42,6 +61,26 @@ func (captchaType) VerifyCaptcha(restyClient *resty.Client, captchaConfig *Captc
 		} else {
 			return false, nil
 		}
+	case constants.CaptchaTypeReCaptcha:
+		result := make(map[string]any)
+		resp, err := restyClient.R().
+			SetFormData(map[string]string{
+				"secret":   captchaConfig.SecretKey,
+				"response": captchaToken,
+			}).SetResult(&result).Post("https://www.google.com/recaptcha/api/siteverify")
+		if err != nil {
+			return false, err
+		}
+		if resp.IsError() {
+			return false, nil
+		}
+		fmt.Printf("%#v\n", result)
+		if success, ok := result["success"].(bool); ok && success {
+			return true, nil
+		} else {
+			return false, nil
+		}
+
 	default:
 		return false, fmt.Errorf("invalid captcha type: %s", captchaConfig.Type)
 	}

@@ -8,7 +8,6 @@ export default function HCaptchaWidget(props: CaptchaProps) {
             onVerify={props.onSuccess}
             onError={props.onError}
             onExpire={() => props.onError?.('Captcha expired')}
-            size="invisible"
         />
     );
 }
