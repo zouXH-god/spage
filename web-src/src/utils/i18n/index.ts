@@ -5,23 +5,25 @@ import resources from "./locales"
 
 export const getDefaultLang = () => {
     if (typeof window !== "undefined") {
-        // 优先 localStorage，其次浏览器语言
         return (
             localStorage.getItem("language") ||
-            navigator.language.split("-")[0] ||
-            "zh"
+            navigator.language.replace("_", "-") || // 保证格式
+            "zh-CN"
         )
     }
-    return "zh"
+    return "zh-CN"
 }
+
 
 i18n.use(initReactI18next).init({
     resources: resources,
     lng: getDefaultLang(),
-    fallbackLng: "zh",
+    fallbackLng: "zh-CN",
     interpolation: {
         escapeValue: false,
     },
 })
+
+console.log("i18n initialized with language:", i18n.language)
 
 export default i18n

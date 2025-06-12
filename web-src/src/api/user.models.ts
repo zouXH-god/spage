@@ -2,6 +2,7 @@
  * This file defines the request models used in the API.
  */
 
+import { CaptchaProvider } from "@/types/captcha";
 import type { BaseResponse } from "./base.models";
 import type { Org } from "./org.models";
 import type { Project } from "./project.models";
@@ -62,7 +63,7 @@ export interface UserOrganizationsResponse extends BaseResponse {
 }
 
 export interface CaptchaConfig extends BaseResponse {
-    provider: "disable" | "turnstile" | "recaptcha" | "hcaptcha" | "dev-captcha";
+    provider: CaptchaProvider;
     siteKey: string;
     url?: string;
 }

@@ -36,6 +36,7 @@ func (captchaType) VerifyCaptcha(restyClient *resty.Client, captchaConfig *Captc
 		if resp.IsError() {
 			return false, nil
 		}
+		fmt.Printf("%#v\n", result)
 		if success, ok := result["success"].(bool); ok && success {
 			return true, nil
 		} else {

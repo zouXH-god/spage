@@ -14,13 +14,15 @@ func Run() error {
 	H := server.New(server.WithHostPorts(":" + config.ServerPort))
 	H.Use(middle.Cors.UseCors(), middle.Trace.UseTrace())
 	apiV1 := H.Group("/api/v1")
+
 	apiV1.Use(middle.Auth.UseAuth())
 	apiV1WithoutAuth := H.Group("/api/v1")
+	apiV1WithoutAuthAndCaptcha := H.Group("/api/v1") // 不需要登录和验证码的路由 Group without auth and captcha
 	{
+		apiV1WithoutAuthAndCaptcha.GET("/user/captcha", handlers.User.GetCaptcha) // 取验证码 Get captcha
+		apiV1WithoutAuth.POST("/user/logout", handlers.User.Logout)
 		apiV1WithoutAuth.POST("/user/register", handlers.User.Register).Use(middle.Captcha.UseCaptcha()) // 注册 Register
 		apiV1WithoutAuth.POST("/user/login", handlers.User.Login).Use(middle.Captcha.UseCaptcha())
-		apiV1WithoutAuth.GET("/user/captcha", handlers.User.GetCaptcha) // 获取验证码 Get captcha
-		apiV1WithoutAuth.POST("/user/logout", handlers.User.Logout)
 		userGroup := apiV1.Group("/user")
 		{
 			userGroup.PUT("", handlers.User.UpdateUser)               // 更新用户信息 Update user info

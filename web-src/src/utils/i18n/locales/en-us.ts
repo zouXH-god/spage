@@ -1,6 +1,12 @@
 const resources = {
-    translations: {
+    translation: {
         hello: 'Hello',
+        login: {
+            login: "Login",
+            username: "Username",
+            password: "Password",
+            captcha: "Captcha",
+        }
     }
 }
 
