@@ -35,11 +35,16 @@ ghcr.io/liteyukistudio/spage:latest
 
 # Liteyuki Container Registry源
 reg.liteyuki.org/spage/spage:latest
+
+# 推荐优先使用公共源，即Docker Hub源和GHCR源，若访问不了再使用Liteyuki Container Registry源
+# 以减轻Liteyuki Container Registry的压力
 ```
 
 你可使用docker，podman等工具部署，也可以将其部署到Kubernetes集群中
 
 默认容器内服务端口是`8888`，你可以按需暴露，并挂载`./config.yaml`到容器内部
+
+若你需要使用最新提交，可以将`latest`替换为`nightly`标签
 
 ### 二进制部署
 
