@@ -22,9 +22,9 @@
 
 类似于`Vercel Pages`, `GitHub Pages`, `Cloudflare Pages`等PaaS服务, 但它是一个开源的, 可自托管的**平替**
 
-## 快速安装
+## 快速开始
 
-### 容器化部署
+### 容器化自部署
 
 ```bash
 # Docker Hub源
@@ -46,7 +46,7 @@ reg.liteyuki.org/spage/spage:latest
 
 若你需要使用最新提交，可以将`latest`替换为`nightly`标签
 
-### 二进制部署
+### 二进制自部署
 
 如果不想容器化，也可以直接跑二进制，支持，可以在[Release](./releases)界面找到大部分平台和架构的二进制文件
 
@@ -56,6 +56,12 @@ AMD64兼容性：v1支持所有AMD64架构的CPU，v3支持2013年及以后的AM
 
 如果找不到你目标平台的二进制文件，可以尝试从源代码构建
     `go build ./cmd/server`
+
+### 使用Spage Cloud SaaS
+
+无需自己部署，直接使用我们的现有实例及CDN加速服务
+
+> 敬请期待...
 
 ## 技术栈
 
