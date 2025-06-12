@@ -312,3 +312,12 @@ jobs:
           generateReleaseNotes: true
           allowUpdates: true
           token: ${{ env.BOT_TOKEN }}
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Edit Changelog
+        run: |
+          npx changelogithub
+        env:
+          GITHUB_TOKEN: ${{ env.BOT_TOKEN }}
