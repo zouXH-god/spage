@@ -42,7 +42,7 @@ reg.liteyuki.org/spage/spage:latest
 
 你可使用docker，podman等工具部署，也可以将其部署到Kubernetes集群中
 
-默认容器内服务端口是`8888`，你可以按需暴露，并挂载`./config.yaml`到容器内部
+默认容器内服务端口是`8888`，你可以按需暴露，并挂载`/app/config.yaml`到容器内部
 
 若你需要使用最新提交，可以将`latest`替换为`nightly`标签
 
