@@ -95,15 +95,9 @@ jobs:
       - name: Set version/tag
         id: version
         run: |
-          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
-            VERSION="${GITHUB_REF#refs/tags/}"
-            TAG="${VERSION}"
-            NIGHTLY="false"
-          else
-            VERSION="${GITHUB_SHA}"
-            TAG="nightly"
-            NIGHTLY="true"
-          fi
+          VERSION="${GITHUB_REF#refs/tags/}"
+          TAG="${VERSION}"
+          NIGHTLY="false"
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
           echo "tag=${TAG}" >> $GITHUB_OUTPUT
           echo "nightly=${NIGHTLY}" >> $GITHUB_OUTPUT
