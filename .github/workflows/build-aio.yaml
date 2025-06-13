@@ -218,6 +218,7 @@ jobs:
               -X '${{ env.GO_PKG_ROOT }}/config.BuildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)' \
               -X '${{ env.GO_PKG_ROOT }}/config.Version=${{ steps.version.outputs.version }}'" \
             -o build/$OUTNAME ${{ env.GO_ENTRYPOINT_SERVER }}
+          upx -9 build/$OUTNAME
 
       - name: Prepare main arch binaries for Docker buildx
         env:
