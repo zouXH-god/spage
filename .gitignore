@@ -14,11 +14,11 @@ config.*
 .vscode/
 
 data/
+# backend embed fs
+static/dist/**
 
 # frontend dev
 **/node_modules/
 .next
 
 # frontend dist
-
-static/dist/**
