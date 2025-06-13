@@ -16,6 +16,8 @@ config.*
 data/
 # backend build
 build/
+**.so
+**.dylib
 
 # backend embed fs
 spage/static/dist/**

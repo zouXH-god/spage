@@ -43,5 +43,16 @@ spage-container: web spage
 
 .PHONY: agent
 agent:
-	@echo "Building agent for $(GOOS)/$(GOARCH)"; \
+	@echo "Building agent for $(GOOS)/$(GOARCH)";
 
+.PHONY: plugin
+
+# 用法: make plugin name=XXX
+plugin:
+	@mkdir -p build
+	@ext=so; \
+	if [ "$(GOOS)" = "darwin" ]; then ext=dylib; fi; \
+	echo "Building plugin: plugins/$(name) -> build/$(name).$${ext}"; \
+	CGO_ENABLED=1 GOOS=$(GOOS) GOARCH=$(GOARCH) \
+	go build -buildmode=plugin \
+	-o build/$(name).$${ext} ./plugins/$(name)

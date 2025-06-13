@@ -7,11 +7,12 @@ import (
 	"github.com/LiteyukiStudio/spage/spage/constants"
 	"github.com/LiteyukiStudio/spage/spage/models"
 	"github.com/LiteyukiStudio/spage/utils"
-	//"github.com/glebarez/sqlite" // 基于Go的 SQLite 驱动 Based on Go's SQLite driver
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+	"plugin"
+	"runtime"
 )
 
 var DB *gorm.DB
@@ -59,11 +60,11 @@ func Init() error {
 			return fmt.Errorf("postgres initialization failed: %w", err)
 		}
 		logrus.Infoln("postgres initialization succeeded", dbConfig)
-	//case "sqlite":
-	//	if DB, err = initSQLite(dbConfig, gormConfig); err != nil {
-	//		return fmt.Errorf("sqlite initialization failed: %w", err)
-	//	}
-	//	logrus.Infoln("sqlite initialization succeeded", dbConfig)
+	case "sqlite":
+		if DB, err = InitSQLiteDynamic(dbConfig, gormConfig); err != nil {
+			return fmt.Errorf("sqlite initialization failed: %w", err)
+		}
+		logrus.Infoln("sqlite initialization succeeded", dbConfig)
 	default:
 		return errors.New("unsupported database driver, only sqlite and postgres are supported")
 	}
@@ -108,17 +109,37 @@ func initPostgres(config DBConfig, gormConfig *gorm.Config) (db *gorm.DB, err er
 	return
 }
 
-// initSQLite 初始化SQLite连接
-//func initSQLite(config DBConfig, gormConfig *gorm.Config) (db *gorm.DB, err error) {
-//	if config.Path == "" {
-//		config.Path = "./data/data.db"
-//	}
-//	// 创建 SQLite 数据库文件的目录
-//	// Create the directory for SQLite database file if it doesn't exist
-//	if err = os.MkdirAll(filepath.Dir(config.Path), os.ModePerm); err != nil {
-//		err = fmt.Errorf("failed to create directory for SQLite database: %w", err)
-//	}
-//
-//	db, err = gorm.Open(sqlite.Open(config.Path), gormConfig)
-//	return
-//}
+func InitSQLiteDynamic(config DBConfig, gormConfig *gorm.Config) (*gorm.DB, error) {
+	// 根据操作系统选择插件后缀
+	var ext string
+	switch runtime.GOOS {
+	case "darwin":
+		ext = "dylib"
+	case "linux":
+		ext = "so"
+	default:
+		return nil, fmt.Errorf("unsupported operating system: %s", runtime.GOOS)
+	}
+	// 构建插件路径
+	pluginPath := fmt.Sprintf("./build/sqlite.%s", ext)
+	// 加载 SQLite 插件
+	plug, err := plugin.Open(pluginPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load SQLite plugin: %w", err)
+	}
+	// 查找导出的 Init 函数
+	symbol, err := plug.Lookup("InitSQLite")
+	logrus.Infof("Found symbol: %v", symbol)
+	if err != nil {
+		return nil, fmt.Errorf("failed to find Init function in plugin: %w", err)
+	}
+	// 调试符号类型
+	fmt.Printf("Loaded symbol type: %T\n", symbol)
+	// 转换为函数类型
+	initFunc, ok := symbol.(func(string, *gorm.Config) (*gorm.DB, error))
+	if !ok {
+		return nil, errors.New("invalid Init function signature in plugin")
+	}
+	// 调用插件中的 Init 函数
+	return initFunc(config.Path, gormConfig)
+}
