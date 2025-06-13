@@ -250,7 +250,7 @@ jobs:
           name: "Release ${{ needs.backend-xgo.outputs.tag }}"
           generateReleaseNotes: true
           allowUpdates: true
-          token: ${{ env.BOT_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Checkout code
         uses: actions/checkout@v4
