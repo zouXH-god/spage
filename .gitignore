@@ -6,6 +6,8 @@ server.exe
 
 config.yaml
 config.*
+!config.go
+!config.example.yaml
 
 .DS_Store
 .idea/
