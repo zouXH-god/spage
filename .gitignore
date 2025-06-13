@@ -14,8 +14,11 @@ config.*
 .vscode/
 
 data/
+# backend build
+build/
+
 # backend embed fs
-static/dist/**
+spage/static/dist/**
 
 # frontend dev
 **/node_modules/

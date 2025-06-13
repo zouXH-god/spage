@@ -115,17 +115,54 @@ CLI将输出文件夹压缩后使用指定接口上传到服务器
 可以无缝衔接**GitHub**, **Gitea**等平台的工作流
 例如: 一个项目有`Release`/`Nightly`两个稳定站点, 在CLI中推送时就需要指定站点ID, 优先返回第一个配置的自定义域名, 在PR预览模式下, 无需指定站点URL, 自动创建新站点并返回随机前缀的URL
 
-## 开发
+## 开发者须知
 
 在不修改默认配置的情况下，开发模式有预设配置，可以直接上手开发
 
-### 主控后端和agent部分
 
-- 安装go工具链
+### Go环境配置
+
+- 安装go工具链: [Go官网](https://golang.google.cn/dl/)
 - 安装依赖`go mod tidy`
 - 启动主控后端`go run ./cmd/server`
 
-### 主控前端
+
+### GNU Make安装
+
+- macOS: `brew install make`
+- Linux: 使用发行版的包管理器下载打包好的软件包
+    - Debian/Ubuntu: `apt install make`
+    - Fedora/RHEL/CentOS: `dnf install make`
+    - Arch Linux: `pacman -S make`
+- Windows: 前往[GNU Make for Windows](http://gnuwin32.sourceforge.net/packages/make.htm)下载二进制自己解压到PATH中
+- 或者使用WSL(Windows Subsystem for Linux)安装Linux发行版, 然后在Linux发行版中安装GNU Make
+- 或者使用[Chocolatey](https://chocolatey.org/)安装`make`包: `choco install make`
+
+
+### ProtoBuf工具链安装
+
+#### protoc编译器安装
+
+推荐方法：
+- macOS: `brew install protobuf`
+- Linux: 使用发行版的包管理器下载打包好的软件包
+    - Debian/Ubuntu: `apt install protobuf-compiler`
+    - Fedora/RHEL/CentOS: `dnf install protobuf-compiler`
+    - Arch Linux: `pacman -S protobuf`
+
+其他方法：前往[ProtoBuf Release](https://github.com/protocolbuffers/protobuf/releases)下载二进制自己解压到PATH中
+
+
+#### protoc-gen-go 和 protoc-gen-go-grpc 安装
+
+```bash
+go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+# 确保 $GOPATH/bin 或 $HOME/go/bin 在 PATH 中
+```
+
+
+### 前端环境配置
 
 - 安装pnpm和node(或其他运行时，例如bun，deno)
 - 在项目根目录下切换到前端源码目录：`cd web-src`
@@ -136,7 +173,29 @@ CLI将输出文件夹压缩后使用指定接口上传到服务器
 
 - 开发模式下，前后端的域是不一样的，默认值是前端`http://localhost:3000`，
 后端`http://localhost:8888`，后端配置了默认的frontend.url，来确保跨域请求及Cookie正常工作，若自定义了端口，请确保前端配置的URL与后端配置的frontend.url一致
-
 - 开发模式下，在测试captcha时，需要将localhost（或其他域）加入到平台的白名单中
-
 - 暂不支持mcaptcha，后续会支持
+- 善用AI，但不能滥用AI，AI只能作为辅助工具
+
+## 构建须知
+
+### 构建前端
+
+```bash
+# 切换到前端源码目录
+cd web-src
+# 安装依赖
+pnpm install
+# 构建前端
+pnpm build
+# 把前端构建产物移动到后端的static/dist目录下
+cp -r ./out ../static/dist
+# 退出前端源码目录
+cd ..
+```
+
+### IDL code gen
+```bash
+make proto
+```
+

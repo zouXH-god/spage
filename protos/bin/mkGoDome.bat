@@ -1,1 +1,0 @@
-.\protos\bin\protoc.exe --go_out=.\protos\result --go_opt=paths=source_relative --go-grpc_out=.\protos\result --go-grpc_opt=paths=source_relative .\protos\source\%1

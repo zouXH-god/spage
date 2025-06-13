@@ -2,8 +2,8 @@ package utils
 
 import (
 	"fmt"
+	"github.com/LiteyukiStudio/spage/spage/constants"
 
-	"github.com/LiteyukiStudio/spage/constants"
 	"github.com/go-resty/resty/v2"
 )
 

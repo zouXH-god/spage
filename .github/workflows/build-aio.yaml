@@ -12,9 +12,6 @@ env:
   BIN_NAME: spage
   BIN_OUT: build
   FRONTEND_DIR: web-src
-  # for Go build
-  GO_PKG_ROOT: github.com/LiteyukiStudio/spage
-  GO_ENTRYPOINT_SERVER: ./cmd/server
   # for container build
   CONTAINER_PLATFORMS: linux/amd64,linux/arm64,linux/386,linux/arm,linux/ppc64le,linux/s390x
   REG_GHCR: ghcr.io
@@ -157,22 +154,7 @@ jobs:
           GOARM: ${{ matrix.goarm }}
           GO386: ${{ matrix.go386 }}
         run: |
-          mkdir -p build
-          OUTNAME="${{ env.BIN_NAME }}-${{ matrix.goos }}-${{ matrix.output }}"
-          if [ "${{ matrix.goos }}" = "windows" ]; then
-            OUTNAME="${OUTNAME}.exe"
-          fi
-          CGO_ENABLED=0 go build \
-            -trimpath \
-            -ldflags "-X '${{ env.GO_PKG_ROOT }}/config.CommitHash=${{ github.sha }}' \
-              -X '${{ env.GO_PKG_ROOT }}/config.BuildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)' \
-              -X '${{ env.GO_PKG_ROOT }}/config.Version=${{ steps.version.outputs.version }}'" \
-            -o build/$OUTNAME ${{ env.GO_ENTRYPOINT_SERVER }}
-          if [[ "${{ matrix.goos }}" == "linux" || "${{ matrix.goos }}" == "windows" ]]; then
-            if [[ "${{ matrix.goarch }}" == "amd64" || "${{ matrix.goarch }}" == "arm64" ]]; then
-              upx -9 build/$OUTNAME || echo "upx failed, skip"
-            fi
-          fi
+          make ${{ env.BIN_NAME }} GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} GOAMD64=${{ matrix.goamd64 }} GOARM=${{ matrix.goarm }} GO386=${{ matrix.go386 }}
           
       - name: List build dir
         run: ls -lh build/

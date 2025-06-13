@@ -1,10 +1,10 @@
 package utils
 
 import (
+	"github.com/LiteyukiStudio/spage/spage/config"
+	"github.com/LiteyukiStudio/spage/spage/models"
 	"time"
 
-	"github.com/LiteyukiStudio/spage/config"
-	"github.com/LiteyukiStudio/spage/models"
 	"github.com/golang-jwt/jwt/v5"
 	"gorm.io/gorm"
 )
