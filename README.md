@@ -181,13 +181,14 @@ go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 
 ### 构建前端
 
-#### 使用GNU Make构建
+**使用GNU Make构建(推荐)**
 
 ```bash
 make web
 ```
 
-#### 单步构建
+**或单步构建**
+
 ```bash
 # 切换到前端源码目录
 cd web-src
@@ -201,8 +202,28 @@ cp -r ./out ../static/dist
 cd ..
 ```
 
-### IDL code gen
+### RPC IDL code gen
+
+若你没有修改proto文件，可以跳过这一步
+如果你修改了proto文件，需要重新生成IDL代码并一起推送
+
 ```bash
 make proto
+```
+
+### 构建后端
+
+**使用GNU Make构建(推荐)**
+
+```bash
+make spage
+# 可以查看Makefile文件获取更多跨平台参数
+```
+
+**或单步构建(不推荐，因为没有注入一些必要ldflags)**
+
+```bash
+# 切换到后端源码目录
+go build -o ./bin/spage ./cmd/server
 ```
 
