@@ -84,11 +84,7 @@ jobs:
     strategy:
       matrix:
         include: [
-          { goos: "android", goarch: "arm", goarm: "7", output: "armv7" },
-          { goos: "android", goarch: "arm", goarm: "6", output: "armv6" },
-          { goos: "android", goarch: "arm", goarm: "5", output: "armv5" },
           { goos: "android", goarch: "arm64", output: "arm64"},
-          { goos: "android", goarch: "386", output: "386" },
           { goos: "android", goarch: "amd64", output: "amd64" },
           { goos: "darwin", goarch: "amd64", goamd64: "v1", output: "amd64-v1" },
           { goos: "darwin", goarch: "amd64", goamd64: "v3", output: "amd64-v3" },
