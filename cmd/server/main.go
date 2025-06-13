@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/LiteyukiStudio/spage/spage/config"
+	"github.com/LiteyukiStudio/spage/config"
 	"github.com/LiteyukiStudio/spage/spage/router"
 	"github.com/LiteyukiStudio/spage/spage/store"
 	"github.com/sirupsen/logrus"

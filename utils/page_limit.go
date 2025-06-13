@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"github.com/LiteyukiStudio/spage/spage/config"
+	"github.com/LiteyukiStudio/spage/config"
 	"strconv"
 
 	"github.com/cloudwego/hertz/pkg/app"

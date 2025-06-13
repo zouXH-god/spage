@@ -1,7 +1,7 @@
 package store
 
 import (
-	"github.com/LiteyukiStudio/spage/spage/config"
+	"github.com/LiteyukiStudio/spage/config"
 	"gorm.io/gorm"
 )
 

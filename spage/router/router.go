@@ -1,7 +1,7 @@
 package router
 
 import (
-	"github.com/LiteyukiStudio/spage/spage/config"
+	"github.com/LiteyukiStudio/spage/config"
 	"github.com/LiteyukiStudio/spage/spage/handlers"
 	"github.com/LiteyukiStudio/spage/spage/middle"
 	"github.com/cloudwego/hertz/pkg/app/server"

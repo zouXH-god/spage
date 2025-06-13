@@ -1,7 +1,7 @@
 package middle
 
 import (
-	"github.com/LiteyukiStudio/spage/spage/config"
+	"github.com/LiteyukiStudio/spage/config"
 	"github.com/LiteyukiStudio/spage/spage/constants"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/hertz-contrib/cors"

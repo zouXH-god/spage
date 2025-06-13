@@ -3,7 +3,7 @@ package middle
 import (
 	"context"
 	"fmt"
-	"github.com/LiteyukiStudio/spage/spage/config"
+	"github.com/LiteyukiStudio/spage/config"
 	"github.com/LiteyukiStudio/spage/spage/constants"
 	models "github.com/LiteyukiStudio/spage/spage/models"
 	store "github.com/LiteyukiStudio/spage/spage/store"
