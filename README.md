@@ -117,8 +117,11 @@ CLI将输出文件夹压缩后使用指定接口上传到服务器
 
 ## 开发者须知
 
-在不修改默认配置的情况下，开发模式有预设配置，可以直接上手开发
+*我们强烈推荐使用Unix-like系统进行开发, 例如Linux或macOS, 因为它们的兼容性更好*
 
+*使用Windows你将无法使用SQLite3作为开发数据库, 需要自行部署PostgreSQL*
+
+在不修改默认配置的情况下，开发模式有预设配置，可以直接上手开发
 
 ### Go环境配置
 
@@ -163,11 +166,10 @@ go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 
 ### 数据库
 
-最早，我们提供了默认的SQLite，便于开发者开发调试
-由于SQLite3是由C语言编写，CGO跨平台兼容性特别烂，便移除了对CGO的支持，开发者需要自行部署PostgreSQL进行开发
-推荐使用容器化一键启动
+- Postgres: 推荐开发者自行部署PostgreSQL数据库进行开发，PostgreSQL是一个功能强大的关系型数据库，驱动兼容性更好
+- SQLite3: 通过动态链接引入，避免构建时CGO导致的问题
 
-如果你仍然想在开发中使用SQLite3，可以构建我们写好的sqlite插件，它在开发时会动态链接过去(仅支持macOS和Linux)
+如果你想在开发中使用SQLite3，可以构建我们写好的sqlite插件，它在开发时会动态链接过去(仅支持macOS和Linux)
 
 ```bash
 make plugin name=sqlite
