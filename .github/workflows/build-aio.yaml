@@ -218,7 +218,11 @@ jobs:
               -X '${{ env.GO_PKG_ROOT }}/config.BuildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)' \
               -X '${{ env.GO_PKG_ROOT }}/config.Version=${{ steps.version.outputs.version }}'" \
             -o build/$OUTNAME ${{ env.GO_ENTRYPOINT_SERVER }}
-          upx -9 build/$OUTNAME
+          if [[ "${{ matrix.goos }}" == "linux" || "${{ matrix.goos }}" == "windows" ]]; then
+            if [[ "${{ matrix.goarch }}" == "amd64" || "${{ matrix.goarch }}" == "arm64" ]]; then
+              upx -9 build/$OUTNAME || echo "upx failed, skip"
+            fi
+          fi
 
       - name: Prepare main arch binaries for Docker buildx
         env:
