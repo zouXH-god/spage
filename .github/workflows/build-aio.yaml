@@ -152,6 +152,7 @@ jobs:
           GOARM: ${{ matrix.goarm }}
           GO386: ${{ matrix.go386 }}
         run: |
+          make proto
           make ${{ env.BIN_NAME }} GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} GOAMD64=${{ matrix.goamd64 }} GOARM=${{ matrix.goarm }} GO386=${{ matrix.go386 }}
           
       - name: List build dir

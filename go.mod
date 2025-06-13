@@ -5,6 +5,7 @@ go 1.24.1
 require (
 	github.com/cloudwego/hertz v0.10.0
 	github.com/glebarez/sqlite v1.11.0
+	github.com/go-resty/resty/v2 v2.16.5
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/hertz-contrib/cors v0.1.0
 	github.com/sirupsen/logrus v1.9.3
@@ -24,7 +25,6 @@ require (
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/glebarez/go-sqlite v1.21.2 // indirect
-	github.com/go-resty/resty/v2 v2.16.5 // indirect
 	github.com/go-viper/mapstructure/v2 v2.2.1 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
