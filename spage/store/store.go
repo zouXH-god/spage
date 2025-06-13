@@ -7,13 +7,11 @@ import (
 	"github.com/LiteyukiStudio/spage/spage/constants"
 	"github.com/LiteyukiStudio/spage/spage/models"
 	"github.com/LiteyukiStudio/spage/utils"
-	"github.com/glebarez/sqlite" // 基于Go的 SQLite 驱动 Based on Go's SQLite driver
+	//"github.com/glebarez/sqlite" // 基于Go的 SQLite 驱动 Based on Go's SQLite driver
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"os"
-	"path/filepath"
 )
 
 var DB *gorm.DB
@@ -61,11 +59,11 @@ func Init() error {
 			return fmt.Errorf("postgres initialization failed: %w", err)
 		}
 		logrus.Infoln("postgres initialization succeeded", dbConfig)
-	case "sqlite":
-		if DB, err = initSQLite(dbConfig, gormConfig); err != nil {
-			return fmt.Errorf("sqlite initialization failed: %w", err)
-		}
-		logrus.Infoln("sqlite initialization succeeded", dbConfig)
+	//case "sqlite":
+	//	if DB, err = initSQLite(dbConfig, gormConfig); err != nil {
+	//		return fmt.Errorf("sqlite initialization failed: %w", err)
+	//	}
+	//	logrus.Infoln("sqlite initialization succeeded", dbConfig)
 	default:
 		return errors.New("unsupported database driver, only sqlite and postgres are supported")
 	}
@@ -111,16 +109,16 @@ func initPostgres(config DBConfig, gormConfig *gorm.Config) (db *gorm.DB, err er
 }
 
 // initSQLite 初始化SQLite连接
-func initSQLite(config DBConfig, gormConfig *gorm.Config) (db *gorm.DB, err error) {
-	if config.Path == "" {
-		config.Path = "./data/data.db"
-	}
-	// 创建 SQLite 数据库文件的目录
-	// Create the directory for SQLite database file if it doesn't exist
-	if err = os.MkdirAll(filepath.Dir(config.Path), os.ModePerm); err != nil {
-		err = fmt.Errorf("failed to create directory for SQLite database: %w", err)
-	}
-
-	db, err = gorm.Open(sqlite.Open(config.Path), gormConfig)
-	return
-}
+//func initSQLite(config DBConfig, gormConfig *gorm.Config) (db *gorm.DB, err error) {
+//	if config.Path == "" {
+//		config.Path = "./data/data.db"
+//	}
+//	// 创建 SQLite 数据库文件的目录
+//	// Create the directory for SQLite database file if it doesn't exist
+//	if err = os.MkdirAll(filepath.Dir(config.Path), os.ModePerm); err != nil {
+//		err = fmt.Errorf("failed to create directory for SQLite database: %w", err)
+//	}
+//
+//	db, err = gorm.Open(sqlite.Open(config.Path), gormConfig)
+//	return
+//}
