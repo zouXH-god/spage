@@ -161,6 +161,11 @@ go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 # 确保 $GOPATH/bin 或 $HOME/go/bin 在 PATH 中
 ```
 
+### 数据库
+
+最早，我们提供了默认的SQLite，便于开发者开发调试
+由于SQLite3是由C语言编写，CGO跨平台兼容性特别坏，便移除了对CGO的支持，开发者需要自行部署PostgreSQL进行开发
+推荐使用容器化一键启动
 
 ### 前端环境配置
 
