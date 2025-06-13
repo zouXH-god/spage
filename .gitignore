@@ -17,6 +17,7 @@ build/
 
 # backend embed fs
 spage/static/dist/**
+!spage/static/dist/.keep
 
 # frontend dev
 **/node_modules/
