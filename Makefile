@@ -36,6 +36,11 @@ spage:
 	-o build/$${OUTNAME} $(GO_ENTRYPOINT_SERVER) \
 	)
 
+.PHONY: spage-container
+spage-container: web spage
+	@echo "Building container image for $(GOOS)/$(GOARCH)"; \
+	docker build -t $(BIN_NAME):$(GOOS)-$(output) --build-arg GOOS=$(GOOS) --build-arg GOARCH=$(GOARCH) .
+
 .PHONY: agent
 agent:
 	@echo "Building agent for $(GOOS)/$(GOARCH)"; \
