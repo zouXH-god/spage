@@ -320,6 +320,6 @@ jobs:
 
       - name: Edit Changelog
         run: |
-          npx changelogithub
+          npx changelogithub || true
         env:
           GITHUB_TOKEN: ${{ env.BOT_TOKEN }}
