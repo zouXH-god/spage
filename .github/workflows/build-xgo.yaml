@@ -12,8 +12,7 @@ env:
   BIN_OUT: build
   FRONTEND_DIR: web-src
   # for Go build
-  GO_PKG_ROOT: github.com/LiteyukiStudio/spage/cmd/server
-  GO_ENTRYPOINT_SERVER: ./cmd/server
+  GO_ENTRYPOINT_PKG: github.com/LiteyukiStudio/spage/cmd/server
   # for container build
   CONTAINER_PLATFORMS: linux/amd64,linux/arm64,linux/386,linux/arm,linux/ppc64le,linux/s390x
   REG_GHCR: ghcr.io
@@ -114,7 +113,7 @@ jobs:
           xgo_version: latest
           go_version: 1.22
           dest: build
-          pkg: ${{ env.GO_PKG_ROOT }}
+          pkg: ${{ env.GO_ENTRYPOINT_PKG  }}
           targets: |
             linux/amd64
             linux/386
