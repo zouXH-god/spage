@@ -181,6 +181,13 @@ go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 
 ### 构建前端
 
+#### 使用GNU Make构建
+
+```bash
+make web
+```
+
+#### 单步构建
 ```bash
 # 切换到前端源码目录
 cd web-src
