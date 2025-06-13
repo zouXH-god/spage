@@ -235,12 +235,12 @@ jobs:
           merge-multiple: true
 
       - name: Publish GitHub Release(tag & latest)
-        if: ${{ needs.backend.outputs.nightly == 'false' }}
+        if: ${{ needs.backend-xgo.outputs.nightly == 'false' }}
         uses: ncipollo/release-action@v1
         with:
-          tag: ${{ needs.backend.outputs.tag }}
+          tag: ${{ needs.backend-xgo.outputs.tag }}
           artifacts: build/${{ env.BIN_NAME }}-*
-          name: "Release ${{ needs.backend.outputs.tag }}"
+          name: "Release ${{ needs.backend-xgo.outputs.tag }}"
           generateReleaseNotes: true
           allowUpdates: true
           token: ${{ env.BOT_TOKEN }}
