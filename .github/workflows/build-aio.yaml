@@ -57,6 +57,7 @@ jobs:
           key: ${{ runner.os }}-pnpm-${{ hashFiles('${{ env.FRONTEND_DIR }}/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-
+            pnpm-
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -223,6 +224,8 @@ jobs:
               upx -9 build/$OUTNAME || echo "upx failed, skip"
             fi
           fi
+      - name: List build dir
+        run: ls -lh build/
 
       - name: Prepare main arch binaries for Docker buildx
         env:
