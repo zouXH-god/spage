@@ -11,6 +11,7 @@ env:
   BOT_TOKEN: ${{ secrets.LITEYUKIFLOW_TOKEN }}
   BIN_NAME: spage
   BIN_OUT: build
+  FRONTEND_DIR: web-src
   # for Go build
   GO_PKG_ROOT: github.com/LiteyukiStudio/spage
   GO_ENTRYPOINT_SERVER: ./cmd/server
@@ -46,13 +47,25 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pnpm-store
+            ${{ env.FRONTEND_DIR }}/node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('${{ env.FRONTEND_DIR }}/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
+
       - name: Build frontend
         run: |
-          cd web-src
+          cd ${{ env.FRONTEND_DIR }}
           npm install pnpm -g
           pnpm install
           pnpm build
@@ -61,7 +74,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: web
-          path: web-src/out
+          path: ${{ env.FRONTEND_DIR }}/out
           retention-days: 30
 
   backend:
@@ -150,6 +163,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
 
       - name: Setup Go
         uses: actions/setup-go@v5
