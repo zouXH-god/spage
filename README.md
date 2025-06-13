@@ -167,6 +167,12 @@ go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 由于SQLite3是由C语言编写，CGO跨平台兼容性特别坏，便移除了对CGO的支持，开发者需要自行部署PostgreSQL进行开发
 推荐使用容器化一键启动
 
+如果你仍然想使用SQLite3进行开发，可以构建我们写好的sqlite插件，它在开发时会动态链接过去(仅支持macOS和Linux)
+
+```bash
+make plugin name=sqlite
+```
+
 ### 前端环境配置
 
 - 安装pnpm和node(或其他运行时，例如bun，deno)
