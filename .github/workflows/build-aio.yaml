@@ -224,6 +224,7 @@ jobs:
               upx -9 build/$OUTNAME || echo "upx failed, skip"
             fi
           fi
+          
       - name: List build dir
         run: ls -lh build/
 
