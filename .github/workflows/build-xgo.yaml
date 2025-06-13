@@ -113,7 +113,8 @@ jobs:
           xgo_version: latest
           go_version: 1.22
           dest: build
-          pkg: ${{ env.GO_ENTRYPOINT_PKG  }}
+          working_dir: .
+          pkg: ./cmd/server
           targets: |
             linux/amd64
             linux/386
