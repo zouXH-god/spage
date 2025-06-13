@@ -12,7 +12,7 @@ env:
   BIN_OUT: build
   FRONTEND_DIR: web-src
   # for Go build
-  GO_PKG_ROOT: github.com/LiteyukiStudio/spage
+  GO_PKG_ROOT: github.com/LiteyukiStudio/spage/cmd/server
   GO_ENTRYPOINT_SERVER: ./cmd/server
   # for container build
   CONTAINER_PLATFORMS: linux/amd64,linux/arm64,linux/386,linux/arm,linux/ppc64le,linux/s390x
@@ -114,7 +114,7 @@ jobs:
           xgo_version: latest
           go_version: 1.22
           dest: build
-          pkg: ${{ env.GO_ENTRYPOINT_SERVER }}
+          pkg: ${{ env.GO_PKG_ROOT }}
           targets: |
             linux/amd64
             linux/386
@@ -195,7 +195,7 @@ jobs:
           password: ${{ secrets.LITEYUKIREG_TOKEN }}
 
       - name: Build & Push Docker Images (tag & latest)
-        if: ${{ needs.backend.outputs.nightly == 'false' }}
+        if: ${{ needs.backend-xgo.outputs.nightly == 'false' }}
         uses: docker/build-push-action@v6
         with:
           context: .
