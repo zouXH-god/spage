@@ -167,7 +167,7 @@ go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 ### 数据库
 
 - Postgres: 推荐开发者自行部署PostgreSQL数据库进行开发，PostgreSQL是一个功能强大的关系型数据库，驱动兼容性更好
-- SQLite3: 通过动态链接引入，避免构建时CGO导致的问题
+- SQLite3: 通过动态链接引入，避免构建时CGO导致的问题，(不建议用于生产环境，我们不能保证它不会出事)
 
 如果你想在开发中使用SQLite3，可以构建我们写好的sqlite插件，它在开发时会动态链接过去(仅支持macOS和Linux)
 
@@ -175,7 +175,7 @@ go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 make plugin name=sqlite
 ```
 
-> 请勿将此用于生产环境，我们不能保证它不会出事
+如果你要将SQLite用于生产环境，请自行编译二进制，需要启用CGO，如果需要在容器中使用，请确保容器中安装了GNU Libc
 
 ### 前端环境配置
 
@@ -190,7 +190,8 @@ make plugin name=sqlite
 后端`http://localhost:8888`，后端配置了默认的frontend.url，来确保跨域请求及Cookie正常工作，若自定义了端口，请确保前端配置的URL与后端配置的frontend.url一致
 - 开发模式下，在测试captcha时，需要将localhost（或其他域）加入到平台的白名单中
 - 暂不支持mcaptcha，后续会支持
-- 善用AI，但不能滥用AI，AI只能作为辅助工具
+
+善用AI，但不能滥用AI，AI只能作为辅助工具
 
 ## 构建须知
 
