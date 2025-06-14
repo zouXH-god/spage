@@ -145,7 +145,7 @@
   scrollbar-color: rgba(100,116,139,0.8) transparent;
 }
 
-a {
+/* a {
   color: oklch(68.5% 0.169 237.323);
   text-decoration: underline;
   transition: color 0.2s;
@@ -153,4 +153,4 @@ a {
 
 a:hover {
   color: oklch(62.3% 0.214 259.815);
-}
+} */
