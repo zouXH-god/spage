@@ -1,0 +1,50 @@
+name: Deploy VitePress site to Spage
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  MELI_SITE: "a8ee251d-2783-4b94-b004-539d8108a24e"
+
+jobs:
+  # 构建工作
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 如果未启用 lastUpdated，则不需要
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.11"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          run_install: true
+          version: 8
+
+      - name: Install dependencies and build
+        run: |-
+          cd docs
+          pnpm install
+          pnpm build
+
+      - name: Publish
+        run: |
+          npx -p "@getmeli/cli" meli upload docs/.vitepress/dist \
+            --url "https://dash.apage.dev" \
+            --site "$MELI_SITE" \
+            --token "$MELI_TOKEN" \
+            --release "$GITHUB_SHA"
+        env:
+          MELI_TOKEN: ${{ secrets.MELI_TOKEN }}
