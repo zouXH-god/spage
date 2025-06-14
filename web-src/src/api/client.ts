@@ -1,12 +1,12 @@
 import axios from "axios";
 import { camelToSnakeObj, snakeToCamelObj } from "@/utils/strings";
 
-const API_SUFFIX = "/api/v1";
+const API_SUFFIX = "./api/v1";
 
 const axiosInstance = axios.create({
     // dev模式使用 localhost:8888/api/v1
     // 生产模式使用 ""，同源请求
-    baseURL: (process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NODE_ENV === "development" ? "http://localhost:8888" : "") + API_SUFFIX,
+    baseURL: API_SUFFIX,
     timeout: 10000,
 });
 

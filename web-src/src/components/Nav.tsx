@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Settings,
     LayoutDashboard,
@@ -17,6 +17,10 @@ import {
     ChevronDown,
 } from "lucide-react";
 import DropdownMenu, { DropdownMenuItem } from "@/components/reusable/DropdownMenu";
+import { getUser } from "@/api/user.api";
+import { User } from "@/api/user.models";
+import { useRouter } from "next/navigation";
+import GravatarAvatar from "@/components/reusable/Gravatar";
 
 
 const teams = [
@@ -88,6 +92,18 @@ const menuTree: DropdownMenuItem[] = [
 export default function Nav() {
     const [selectedTeam] = useState(teams[0]);
     const [selectedProject, setSelectedProject] = useState(teams[0].projects[0]);
+    const router = useRouter();
+    const [user, setUser] = useState<User | null>(null);
+
+    useEffect(() => {
+        getUser().then((response) => {
+            setUser(response.data.user);
+        }).catch((error) => {
+            console.error("Error fetching user data:", error);
+            router.push("/login");
+        });
+    }, [router])
+
     return (
         <nav className="pt-4 px-4 w-full border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
             {/* 顶部栏 */}
@@ -121,6 +137,13 @@ export default function Nav() {
                         <Settings className="w-4 h-4 mr-1" />
                         Settings
                     </button>
+                    {/* gravatar头像 */}
+                    <GravatarAvatar
+                        email={user?.email || user?.name || ""}
+                        size={32}
+                        className="ml-4 w-8 h-8 object-cover border border-gray-200 dark:border-gray-700"
+                        alt="avatar"
+                    />
                 </div>
             </div>
             {/* 下部菜单 */}

@@ -59,12 +59,8 @@ func (u *userType) GetByEmail(email string) (user *models.User, err error) {
 }
 
 // Update 更新用户信息
-func (u *userType) Update(user *models.User) (err error) {
-	err = DB.Save(user).Error
-	if err != nil {
-		return err
-	}
-	return nil
+func (u *userType) Update(user *models.User) error {
+	return DB.Updates(user).Error
 }
 
 // DeleteByID 根据ID删除用户

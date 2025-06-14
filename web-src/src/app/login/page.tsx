@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { login, getCaptchaConfig } from "@/api/user.api";
+import { login, getCaptchaConfig, getUser } from "@/api/user.api";
 import AIOCaptchaWidget from "@/components/captcha/AIOCaptcha";
 import { CaptchaProps, CaptchaProvider } from "@/types/captcha";
 import { t } from "i18next";
@@ -16,8 +16,14 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [captchaToken, setCaptchaToken] = useState("");
   const [captchaProps, setCaptchaProps] = useState<CaptchaProps | null>(null);
+  const [captchaKey, setCaptchaKey] = useState(Date.now()); // 新增
 
   useEffect(() => {
+    getUser().then(() => {
+      router.push("/"); // 如果已登录，直接跳转到首页
+    }).catch((error) => {
+      console.error("Error fetching user data:", error);
+    });
     getCaptchaConfig()
       .then((response) => {
         const config = response.data;
@@ -30,7 +36,7 @@ export default function LoginPage() {
         });
       })
       .catch(() => setError("login.captcha.fetchFailed"));
-  }, []);
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,7 +46,12 @@ export default function LoginPage() {
         // 路由跳转
         router.push("/");
       })
-      .catch((err) => setError(t("login.failed") + ": " + err.response?.data?.message || err.message));
+      .catch((err) => {
+        setError(t("login.failed") + ": " + err.response?.data?.message || err.message)
+        console.error("登录失败:", err);
+        setCaptchaToken("");
+        setCaptchaKey(Date.now());
+      });
   };
 
   return (
@@ -73,14 +84,18 @@ export default function LoginPage() {
             className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
-        <div className={`flex justify-center (${ ![CaptchaProvider.DISABLE, CaptchaProvider.RECAPTCHA].includes(captchaProps?.provider ?? CaptchaProvider.DISABLE)  ? "my-4" : ""})`}>
+        <div className={`flex justify-center (${![CaptchaProvider.DISABLE, CaptchaProvider.RECAPTCHA].includes(captchaProps?.provider ?? CaptchaProvider.DISABLE) ? "my-4" : ""})`}>
           <AIOCaptchaWidget
+            key={captchaKey}
             {...(captchaProps || {
               provider: CaptchaProvider.DISABLE,
               siteKey: "",
               url: "",
-              onSuccess: () => { },
-              onError: () => { },
+              onSuccess: (token: string) => setCaptchaToken(token),
+              onError: () => {
+                setError("login.captcha.failed")
+                setCaptchaKey(Date.now()); // 重新生成key以重置验证码组件
+              },
             })}
           />
         </div>

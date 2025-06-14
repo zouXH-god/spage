@@ -27,7 +27,7 @@ export function register(data: RegisterRequest): Promise<AxiosResponse<RegisterR
 }
 
 export function getUser(userId: number | null = null): Promise<AxiosResponse<UserResponse, unknown>> {
-    return client.get<UserResponse>(`/user/${userId}`);
+    return client.get<UserResponse>(userId ? `/user/${userId}` : "/user");
 }
 
 export function updateUser(data: User): Promise<AxiosResponse<BaseResponse, unknown>> {
