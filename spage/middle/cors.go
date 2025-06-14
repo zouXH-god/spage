@@ -17,7 +17,7 @@ var Cors = corsType{}
 func (corsType) UseCors() app.HandlerFunc {
 	var allowedOrigins []string
 	if config.Mode == constants.ModeDev {
-		allowedOrigins = []string{config.FrontEndURL}
+		allowedOrigins = []string{"*"}
 		logrus.Infof("Allowed origins: %v", allowedOrigins)
 	} else {
 		allowedOrigins = []string{"*"}

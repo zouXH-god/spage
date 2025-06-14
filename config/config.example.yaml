@@ -5,10 +5,6 @@ server:
 # 运行模式配置
 mode: "prod"     # 运行模式，可选：prod/dev/test
 
-# 前端配置
-frontend:
-  url: "http://localhost:3000"  # 前端URL地址
-
 # 日志配置
 log:
   level: "info"  # 日志级别，可选：debug/info/warn/error/fatal/panic

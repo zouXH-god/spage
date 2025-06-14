@@ -186,10 +186,10 @@ make plugin name=sqlite
 
 ### 注意事项
 
-- 开发模式下，前后端的域是不一样的，默认值是前端`http://localhost:3000`，
-后端`http://localhost:8888`，后端配置了默认的frontend.url，来确保跨域请求及Cookie正常工作，若自定义了端口，请确保前端配置的URL与后端配置的frontend.url一致
-- 开发模式下，在测试captcha时，需要将localhost（或其他域）加入到平台的白名单中
-- 暂不支持mcaptcha，后续会支持
+为避免跨域导致的资源请求和Cookie问题
+
+- 开发模式下，请求是先到达前端开发服务器，然后通过next rewrites转发到后端开发服务器
+- 构建产物中，请求是直接到达后端服务器
 
 善用AI，但不能滥用AI，AI只能作为辅助工具
 
