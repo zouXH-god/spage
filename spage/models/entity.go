@@ -48,13 +48,14 @@ func (Organization) TableName() string {
 // Project Model
 type Project struct {
 	gorm.Model
-	Name        string  `gorm:"not null;unique"`           // 项目的唯一名称 Project's unique name
-	DisplayName *string `gorm:"column:display_name"`       // 项目的显示名称 Project's display name
-	Description string  `gorm:"default:'No description.'"` // 项目描述 Project description
-	OwnerID     uint    `gorm:"not null"`                  // 所有者 ID（用户 ID 或组织 ID） Owner ID (user ID or organization ID)
-	OwnerType   string  `gorm:"not null"`                  // 所有者类型，可以是用户或组织 Owner type, can be user or organization
-	Owners      []User  `gorm:"many2many:project_owners;"` // 项目的所有者，无反向关系 Project's owners, no reverse relation
-	SiteLimit   int     `gorm:"default:0"`                 // 项目的站点限制，0：遵循策略，-1：无限制 Project's site limit, 0: follow the policy, -1: unlimited
+	Name        string  `gorm:"not null;unique"`            // 项目的唯一名称 Project's unique name
+	DisplayName *string `gorm:"column:display_name"`        // 项目的显示名称 Project's display name
+	Description string  `gorm:"default:'No description.'"`  // 项目描述 Project description
+	OwnerID     uint    `gorm:"not null"`                   // 所有者 ID（用户 ID 或组织 ID） Owner ID (user ID or organization ID)
+	OwnerType   string  `gorm:"not null"`                   // 所有者类型，可以是用户或组织 Owner type, can be user or organization
+	Owners      []User  `gorm:"many2many:project_owners;"`  // 项目的所有者，无反向关系 Project's owners, no reverse relation
+	Members     []*User `gorm:"many2many:project_members;"` // 项目的成员 Project's members
+	SiteLimit   int     `gorm:"default:0"`                  // 项目的站点限制，0：遵循策略，-1：无限制 Project's site limit, 0: follow the policy, -1: unlimited
 }
 
 // TableName 项目
