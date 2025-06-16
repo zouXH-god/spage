@@ -25,7 +25,7 @@ func Run() error {
 		apiV1WithoutAuth.POST("/user/login", handlers.User.Login).Use(middle.Captcha.UseCaptcha())
 		// OAuth2
 		apiV1WithoutAuth.GET("/user/oidc/config", handlers.Oidc.ListOidcConfig)
-		//apiV1WithoutAuth.POST("/user/oidc/login/:name")
+		apiV1WithoutAuth.POST("/user/oidc/login/:name", handlers.Oidc.LoginOidcConfig)
 
 		userGroup := apiV1.Group("/user")
 		{

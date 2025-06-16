@@ -25,14 +25,14 @@ func (oidcType) ListOidcConfig(ctx context.Context, c *app.RequestContext) {
 			var configsDto []map[string]any
 			for _, oidcConfig := range oidcConfigs {
 				state := utils.GenerateRandomString(32)
-				// TODO 储存和验证state
+				// TODO 使用utils的键值内存储存和验证state
 				configsDto = append(configsDto, map[string]any{
 					"id":           oidcConfig.ID,
 					"display_name": oidcConfig.DisplayName,
 					"icon":         oidcConfig.Icon,
 					"login_url": buildURL(oidcConfig.AuthorizationEndpoint, map[string]string{
 						"client_id":     oidcConfig.ClientID,
-						"redirect_uri":  config.BaseUrl + config.OidcUri,
+						"redirect_uri":  config.BaseUrl + config.OidcUri + "/" + oidcConfig.Name,
 						"response_type": "code",
 						"scope":         "openid email profile",
 						"state":         state,
@@ -43,6 +43,12 @@ func (oidcType) ListOidcConfig(ctx context.Context, c *app.RequestContext) {
 			return configsDto
 		}(),
 	})
+}
+
+func (oidcType) LoginOidcConfig(ctx context.Context, c *app.RequestContext) {
+	name := c.Param("name")
+	_ = name
+	// TODO 实现OIDC登录
 }
 
 func buildURL(baseURL string, queryParams map[string]string) string {
