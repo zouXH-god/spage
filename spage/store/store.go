@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/LiteyukiStudio/spage/config"
-	"github.com/LiteyukiStudio/spage/spage/constants"
+	"github.com/LiteyukiStudio/spage/constants"
 	"github.com/LiteyukiStudio/spage/spage/models"
 	"github.com/LiteyukiStudio/spage/utils"
 	"github.com/sirupsen/logrus"
@@ -47,7 +47,6 @@ func loadDBConfig() DBConfig {
 func Init() error {
 	dbConfig := loadDBConfig()
 	// 创建通用的 GORM 配置
-	// Create a common GORM configuration
 	gormConfig := &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
 	}
@@ -70,15 +69,12 @@ func Init() error {
 	}
 
 	// 迁移模型
-	// Migrate models
 	if err = models.Migrate(DB); err != nil {
 		logrus.Error("Failed to migrate models:", err)
 		return err
 	}
 	// 执行初始化数据
-	// Initialize data
 	// 创建管理员账户
-	// Create admin account
 	hashedPassword, err := utils.Password.HashPassword(config.AdminPassword, config.JwtSecret)
 	if err != nil {
 		logrus.Error("Failed to hash password:", err)
@@ -134,7 +130,6 @@ func InitSQLiteDynamic(config DBConfig, gormConfig *gorm.Config) (*gorm.DB, erro
 		return nil, fmt.Errorf("failed to find Init function in plugin: %w", err)
 	}
 	// 调试符号类型
-	fmt.Printf("Loaded symbol type: %T\n", symbol)
 	// 转换为函数类型
 	initFunc, ok := symbol.(func(string, *gorm.Config) (*gorm.DB, error))
 	if !ok {

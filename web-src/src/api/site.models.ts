@@ -1,3 +1,5 @@
+import { BaseResponse } from "./base.models";
+
 /**
  * 站点 Site
  */
@@ -20,5 +22,10 @@ export interface SiteRelease {
     id: number;
     siteId: number;
     tag: string;
+    url: string;
     [property: string]: unknown;
+}
+
+export interface CreateSiteReleaseResponse extends BaseResponse {
+  id: number;
 }

@@ -11,7 +11,7 @@ import (
 // Run router service
 func Run() error {
 	// 运行路由 Run router
-	H := server.New(server.WithHostPorts(":" + config.ServerPort))
+	H := server.New(server.WithHostPorts(":"+config.ServerPort), server.WithMaxRequestBodySize(config.FileMaxSize))
 	H.Use(middle.Cors.UseCors(), middle.Trace.UseTrace())
 	apiV1 := H.Group("/api/v1")
 
@@ -67,6 +67,12 @@ func Run() error {
 					siteRelease.POST("/activation", handlers.Release.Activation) // 指定使用该站点版本
 				}
 			}
+		}
+		fileGroup := apiV1.Group("/file")
+		{
+			fileGroup.POST("", handlers.File.UploadFileStream) // 上传文件 Upload file
+			fileGroup.GET("")                                  // 下载文件 Download file
+			fileGroup.DELETE("")                               // 删除文件 Delete file
 		}
 		adminGroup := apiV1.Group("/admin") // 管理员路由
 		adminGroup.Use(middle.Auth.IsAdmin())

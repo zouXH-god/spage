@@ -139,7 +139,7 @@ export default function Nav() {
                     </button>
                     {/* gravatar头像 */}
                     <GravatarAvatar
-                        email={user?.email || user?.name || ""}
+                        email={user?.avatarUrl || user?.email || user?.name || ""}
                         size={32}
                         className="ml-4 w-8 h-8 object-cover border border-gray-200 dark:border-gray-700"
                         alt="avatar"

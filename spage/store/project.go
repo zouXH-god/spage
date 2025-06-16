@@ -2,7 +2,7 @@ package store
 
 import (
 	"fmt"
-	"github.com/LiteyukiStudio/spage/spage/constants"
+	"github.com/LiteyukiStudio/spage/constants"
 	"github.com/LiteyukiStudio/spage/spage/models"
 )
 

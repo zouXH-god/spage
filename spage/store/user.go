@@ -2,7 +2,7 @@ package store
 
 import (
 	"errors"
-	"github.com/LiteyukiStudio/spage/spage/constants"
+	"github.com/LiteyukiStudio/spage/constants"
 	"github.com/LiteyukiStudio/spage/spage/models"
 
 	"gorm.io/gorm"

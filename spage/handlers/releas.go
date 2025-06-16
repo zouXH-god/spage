@@ -87,7 +87,7 @@ func (ReleaseApi) Create(ctx context.Context, c *app.RequestContext) {
 	// 创建文件记录
 	file := models.File{
 		Path: releaseSavePath,
-		Hash: fileHash,
+		MD5:  fileHash,
 	}
 	if err := store.File.Create(&file); err != nil {
 		resps.InternalServerError(c, "create file record error")
