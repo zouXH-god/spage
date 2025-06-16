@@ -71,7 +71,7 @@ func Run() error {
 		fileGroup := apiV1.Group("/file")
 		{
 			fileGroup.POST("", handlers.File.UploadFileStream) // 上传文件 Upload file
-			fileGroup.GET("")                                  // 下载文件 Download file
+			fileGroup.GET("/:id", handlers.File.GetFile)       // 下载文件 Download file
 			fileGroup.DELETE("")                               // 删除文件 Delete file
 		}
 		adminGroup := apiV1.Group("/admin") // 管理员路由

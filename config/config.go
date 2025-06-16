@@ -60,7 +60,7 @@ var (
 
 	BuildTime  = "0000-00-00 00:00:00" // 构建时间 Build Time
 	Version    = "0.0.0"               // 版本号 Version
-	CommitHash = "unknown"             // 提交哈希 Commit MD5
+	CommitHash = "unknown"             // 提交哈希 Commit Hash
 
 	ReleaseSavePath  = "./data/releases"
 	UploadsPath      = "./data/uploads"
@@ -153,9 +153,10 @@ func Init() error {
 	FileDriverConfig = &filedriver.DriverConfig{
 		Type:           GetString("file.driver.type", constants.FileDriverLocal),
 		BasePath:       UploadsPath,
-		WebDavUrl:      GetString("file.driver.webdav.url", UploadsPath),
+		WebDavUrl:      GetString("file.driver.webdav.url", ""),
 		WebDavUser:     GetString("file.driver.webdav.user", ""),
 		WebDavPassword: GetString("file.driver.webdav.password", ""),
+		WebDavPolicy:   GetString("file.driver.webdav.policy", constants.WebDavPolicyProxy),
 	}
 
 	// 分页查询限制

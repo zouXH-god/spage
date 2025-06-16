@@ -1,6 +1,7 @@
 package filedriver
 
 import (
+	"github.com/cloudwego/hertz/pkg/app"
 	"io"
 	"os"
 	"path/filepath"
@@ -20,7 +21,7 @@ func (d *LocalDriver) fullPath(path string) string {
 	return filepath.Join(d.BasePath, path)
 }
 
-func (d *LocalDriver) Save(path string, r io.Reader) error {
+func (d *LocalDriver) Save(ctx *app.RequestContext, path string, r io.Reader) error {
 	full := d.fullPath(path)
 	if err := os.MkdirAll(filepath.Dir(full), 0755); err != nil {
 		return err
@@ -29,24 +30,34 @@ func (d *LocalDriver) Save(path string, r io.Reader) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer func(f *os.File) {
+		err := f.Close()
+		if err != nil {
+
+		}
+	}(f)
 	_, err = io.Copy(f, r)
 	return err
 }
 
-func (d *LocalDriver) Open(path string) (io.ReadCloser, error) {
+func (d *LocalDriver) Open(ctx *app.RequestContext, path string) (io.ReadCloser, error) {
 	return os.Open(d.fullPath(path))
 }
 
-func (d *LocalDriver) Delete(path string) error {
+func (d *LocalDriver) Get(ctx *app.RequestContext, path string) {
+	ctx.File(d.fullPath(path))
+	ctx.Abort()
+}
+
+func (d *LocalDriver) Delete(ctx *app.RequestContext, path string) error {
 	return os.Remove(d.fullPath(path))
 }
 
-func (d *LocalDriver) Stat(path string) (os.FileInfo, error) {
+func (d *LocalDriver) Stat(ctx *app.RequestContext, path string) (os.FileInfo, error) {
 	return os.Stat(d.fullPath(path))
 }
 
-func (d *LocalDriver) ListDir(path string) ([]os.FileInfo, error) {
+func (d *LocalDriver) ListDir(ctx *app.RequestContext, path string) ([]os.FileInfo, error) {
 	entries, err := os.ReadDir(d.fullPath(path))
 	if err != nil {
 		return nil, err
