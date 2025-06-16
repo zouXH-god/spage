@@ -1,5 +1,5 @@
 import axios from "axios";
-import { camelToSnakeObj, snakeToCamelObj } from "@/utils/strings";
+import { camelToSnakeObj, snakeToCamelObj } from "field-conv";
 
 const API_SUFFIX = "./api/v1";
 
