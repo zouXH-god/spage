@@ -22,17 +22,15 @@ var (
 	JwtSecret string
 	// JWT密钥 JWT Secret
 
-	FrontEndURL string
-	// 前端URL Frontend URL
-
 	LogLevel = "info"
 	// 日志级别 Log Level
 
 	AdminUsername = "admin"
-	// 管理员用户名 Admin Username
-
 	AdminPassword = "admin"
-	// 管理员密码 Admin Password
+
+	// BaseUrl 基础路径
+	BaseUrl = "http://localhost:3000"
+	OidcUri = "/api/v1/user/oidc/login"
 
 	EmailEnable   bool   // 是否启用邮箱发送 Enable Email Sending
 	EmailUsername string // 邮箱用户名 Email Username
@@ -125,6 +123,7 @@ func Init() error {
 	ServerPort = GetString("server.port", ServerPort)
 	Mode = GetString("mode", Mode)
 	LogLevel = GetString("log.level", LogLevel)
+	BaseUrl = GetString("base-url", BaseUrl)
 
 	// Admin配置项
 	AdminUsername = GetString("admin.username", AdminUsername)
@@ -169,7 +168,7 @@ func Init() error {
 
 	// 从启动参数拿取一些配置项mode frontend-url
 	argsMap := Cmd.GetArgsMap(os.Args[1:])
-	queryKeys := []string{"mode", "frontend-url", "port"}
+	queryKeys := []string{"mode", "port"}
 	for _, key := range queryKeys {
 		if value, ok := argsMap[key]; ok {
 			switch key {
@@ -177,8 +176,6 @@ func Init() error {
 				Mode = value
 			case "port":
 				ServerPort = value
-			case "frontend-url":
-				FrontEndURL = value
 			}
 		}
 	}

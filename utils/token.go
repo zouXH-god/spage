@@ -22,8 +22,8 @@ type Claims struct {
 	Stateful bool `json:"stateful"` // 是否为有状态Token Whether it is a stateful Token
 }
 
-// generateRandomString 生成随机字符串
-func generateRandomString(length int) string {
+// GenerateRandomString 生成随机字符串
+func GenerateRandomString(length int) string {
 	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	result := make([]byte, length)
 	for i := 0; i < length; i++ {
@@ -92,7 +92,7 @@ func (TokenType) CreateApiToken(userID uint, duration time.Duration, persistentH
 	expiration := time.Now().Add(duration)
 	apiToken := &models.ApiToken{
 		UserID:    userID,
-		Token:     "spat_" + generateRandomString(32), // 生成随机字符串作为令牌
+		Token:     "spat_" + GenerateRandomString(32), // 生成随机字符串作为令牌
 		ExpiresAt: expiration,
 	}
 	err := persistentHandler(apiToken)

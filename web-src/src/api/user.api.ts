@@ -4,6 +4,7 @@ import type {
     CaptchaConfig,
     LoginRequest,
     LoginResponse,
+    OidcConfig,
     RegisterRequest,
     RegisterResponse,
     User,
@@ -44,4 +45,8 @@ export function getUserOrganizations(userId: number): Promise<AxiosResponse<User
 
 export function getCaptchaConfig(): Promise<AxiosResponse<CaptchaConfig, unknown>> {
     return client.get<CaptchaConfig>("/user/captcha");
+}
+
+export function getOidcConfig(): Promise<AxiosResponse<{ oidcConfigs: OidcConfig[]} , unknown>> {
+    return client.get<{oidcConfigs: OidcConfig[]}>("/user/oidc/config");
 }

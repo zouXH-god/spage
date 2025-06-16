@@ -67,3 +67,10 @@ export interface CaptchaConfig extends BaseResponse {
     siteKey: string;
     url?: string;
 }
+
+export interface OidcConfig {
+    name: string;
+    displayName: string;
+    icon: string;
+    loginUrl: string;
+}

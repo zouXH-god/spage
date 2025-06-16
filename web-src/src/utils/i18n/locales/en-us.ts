@@ -3,6 +3,7 @@ const resources = {
         hello: 'Hello',
         login: {
             login: "Login",
+            useOidc: "Login with {{provider}}",
             failed: "Login failed",
             username: "Username",
             password: "Password",

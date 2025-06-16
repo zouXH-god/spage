@@ -23,10 +23,17 @@ func Run() error {
 		apiV1WithoutAuth.POST("/user/logout", handlers.User.Logout)
 		apiV1WithoutAuth.POST("/user/register", handlers.User.Register).Use(middle.Captcha.UseCaptcha()) // 注册 Register
 		apiV1WithoutAuth.POST("/user/login", handlers.User.Login).Use(middle.Captcha.UseCaptcha())
+		// OAuth2
+		apiV1WithoutAuth.GET("/user/oidc/config", handlers.Oidc.ListOidcConfig)
+		//apiV1WithoutAuth.POST("/user/oidc/login/:name")
+
 		userGroup := apiV1.Group("/user")
 		{
-			userGroup.PUT("", handlers.User.UpdateUser)               // 更新用户信息 Update user info
-			userGroup.GET("", handlers.User.GetUser)                  // 获取用户信息 Get user info
+			userGroup.PUT("", handlers.User.UpdateUser) // 更新用户信息 Update user info
+			userGroup.GET("", handlers.User.GetUser)    // 获取用户信息 Get user info
+			userGroup.POST("/token", handlers.User.CreateApiToken)
+			userGroup.GET("/token/list", handlers.User.ListApiToken)
+			userGroup.DELETE("/token/:id", handlers.User.RevokeApiToken)
 			userGroup.GET("/:id", handlers.User.GetUser)              // 获取用户信息 Get user info
 			userGroup.GET("/:id/projects", handlers.User.GetProjects) // 获取用户项目 Get user projects
 			userGroup.GET("/:id/orgs", handlers.User.GetOrgs)         // 获取用户组织 Get user orgs
@@ -73,7 +80,7 @@ func Run() error {
 		{
 			fileGroup.POST("", handlers.File.UploadFileStream)      // 上传文件 Upload file
 			fileGroup.DELETE("")                                    // 删除文件 Delete file
-			fileGroupWithoutAuth.GET("/:id", handlers.File.GetFile) // 下载文件 Download file TODO 做公私鉴权
+			fileGroupWithoutAuth.GET("/:id", handlers.File.GetFile) // 下载文件 Download file
 		}
 		adminGroup := apiV1.Group("/admin") // 管理员路由
 		adminGroup.Use(middle.Auth.IsAdmin())
@@ -88,7 +95,14 @@ func Run() error {
 				adminNode.POST("")      // 创建节点（上传ssh密码自动化创建）
 				adminNode.GET("/token") // 获取节点令牌
 			}
+			adminOidc := adminGroup.Group("/oidc")
+			{
+				adminOidc.POST("", handlers.Admin.CreateOidcConfig)
+				adminOidc.DELETE("/:id")
+				adminOidc.PUT("/:id", handlers.Admin.UpdateOidcConfig)
+			}
 		}
+
 		nodeGroup := apiV1.Group("/node") // 节点路由
 		{
 			nodeGroup.GET("")  // 节点心跳上报

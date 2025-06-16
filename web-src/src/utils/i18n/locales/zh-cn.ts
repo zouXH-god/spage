@@ -3,6 +3,7 @@ const resources = {
         hello: '你好',
         login: {
             login: "登录",
+            useOidc: "使用 {{provider}} 登录",
             failed: "登录失败",
             username: "用户名",
             password: "密码",

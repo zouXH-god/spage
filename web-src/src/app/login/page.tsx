@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { login, getCaptchaConfig, getUser } from "@/api/user.api";
+import Image from "next/image";
+import { login, getCaptchaConfig, getUser, getOidcConfig } from "@/api/user.api";
 import AIOCaptchaWidget from "@/components/captcha/AIOCaptcha";
 import { CaptchaProps, CaptchaProvider } from "@/types/captcha";
 import { t } from "i18next";
 import { useDevice } from "@/contexts/DeviceContext";
 import { useRouter } from "next/navigation";
+import { OidcConfig } from "@/api/user.models";
 
 export default function LoginPage() {
   const { isMobile } = useDevice();
@@ -17,6 +19,7 @@ export default function LoginPage() {
   const [captchaToken, setCaptchaToken] = useState("");
   const [captchaProps, setCaptchaProps] = useState<CaptchaProps | null>(null);
   const [captchaKey, setCaptchaKey] = useState(Date.now()); // 新增
+  const [oidcConfigs, setOidcConfigs] = useState<OidcConfig[]>([]);
 
   useEffect(() => {
     getUser().then(() => {
@@ -37,6 +40,20 @@ export default function LoginPage() {
       })
       .catch(() => setError("login.captcha.fetchFailed"));
   }, [router]);
+
+  useEffect(() => {
+    getOidcConfig()
+      .then((response) => {
+        const configs = response.data.oidcConfigs || [];
+        setOidcConfigs(configs);
+      }
+      )
+      .catch((error) => {
+        console.error("获取 OIDC 配置失败:", error);
+        setError("login.oidc.fetchFailed");
+      }
+    ); 
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,6 +119,7 @@ export default function LoginPage() {
         {error && (
           <div className="text-red-500 text-sm text-center mb-2">{t(error)}</div>
         )}
+        {/* 登录按钮 */}
         <button
           type="submit"
           disabled={!captchaToken}
@@ -114,6 +132,23 @@ export default function LoginPage() {
         >
           {t("login.login")} {captchaToken ? "" : t("login.captcha.processing")}
         </button>
+        {/* oidc登录按钮 */}
+        {oidcConfigs.map((config) => (
+          <a
+            key={config.name}
+            href={config.loginUrl}
+            className="w-full py-2 mt-4 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white text-center font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+          >
+            <Image
+              src={config.icon}
+              alt={config.displayName}
+              width={40}
+              height={40}
+              className="inline-block mr-2"
+            />
+            {t("login.useOidc", { provider: t(config.displayName) })}
+          </a>
+        ))}
       </form>
     </div>
   );

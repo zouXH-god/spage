@@ -93,7 +93,14 @@ func (TokenType) RevokeApiTokenByID(id uint) error {
 }
 
 // ListApiTokens 列出所有Tokens
-func (TokenType) ListApiTokens(userID uint) (tokens []models.ApiToken, err error) {
-	err = DB.Where("user_id = ?", userID).Find(&tokens).Error
+func (TokenType) ListApiTokens(userID uint, page, limit int) (tokens []models.ApiToken, total int64, err error) {
+	// 构建查询
+	query := DB.Model(&models.ApiToken{}).Where("user_id = ?", userID)
+	// 使用通用分页方法
+	tokens, total, err = Paginate[models.ApiToken](
+		query,
+		page,
+		limit,
+	)
 	return
 }

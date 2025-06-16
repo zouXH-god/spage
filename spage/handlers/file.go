@@ -95,6 +95,7 @@ func (FileApi) UploadFileStream(ctx context.Context, c *app.RequestContext) {
 }
 
 func (FileApi) GetFile(ctx context.Context, c *app.RequestContext) {
+	// TODO 私有文件访问控制，目前暂时没有私有化文件，可以先不做
 	fileIdString := c.Param("id")
 	fileId, err := strconv.ParseUint(fileIdString, 10, 64)
 	if err != nil {

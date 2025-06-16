@@ -16,13 +16,12 @@ import (
 	"github.com/cloudwego/hertz/pkg/protocol"
 )
 
-type UserApi struct{}
+type userApi struct{}
 
-var User = UserApi{}
+var User = userApi{}
 
-// UserDTO 用户信息数据传输对象
-// User Information Data Transfer Object (DTO)
-func (UserApi) ToDTO(user *models.User, self bool) UserDTO {
+// ToDTO 用户信息数据传输对象
+func (userApi) ToDTO(user *models.User, self bool) UserDTO {
 	userDTO := UserDTO{
 		ID:          user.ID,
 		Name:        user.Name,
@@ -39,8 +38,7 @@ func (UserApi) ToDTO(user *models.User, self bool) UserDTO {
 }
 
 // Login 用户登录
-// User login
-func (UserApi) Login(ctx context.Context, c *app.RequestContext) {
+func (userApi) Login(ctx context.Context, c *app.RequestContext) {
 	loginReq := &LoginReq{}
 	// TODO: 这里需要验证验证码
 	err := c.BindJSON(loginReq)
@@ -92,8 +90,7 @@ func (UserApi) Login(ctx context.Context, c *app.RequestContext) {
 }
 
 // Logout 用户登出
-// User logout
-func (UserApi) Logout(ctx context.Context, c *app.RequestContext) {
+func (userApi) Logout(ctx context.Context, c *app.RequestContext) {
 	// 删除cookie
 	c.SetCookie("token", "", -1, "/", "", protocol.CookieSameSiteLaxMode, true, true)
 	c.SetCookie("refresh_token", "", -1, "/", "", protocol.CookieSameSiteLaxMode, true, true)
@@ -101,8 +98,7 @@ func (UserApi) Logout(ctx context.Context, c *app.RequestContext) {
 }
 
 // GetCaptcha 获取验证码
-// Get captcha
-func (UserApi) GetCaptcha(ctx context.Context, c *app.RequestContext) {
+func (userApi) GetCaptcha(ctx context.Context, c *app.RequestContext) {
 	resps.Ok(c, "ok", map[string]any{
 		"provider": config.CaptchaType,
 		"site_key": config.CaptchaSiteKey,
@@ -110,9 +106,8 @@ func (UserApi) GetCaptcha(ctx context.Context, c *app.RequestContext) {
 	})
 }
 
-// GetUserOrgs 获取用户的组织
-// Get user organizations
-func (UserApi) GetOrgs(ctx context.Context, c *app.RequestContext) {
+// GetOrgs 获取用户的组织
+func (userApi) GetOrgs(ctx context.Context, c *app.RequestContext) {
 	userID := c.Param("id")
 	crtUser := middle.Auth.GetUser(ctx, c)
 	if userID != strconv.Itoa(int(crtUser.ID)) {
@@ -137,9 +132,8 @@ func (UserApi) GetOrgs(ctx context.Context, c *app.RequestContext) {
 	})
 }
 
-// GetUserProjects 获取用户的项目
-// Get user projects
-func (UserApi) GetProjects(ctx context.Context, c *app.RequestContext) {
+// GetProjects 获取用户的项目
+func (userApi) GetProjects(ctx context.Context, c *app.RequestContext) {
 	userID := c.Param("id")
 	crtUser := middle.Auth.GetUser(ctx, c)
 	if userID != strconv.Itoa(int(crtUser.ID)) {
@@ -163,8 +157,7 @@ func (UserApi) GetProjects(ctx context.Context, c *app.RequestContext) {
 }
 
 // GetUser 获取用户信息
-// Get user information
-func (UserApi) GetUser(ctx context.Context, c *app.RequestContext) {
+func (userApi) GetUser(ctx context.Context, c *app.RequestContext) {
 	userID := c.Param("id")
 	crtUser := middle.Auth.GetUser(ctx, c)
 	if userID == "" {
@@ -184,8 +177,7 @@ func (UserApi) GetUser(ctx context.Context, c *app.RequestContext) {
 }
 
 // Register 用户注册
-// User registration
-func (UserApi) Register(ctx context.Context, c *app.RequestContext) {
+func (userApi) Register(ctx context.Context, c *app.RequestContext) {
 	// 接收参数
 	request := &RegisterReq{}
 	err := c.BindJSON(request)
@@ -229,8 +221,7 @@ func (UserApi) Register(ctx context.Context, c *app.RequestContext) {
 }
 
 // UpdateUser 更新用户信息
-// Update user information
-func (UserApi) UpdateUser(ctx context.Context, c *app.RequestContext) {
+func (userApi) UpdateUser(ctx context.Context, c *app.RequestContext) {
 	userDTO := &UserDTO{}
 	if err := c.BindJSON(userDTO); err != nil {
 		resps.BadRequest(c, resps.ParameterError)
@@ -251,4 +242,77 @@ func (UserApi) UpdateUser(ctx context.Context, c *app.RequestContext) {
 	}
 
 	resps.Ok(c, resps.OK, map[string]any{})
+}
+
+// CreateApiToken 创建API token
+func (userApi) CreateApiToken(ctx context.Context, c *app.RequestContext) {
+	createTokenReq := &CreateTokenReq{}
+	err := c.BindJSON(createTokenReq)
+	if err != nil {
+		resps.BadRequest(c, resps.ParameterError)
+		return
+	}
+	crtUser := middle.Auth.GetUser(ctx, c)
+	token, err := utils.Token.CreateApiToken(crtUser.ID, time.Duration(createTokenReq.Duration)*time.Second, middle.ApiTokenPersistentHandler)
+	if err != nil {
+		resps.InternalServerError(c, "Failed to create token: "+err.Error())
+		return
+	}
+	resps.Ok(c, resps.OK, map[string]any{"token": token})
+}
+
+// RevokeApiToken 吊销删除Api Token
+func (userApi) RevokeApiToken(ctx context.Context, c *app.RequestContext) {
+	tokenIDString := c.Param("id")
+	tokenId, err := strconv.Atoi(tokenIDString)
+	if err != nil {
+		resps.BadRequest(c, resps.ParameterError)
+		return
+	}
+	if tokenId == 0 {
+		resps.BadRequest(c, "Invalid token ID")
+		return
+	}
+	crtUser := middle.Auth.GetUser(ctx, c)
+	token, err := store.Token.GetApiTokenByID(uint(tokenId))
+	if err != nil || token == nil {
+		resps.InternalServerError(c, resps.TargetNotFound)
+		return
+	}
+	if crtUser.ID != token.UserID {
+		resps.Forbidden(c, resps.PermissionDenied)
+		return
+	}
+
+	err = store.Token.RevokeApiTokenByID(uint(tokenId))
+	if err != nil {
+		resps.InternalServerError(c, "Failed to revoke token: "+err.Error())
+		return
+	}
+	resps.Ok(c, resps.OK, map[string]any{})
+}
+
+// ListApiToken 列出ApiToken
+func (userApi) ListApiToken(ctx context.Context, c *app.RequestContext) {
+	page, limit := utils.Ctx.GetPageLimit(c)
+	crtUser := middle.Auth.GetUser(ctx, c)
+	tokens, total, err := store.Token.ListApiTokens(crtUser.ID, page, limit)
+	if err != nil {
+		resps.BadRequest(c, resps.ParameterError)
+		return
+	}
+	resps.Ok(c, resps.OK, map[string]any{
+		"tokens": func() []map[string]any {
+			var tokenDTOs []map[string]any
+			for _, token := range tokens {
+				tokenDTOs = append(tokenDTOs, map[string]any{
+					"id":         token.ID,
+					"created_at": token.CreatedAt.Unix(),
+					"expires_at": token.ExpiresAt.Unix(),
+				})
+			}
+			return tokenDTOs
+		}(),
+		"total": total,
+	})
 }

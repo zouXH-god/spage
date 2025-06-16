@@ -95,7 +95,7 @@ func (authType) GetUser(ctx context.Context, c *app.RequestContext) *models.User
 
 	userID := userIDValue.(uint)
 	user, err := store.User.GetByID(userID)
-	if err != nil || user == nil {
+	if err != nil || user == nil || user.ID == 0 {
 		resps.Unauthorized(c, resps.UnauthorizedText)
 		c.Abort()
 		return nil
