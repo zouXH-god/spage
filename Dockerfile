@@ -2,7 +2,7 @@ FROM alpine:latest
 
 WORKDIR /app
 
-RUN apk --no-cache add tzdata ca-certificates
+RUN apk --no-cache add tzdata ca-certificates git
 
 ARG TARGETARCH
 

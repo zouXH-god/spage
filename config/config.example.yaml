@@ -51,3 +51,4 @@ token:
 # File配置
 file:
   release-path: "./data/release"    # 发布文件保存路径
+  uploads-path: "./data/uploads"      # 上传文件保存路径

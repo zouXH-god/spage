@@ -1,7 +1,7 @@
 import client from "./client";
 import type { AxiosResponse } from "axios";
 import type { BaseResponse } from "./base.models";
-import type { Site, SiteRelease } from "./site.models";
+import type { CreateSiteReleaseResponse, Site, SiteRelease } from "./site.models";
 
 
 export function createSite(data: Site): Promise<AxiosResponse<BaseResponse, unknown>> {
@@ -20,8 +20,8 @@ export function updateSite(data: Site): Promise<AxiosResponse<BaseResponse, unkn
     return client.put<BaseResponse>('/site', data);
 }
 
-export function createSiteRelease(data: SiteRelease): Promise<AxiosResponse<BaseResponse, unknown>> {
-    return client.post<BaseResponse>('/site/release', data);
+export function createSiteRelease(data: SiteRelease): Promise<AxiosResponse<CreateSiteReleaseResponse, unknown>> {
+    return client.post<CreateSiteReleaseResponse>('/site/release', data);
 }
 
 export function deleteSiteRelease(releaseId: number): Promise<AxiosResponse<BaseResponse, unknown>> {

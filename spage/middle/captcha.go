@@ -3,7 +3,7 @@ package middle
 import (
 	"context"
 	"github.com/LiteyukiStudio/spage/config"
-	"github.com/LiteyukiStudio/spage/spage/constants"
+	"github.com/LiteyukiStudio/spage/constants"
 	"github.com/LiteyukiStudio/spage/utils"
 
 	"github.com/LiteyukiStudio/spage/resps"

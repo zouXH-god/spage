@@ -2,8 +2,7 @@ package utils
 
 import (
 	"fmt"
-	"github.com/LiteyukiStudio/spage/spage/constants"
-
+	"github.com/LiteyukiStudio/spage/constants"
 	"github.com/go-resty/resty/v2"
 )
 
@@ -80,7 +79,6 @@ func (captchaType) VerifyCaptcha(restyClient *resty.Client, captchaConfig *Captc
 		} else {
 			return false, nil
 		}
-
 	default:
 		return false, fmt.Errorf("invalid captcha type: %s", captchaConfig.Type)
 	}
