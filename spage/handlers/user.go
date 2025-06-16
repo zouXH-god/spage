@@ -66,12 +66,12 @@ func (UserApi) Login(ctx context.Context, c *app.RequestContext) {
 		return
 	} else {
 		if utils.Password.VerifyPassword(loginReq.Password, *user.Password, config.JwtSecret) {
-			token, err := utils.Token.CreateToken(user.ID, time.Duration(config.TokenExpireTime)*time.Second, false, middle.PersistentHandler)
+			token, err := utils.Token.CreateJsonWebToken(user.ID, time.Duration(config.TokenExpireTime)*time.Second, false, middle.JwtPersistentHandler)
 			if err != nil {
 				resps.InternalServerError(c, "Failed to create token")
 				return
 			}
-			refreshToken, err := utils.Token.CreateToken(user.ID, time.Duration(config.RefreshTokenExpireTime)*time.Second, true, middle.PersistentHandler)
+			refreshToken, err := utils.Token.CreateJsonWebToken(user.ID, time.Duration(config.RefreshTokenExpireTime)*time.Second, true, middle.JwtPersistentHandler)
 			if err != nil {
 				resps.InternalServerError(c, "Failed to create refresh token")
 				return

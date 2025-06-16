@@ -13,7 +13,7 @@ func Migrate(db *gorm.DB) error {
 		// file.go
 		&File{},
 		// jwt
-		&Token{},
+		&JsonWebToken{},
 		// oidc_config.go
 		&OIDCConfig{},
 		// site.go

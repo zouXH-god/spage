@@ -15,7 +15,7 @@ func Run() error {
 	H.Use(middle.Cors.UseCors(), middle.Trace.UseTrace())
 	apiV1 := H.Group("/api/v1")
 
-	apiV1.Use(middle.Auth.UseAuth())
+	apiV1.Use(middle.Auth.UseAuth(true))
 	apiV1WithoutAuth := H.Group("/api/v1")
 	apiV1WithoutAuthAndCaptcha := H.Group("/api/v1") // 不需要登录和验证码的路由 Group without auth and captcha
 	{
@@ -69,10 +69,11 @@ func Run() error {
 			}
 		}
 		fileGroup := apiV1.Group("/file")
+		fileGroupWithoutAuth := apiV1WithoutAuth.Group("/file")
 		{
-			fileGroup.POST("", handlers.File.UploadFileStream) // 上传文件 Upload file
-			fileGroup.GET("/:id", handlers.File.GetFile)       // 下载文件 Download file
-			fileGroup.DELETE("")                               // 删除文件 Delete file
+			fileGroup.POST("", handlers.File.UploadFileStream)      // 上传文件 Upload file
+			fileGroup.DELETE("")                                    // 删除文件 Delete file
+			fileGroupWithoutAuth.GET("/:id", handlers.File.GetFile) // 下载文件 Download file TODO 做公私鉴权
 		}
 		adminGroup := apiV1.Group("/admin") // 管理员路由
 		adminGroup.Use(middle.Auth.IsAdmin())
