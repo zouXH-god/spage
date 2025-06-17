@@ -96,7 +96,6 @@ func (u *userType) DeleteByID(id uint) (err error) {
 }
 
 // UpdateSystemAdmin 更新系统管理员用户，不存在则创建
-// Update System Admin User, create if not exist
 func (u *userType) UpdateSystemAdmin(user *models.User) (err error) {
 	// 设置该用户为系统管理员 Set this user as a system admin
 	user.Flag = constants.FlagSystemAdmin
@@ -119,4 +118,31 @@ func (u *userType) UpdateSystemAdmin(user *models.User) (err error) {
 	// 保留ID，更新其他字段 Keep ID, update other fields
 	user.ID = existingAdmin.ID
 	return DB.Model(&existingAdmin).Updates(user).Error
+}
+
+// IsMemberOfOrg 检查用户是否是组织成员
+func (u *userType) IsMemberOfOrg(userID, orgID uint) (isMember bool, err error) {
+	var count int64
+	err = DB.Model(&models.Organization{}).
+		Joins("JOIN organization_members ON organization_members.organization_id = organizations.id").
+		Where("organization_members.user_id = ? AND organizations.id = ?", userID, orgID).
+		Count(&count).Error
+
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
+// IsOwnerOfOrg 检查用户是否是组织所有者
+func (u *userType) IsOwnerOfOrg(userID, orgID uint) (isOwner bool, err error) {
+	var count int64
+	err = DB.Model(&models.Organization{}).
+		Joins("JOIN organization_owners ON organization_owners.organization_id = organizations.id").
+		Where("organization_owners.user_id = ? AND organizations.id = ?", userID, orgID).
+		Count(&count).Error
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
 }

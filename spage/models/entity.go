@@ -15,6 +15,7 @@ type User struct {
 	ProjectLimit  int             `gorm:"default:-1"`                      // 用户的项目限制，0 表示无限制 User's project limit, 0 means no limit
 	Language      string          `gorm:"default:'zh-cn'"`                 // 用户的语言，默认为英语 User's language, default to English
 	Flag          string          `gorm:"default:'0'"`                     // system_admin 的另一面旗帜 The other side of system_admin flag
+	IsPrivate     bool            `gorm:"default:false"`                   // 用户是否为私有用户，默认为 false，表示公开用户 Whether the user is a private user, default is false, meaning public user
 	Password      *string         `gorm:"column:password"`                 // 用户的密码（经过哈希处理），仅用于本地身份验证 User's password (hashed), only used for local authentication
 }
 
@@ -35,6 +36,7 @@ type Organization struct {
 	AvatarURL    *string `gorm:"column:avatar_url"`               // 留空以使用 Gravatar Leave blank to use Gravatar
 	Members      []*User `gorm:"many2many:organization_members;"` // 组织的成员包含创建者 (including the creator)
 	Owners       []User  `gorm:"many2many:organization_owners;"`  // 组织的所有者（无反向关系）包含创建者 (including the creator)
+	IsPrivate    bool    `gorm:"default:false"`                   // 组织是否为私有组织，默认为 false，表示公开组织 Whether the organization is a private organization, default is false, meaning public organization
 	ProjectLimit int     `gorm:"default:0"`                       // 组织的项目限制，0：遵循策略，-1：无限制 Organization's project limit, 0: follow the policy, -1: unlimited
 }
 
@@ -56,6 +58,7 @@ type Project struct {
 	Owners      []User  `gorm:"many2many:project_owners;"`  // 项目的所有者，无反向关系 Project's owners, no reverse relation
 	Members     []*User `gorm:"many2many:project_members;"` // 项目的成员 Project's members
 	SiteLimit   int     `gorm:"default:0"`                  // 项目的站点限制，0：遵循策略，-1：无限制 Project's site limit, 0: follow the policy, -1: unlimited
+	IsPrivate   bool    `gorm:"default:false"`
 }
 
 // TableName 项目

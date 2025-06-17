@@ -49,6 +49,10 @@ func Run() error {
 			orgGroup.PUT("/:id/users", handlers.Org.AddOrganizationUser)       // 添加组织成员或所有者 Add organization user
 			orgGroup.DELETE("/:id/users", handlers.Org.DeleteOrganizationUser) // 删除组织成员或所有者 Delete organization user
 		}
+		ownerGroup := apiV1.Group("/owner")
+		{
+			ownerGroup.GET("/:name", handlers.Owner.GetByName) // 获取所有者列表 Get owners list
+		}
 		projectGroup := apiV1.Group("/project", handlers.Project.UserProjectAuth)
 		{
 			projectGroup.POST("", handlers.Project.Create)                  // 创建项目 Create project
