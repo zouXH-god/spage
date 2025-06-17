@@ -40,7 +40,6 @@ func (userApi) ToDTO(user *models.User, self bool) UserDTO {
 // Login 用户登录
 func (userApi) Login(ctx context.Context, c *app.RequestContext) {
 	loginReq := &LoginReq{}
-	// TODO 校验Captcha验证码
 	err := c.BindJSON(loginReq)
 	if err != nil {
 		resps.BadRequest(c, "Parameter error")
@@ -58,7 +57,6 @@ func (userApi) Login(ctx context.Context, c *app.RequestContext) {
 			return
 		}
 	}
-
 	if user.Password == nil {
 		resps.Forbidden(c, "Password not set, please use another login method")
 		return
