@@ -3,15 +3,14 @@ package config
 import (
 	"embed"
 	"errors"
+	"github.com/LiteyukiStudio/spage/constants"
+	"github.com/LiteyukiStudio/spage/utils/filedriver"
 	"os"
 	"path/filepath"
 
-	"github.com/LiteyukiStudio/spage/constants"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
-
-const ()
 
 var (
 	ServerPort string
@@ -19,7 +18,6 @@ var (
 
 	Mode = constants.ModeProd
 	// 运行模式，支持dev和prod
-	// Running Mode, support dev and prod
 
 	JwtSecret string
 	// JWT密钥 JWT Secret
@@ -44,13 +42,11 @@ var (
 	EmailPassword string // 邮箱密码 Email Password
 	EmailSSL      bool   // 是否启用SSL Enable SSL
 
-	PageLimit int = 40
+	PageLimit = 40
 	// 每页显示的文章数量，默认为40
-	// Number of articles displayed per page, default 40
 
 	CaptchaType = constants.CaptchaTypeDisable
 	// 验证码类型，支持turnstile、recaptcha和hcaptcha
-	// Captcha Type, support turnstile, recaptcha and hcaptcha
 
 	CaptchaSiteKey   string // reCAPTCHA v3的站点密钥
 	CaptchaSecretKey string // reCAPTCHA v3的密钥
@@ -58,53 +54,48 @@ var (
 
 	TokenExpireTime = 3600 * 24
 	// session过期时间，单位秒
-	// session expiration time, in seconds
 
 	RefreshTokenExpireTime = 3600 * 144
 	// 刷新token过期时间，单位秒
-	// refresh token expiration time, in seconds
 
-	// CommitHash 构件时注入的git commit hash
-	CommitHash = "develop"
-	// git commit hash 构建时注入
-	// git commit hash injected at build time
+	BuildTime  = "0000-00-00 00:00:00" // 构建时间 Build Time
+	Version    = "0.0.0"               // 版本号 Version
+	CommitHash = "unknown"             // 提交哈希 Commit MD5
 
-	BuildTime = "0000-00-00 00:00:00" // 构建时间 Build Time
-
-	ReleaseSavePath = "data/releases"
+	ReleaseSavePath  = "./data/releases"
+	UploadsPath      = "./data/uploads"
+	FileMaxSize      = 100 * 1024 * 1024 // 文件最大大小，单位字节 File Max Size
+	FileDriverConfig = &filedriver.DriverConfig{
+		Type:     constants.FileDriverLocal,
+		BasePath: UploadsPath,
+	}
 
 	//go:embed config.example.yaml
 	configExample embed.FS
 )
 
 // InitConfig 初始化配置文件
-// Initialize the configuration file
 func InitConfig() error {
 	configPath := "config.yaml"
 	// 目标配置文件路径
-	// Target configuration file path
 
 	// 如果 config.yaml 已存在，直接返回
-	// If config.yaml already exists, return directly
 	if _, err := os.Stat(configPath); err == nil {
 		return nil
 	}
 
 	// 读取嵌入的示例配置
-	// Read the embedded example configuration
 	data, err := configExample.ReadFile("config.example.yaml")
 	if err != nil {
 		return errors.New("failed to read embedded config: " + err.Error())
 	}
 
 	// 确保目录存在（如果 config.yaml 不在当前目录）
-	// Ensure the directory exists (if config.yaml is not in the current directory)
 	if err := os.MkdirAll(filepath.Dir(configPath), 0755); err != nil {
 		return errors.New("failed to create config directory: " + err.Error())
 	}
 
 	// 写入 config.yaml
-	// Write config.yaml
 	if err := os.WriteFile(configPath, data, 0644); err != nil {
 		return errors.New("failed to write config file: " + err.Error())
 	}
@@ -113,7 +104,6 @@ func InitConfig() error {
 }
 
 // Init 初始化配置文件和常量
-// Initialize the configuration file and constants
 func Init() error {
 	// 设置配置文件路径
 	// Set the configuration file path
@@ -129,53 +119,54 @@ func Init() error {
 			if err != nil {
 				return err
 			}
-			return errors.New("config file not found")
 		}
 	}
 	// 初始化配置常量
-	// Initialize configuration constants
-	ServerPort = GetString("server.port", "8888")
-	FrontEndURL = GetString("frontend.url", "http://localhost:5173")
-	Mode = GetString("mode", "prod")
-	LogLevel = GetString("log.level", "info")
+	ServerPort = GetString("server.port", ServerPort)
+	Mode = GetString("mode", Mode)
+	LogLevel = GetString("log.level", LogLevel)
 
 	// Admin配置项
-	// Admin configuration items
-	AdminUsername = GetString("admin.username", "admin")
-	AdminPassword = GetString("admin.password", "admin")
+	AdminUsername = GetString("admin.username", AdminUsername)
+	AdminPassword = GetString("admin.password", AdminPassword)
 
 	// Captcha配置项
-	// Captcha configuration items
 	CaptchaType = GetString("captcha.type", CaptchaType)
-	CaptchaSiteKey = GetString("captcha.site-key", "")
-	CaptchaSecretKey = GetString("captcha.secret-key", "")
-	CaptchaUrl = GetString("captcha.url", "")
+	CaptchaSiteKey = GetString("captcha.site-key", CaptchaSiteKey)
+	CaptchaSecretKey = GetString("captcha.secret-key", CaptchaSecretKey)
+	CaptchaUrl = GetString("captcha.url", CaptchaUrl)
 
 	// Email配置项
-	// Email configuration items
-	EmailEnable = GetBool("email.enable", false)
-	EmailUsername = GetString("email.username", "")
-	EmailAddress = GetString("email.address", "")
-	EmailHost = GetString("email.host", "")
-	EmailPort = GetString("email.port", "465")
-	EmailPassword = GetString("email.password", "")
-	EmailSSL = GetBool("email.ssl", true)
+	EmailEnable = GetBool("email.enable", EmailEnable)
+	EmailUsername = GetString("email.username", EmailUsername)
+	EmailAddress = GetString("email.address", EmailAddress)
+	EmailHost = GetString("email.host", EmailHost)
+	EmailPort = GetString("email.port", EmailPort)
+	EmailPassword = GetString("email.password", EmailPassword)
+	EmailSSL = GetBool("email.ssl", EmailSSL)
 
 	// File存储配置项
-	ReleaseSavePath = GetString("file.release-path", "data/releases")
+	ReleaseSavePath = GetString("file.release-path", ReleaseSavePath)
+	UploadsPath = GetString("file.uploads-path", UploadsPath)
+	FileMaxSize = GetInt("file.max-size", FileMaxSize)
+
+	FileDriverConfig = &filedriver.DriverConfig{
+		Type:           GetString("file.driver.type", constants.FileDriverLocal),
+		BasePath:       UploadsPath,
+		WebDavUrl:      GetString("file.driver.webdav.url", UploadsPath),
+		WebDavUser:     GetString("file.driver.webdav.user", ""),
+		WebDavPassword: GetString("file.driver.webdav.password", ""),
+	}
 
 	// 分页查询限制
-	// Pagination query limit
 	PageLimit = GetInt("page-limit", PageLimit)
 
 	// Session过期时间
-	// Session expiration time
 	TokenExpireTime = GetInt("token.expire", TokenExpireTime)
 	RefreshTokenExpireTime = GetInt("token.refresh-expire", RefreshTokenExpireTime)
-	JwtSecret = GetString("token.secret", "none-secret")
+	JwtSecret = GetString("token.secret", JwtSecret)
 
 	// 从启动参数拿取一些配置项mode frontend-url
-	// Get some configuration items from the startup parameters mode frontend-url
 	argsMap := Cmd.GetArgsMap(os.Args[1:])
 	queryKeys := []string{"mode", "frontend-url", "port"}
 	for _, key := range queryKeys {
@@ -193,7 +184,6 @@ func Init() error {
 	logrus.Info("Configuration loaded successfully, mode: ", Mode)
 
 	// 设置日志级别
-	// Set log level
 	logLevel, err := logrus.ParseLevel(LogLevel)
 	if err != nil {
 		logrus.Error("Invalid log level, using default level: info")
@@ -202,14 +192,21 @@ func Init() error {
 	logrus.SetLevel(logLevel)
 	logrus.Info("Log level set to: ", logLevel)
 	logrus.Debugln("LogLevel is: ", LogLevel)
+
+	// 储存相关配置
+	// 创建上传目录和release目录
+	for _, path := range []string{UploadsPath, ReleaseSavePath} {
+		if err := os.MkdirAll(path, 0755); err != nil {
+			return errors.New("failed to create directory: " + path + ", error: " + err.Error())
+		}
+	}
 	// 其他配置项合法校验流程
-	// Other configuration item validation process
 	// ...
 	return nil
+
 }
 
 // Get 返回配置项的值，如果不存在则返回默认值
-// Return the value of the configuration item, or the default value if it does not exist
 func Get[T any](key string, defaultValue T) T {
 	if !viper.IsSet(key) {
 		return defaultValue
@@ -223,7 +220,6 @@ func Get[T any](key string, defaultValue T) T {
 }
 
 // GetString 返回配置项的字符串值
-// Return the string value of the configuration item
 func GetString(key string, defaultValue ...string) string {
 	if len(defaultValue) > 0 {
 		return Get(key, defaultValue[0])
@@ -232,7 +228,6 @@ func GetString(key string, defaultValue ...string) string {
 }
 
 // GetInt 返回配置项的整数值
-// Return the integer value of the configuration item
 func GetInt(key string, defaultValue ...int) int {
 	if len(defaultValue) > 0 {
 		return Get(key, defaultValue[0])
@@ -241,7 +236,6 @@ func GetInt(key string, defaultValue ...int) int {
 }
 
 // GetBool 返回配置项的布尔值
-// Return the boolean value of the configuration item
 func GetBool(key string, defaultValue ...bool) bool {
 	if len(defaultValue) > 0 {
 		return Get(key, defaultValue[0])
@@ -250,7 +244,6 @@ func GetBool(key string, defaultValue ...bool) bool {
 }
 
 // GetFloat64 返回配置项的浮点数值
-// Return the floating-point value of the configuration item
 func GetFloat64(key string, defaultValue ...float64) float64 {
 	if len(defaultValue) > 0 {
 		return Get(key, defaultValue[0])
@@ -259,7 +252,6 @@ func GetFloat64(key string, defaultValue ...float64) float64 {
 }
 
 // GetStringSlice 返回配置项的字符串切片值
-// Return the string slice value of the configuration item
 func GetStringSlice(key string, defaultValue ...[]string) []string {
 	if len(defaultValue) > 0 {
 		return Get(key, defaultValue[0])

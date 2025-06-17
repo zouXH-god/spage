@@ -5,10 +5,6 @@ server:
 # 运行模式配置
 mode: "prod"     # 运行模式，可选：prod/dev/test
 
-# 前端配置
-frontend:
-  url: "http://localhost:5173"  # 前端URL地址
-
 # 日志配置
 log:
   level: "info"  # 日志级别，可选：debug/info/warn/error/fatal/panic
@@ -55,3 +51,4 @@ token:
 # File配置
 file:
   release-path: "./data/release"    # 发布文件保存路径
+  uploads-path: "./data/uploads"      # 上传文件保存路径

@@ -16,4 +16,8 @@ const (
 
 	OwnerTypeUser = "user"         // 个人用户 Personal user
 	OwnerTypeOrg  = "organization" // 组织用户 Organization user
+
+	FileDriverLocal  = "local"
+	FileDriverWebdav = "webdav"
+	FileDriverS3     = "s3"
 )

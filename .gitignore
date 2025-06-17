@@ -5,17 +5,25 @@ server
 server.exe
 
 config.yaml
+!config.go
+!config.example.yaml
 
 .DS_Store
 .idea/
 .vscode/
 
 data/
+# backend build
+build/
+**.so
+**.dylib
+
+# backend embed fs
+spage/static/dist/**
+!spage/static/dist/.keep
 
 # frontend dev
-
-spage-web/
+**/node_modules/
+.next
 
 # frontend dist
-
-static/dist/**

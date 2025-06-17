@@ -1,7 +1,12 @@
-# Spage - 自托管静态页面托管服务
 
+<<<<<<< HEAD
 <center><img src="https://socialify.git.ci/LiteyukiStudio/spage/image?description=1&font=Bitter&forks=1&issues=1&logo=https%3A%2F%2Fcdn.liteyuki.icu%2Flogos%2Fapage.png&name=1&pattern=Overlapping+Hexagons&pulls=1&stargazers=1&theme=Auto" alt="spage" width="780" height="320" />
     <a href="./README.md">简体中文</a>
+=======
+
+<center><img src="https://socialify.git.ci/LiteyukiStudio/spage/image?description=1&font=Bitter&forks=1&issues=1&logo=https%3A%2F%2Fcdn.liteyuki.org%2Flogos%2Fapage.png&name=1&pattern=Overlapping+Hexagons&pulls=1&stargazers=1&theme=Auto" alt="spage" width="780" height="320" />
+    <!-- <a href="./README.md">简体中文</a>
+>>>>>>> c0a64c114d395d38fce1285f73e6ff47a9be43b8
     |
     <a href="./README/en.md">English</a>
     |
@@ -9,54 +14,69 @@
     |
     <a href="./README/ja.md">日本語</a>
     |
-    <a href="./README/ko.md">한국어</a>
+    <a href="./README/ko.md">한국어</a> -->
 </center>
 
----
+# Spage
+
+自托管静态页面托管服务
+
+> 项目处于开发阶段，暂未发布第一个版本，感兴趣的可以先订阅一下
 
 ## 简介
 
-一个基于Go语言开发的, 开源自托管静态页面托管服务
+一个基于Go语言开发的, 开源自托管静态页面托管服务, 使用Caddy作为web服务器
 
-## 初衷
+类似于`Vercel Pages`, `GitHub Pages`, `Cloudflare Pages`等PaaS服务, 但它是一个开源的, 可自托管的**平替**
 
-### 为什么要开发这个平台
+## 快速开始
 
-常规的前端应用管理的流程是
-1. 在构建平台构建好
-2. 上传输出目录到服务器的某处
-3. 在Nginx, Apache, Caddy等这种Web服务器中配置静态资源目录
-4. 用户访问
+### 容器化自部署
 
-通常需要配置一大堆东西, 部署过程还不太好**全自动化**
-我们希望能够让前端应用的部署过程更加**简单**, 更**快速**
+```bash
+# Docker Hub源
+liteyukistudio/spage:latest
 
-为了让现有和未来的前后端分离架构的应用前端部分能够快速上线, 与现有的CI/CD集成, 通过RESTful API部署和管理项目, 且能够托管到自己的服务器, 于是我们打算开发这个平台
+# GitHub Container Registry源
+ghcr.io/liteyukistudio/spage:latest
 
-### 为什么不使用其他同类项目
+# Liteyuki Container Registry源
+reg.liteyuki.org/spage/spage:latest
 
-我们不希望这个平台是一个SaaS服务, 而是一个开源的, 自托管的平台, 我们希望这个平台能够被更多的人使用, 并且能够被更多的人贡献代码
+# 推荐优先使用公共源，即Docker Hub源和GHCR源，若访问不了再使用Liteyuki Container Registry源
+# 以减轻Liteyuki Container Registry的压力
+```
 
-它是`Vercel Pages`, `GitHub Pages`, `Cloudflare Pages`这种PaaS服务的开源, 可自托管的**平替**
+你可使用docker，podman等工具部署，也可以将其部署到Kubernetes集群中
 
-也许有人会问:
-> 为什么我不用公共的SaaS服务, 要使用这个呢？
+默认容器内服务端口是`8888`，你可以按需暴露，并挂载`/app/config.yaml`到容器内部
 
-如果是个人小静态站, 使用公共免费SaaS完全没有问题！
+若你需要使用最新提交，可以将`latest`替换为`nightly`标签
 
-本项目面向的用户更多倾向于使用自托管, 例如企业使用一个服务专门来托管团队/企业中静态页面项目
+### 二进制自部署
 
-我们的设计是在前端构建完成后, 只需要**一条命令**就可以将构建产物部署到平台
+如果不想容器化，也可以直接跑二进制，支持，可以在[Release](./releases)界面找到大部分平台和架构的二进制文件
 
-在此之前我们参考过非常多的同类项目, 例如: `getmeli`/`meli`, 然而其已经在几年前停止更新了, `coolify`和`dokploy`功能过于臃肿和难以部署, 给每个前端项目起一个容器又过于浪费资源
+支持Linux，macOS(Darwin)，Windows，FreeBSD等操作系统
+
+AMD64兼容性：v1支持所有AMD64架构的CPU，v3支持2013年及以后的AMD64架构CPU
+
+如果找不到你目标平台的二进制文件，可以尝试从源代码构建
+    `go build ./cmd/server`
+
+### 使用Spage Cloud SaaS
+
+无需自己部署，直接使用我们的现有实例及CDN加速服务
+
+> 敬请期待...
 
 ## 技术栈
 
 自托管静态页面托管服务, 基于以下技术栈构建:
 - 后端: `Golang`, `Hertz`框架, `Kitex`(RPC框架), `GORM`(ORM框架)
-- 前端: `Vue3`, `Element`, `TypeScript`
+- 前端: `Next.js(React.js)`, `TypeScript`
 - 数据库: `SQLite3`, `PostgreSQL`
-- Web服务器: `Caddy`, `Nginx`(仅提供接口)
+- Web服务器: `Caddy`(仅提供接口)
 - CLI自动化: 任意, 但尽可能和现有的前端工具链集成
 - 容器化: `Docker`
 
@@ -102,45 +122,131 @@ CLI将输出文件夹压缩后使用指定接口上传到服务器
 可以无缝衔接**GitHub**, **Gitea**等平台的工作流
 例如: 一个项目有`Release`/`Nightly`两个稳定站点, 在CLI中推送时就需要指定站点ID, 优先返回第一个配置的自定义域名, 在PR预览模式下, 无需指定站点URL, 自动创建新站点并返回随机前缀的URL
 
-- **站点版本管理**
-每个站点最新版本默认标签为latest, 当部署站点时, 指定相同的标签会被覆盖, 不指定默认latest
-正常情况下, 这样的站点域名为`{version.replace(".", "_")}-{prefix}.{pages-domain}`
+## 开发者须知
 
----
+*我们强烈推荐使用Unix-like系统进行开发, 例如Linux或macOS, 因为它们的兼容性更好*
 
-更多细节请查看[文档](https://docs.apage.dev/)
+*使用Windows你将无法使用SQLite3作为开发数据库, 需要自行部署PostgreSQL*
 
----
+在不修改默认配置的情况下，开发模式有预设配置，可以直接上手开发
 
-## 快速开始
+### Go环境配置
 
-从[Github Release](https://github.com/LiteyukiStudio/spage/releases)下载对应版本的二进制文件, 运行即可
+- 安装go工具链: [Go官网](https://golang.google.cn/dl/)
+- 安装依赖`go mod tidy`
+- 启动主控后端`go run ./cmd/server`
 
-**Todo: 编写快速开始部分的文档**
 
-## 手动构建
+### GNU Make安装
 
-**Todo: 完善构建文档**
+- macOS: `brew install make`
+- Linux: 使用发行版的包管理器下载打包好的软件包
+    - Debian/Ubuntu: `apt install make`
+    - Fedora/RHEL/CentOS: `dnf install make`
+    - Arch Linux: `pacman -S make`
+- Windows: 前往[GNU Make for Windows](http://gnuwin32.sourceforge.net/packages/make.htm)下载二进制自己解压到PATH中
+- 或者使用WSL(Windows Subsystem for Linux)安装Linux发行版, 然后在Linux发行版中安装GNU Make
+- 或者使用[Chocolatey](https://chocolatey.org/)安装`make`包: `choco install make`
 
-1. **首先Clone本仓库**
+
+### ProtoBuf工具链安装
+
+#### protoc编译器安装
+
+推荐方法：
+- macOS: `brew install protobuf`
+- Linux: 使用发行版的包管理器下载打包好的软件包
+    - Debian/Ubuntu: `apt install protobuf-compiler`
+    - Fedora/RHEL/CentOS: `dnf install protobuf-compiler`
+    - Arch Linux: `pacman -S protobuf`
+
+其他方法：前往[ProtoBuf Release](https://github.com/protocolbuffers/protobuf/releases)下载二进制自己解压到PATH中
+
+
+#### protoc-gen-go 和 protoc-gen-go-grpc 安装
+
 ```bash
-git clone https://github.com/LiteyukiStudio/spage ./spage && cd spage
+go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+# 确保 $GOPATH/bin 或 $HOME/go/bin 在 PATH 中
 ```
 
+### 数据库
 
-2. **随后构建您的前端**
+- Postgres: 推荐开发者自行部署PostgreSQL数据库进行开发，PostgreSQL是一个功能强大的关系型数据库，驱动兼容性更好
+- SQLite3: 通过动态链接引入，避免构建时CGO导致的问题，(不建议用于生产环境，我们不能保证它不会出事)
 
+如果你想在开发中使用SQLite3，可以构建我们写好的sqlite插件，它在开发时会动态链接过去(仅支持macOS和Linux)
 
-3. **按照正常的Go语言项目构建server二进制文件即可**
-(从github获取源代码构建)
 ```bash
-go build github.com/LiteyukiStudio/spage/cmd/server
+make plugin name=sqlite
 ```
 
-(从本地获取源代码构建)
+如果你要将SQLite用于生产环境，请自行编译二进制，需要启用CGO，如果需要在容器中使用，请确保容器中安装了GNU Libc
+
+### 前端环境配置
+
+- 安装pnpm和node(或其他运行时，例如bun，deno)
+- 在项目根目录下切换到前端源码目录：`cd web-src`
+- 使用`pnpm install`安装依赖
+- 使用`pnpm dev` `bun dev`等方式启动前端开发服务器
+
+### 注意事项
+
+为避免跨域导致的资源请求和Cookie问题
+
+- 开发模式下，请求是先到达前端开发服务器，然后通过next rewrites转发到后端开发服务器
+- 构建产物中，请求是直接到达后端服务器
+
+善用AI，但不能滥用AI，AI只能作为辅助工具
+
+## 构建须知
+
+### 构建前端
+
+**使用GNU Make构建(推荐)**
+
 ```bash
-go build ./cmd/server
+make web
 ```
 
-## 常见问题
-- 跨域问题：开发模式正常情况下不会遇到跨域问题, 开发模式下允许的域为`http://localhost:5173`(Vite开发服务器默认地址), 如果需要其他域名请配置`frontend-url`配置项
+**或单步构建**
+
+```bash
+# 切换到前端源码目录
+cd web-src
+# 安装依赖
+pnpm install
+# 构建前端
+pnpm build
+# 把前端构建产物移动到后端的static/dist目录下
+cp -r ./out ../static/dist
+# 退出前端源码目录
+cd ..
+```
+
+### RPC IDL code gen
+
+若你没有修改proto文件，可以跳过这一步
+如果你修改了proto文件，需要重新生成IDL代码并一起推送
+
+```bash
+make proto
+```
+
+### 构建后端
+
+**使用GNU Make构建(推荐)**
+
+```bash
+make spage
+# 可以查看Makefile文件获取更多跨平台参数
+```
+
+**或单步构建(不推荐，因为没有注入一些必要ldflags)**
+
+```bash
+# 切换到后端源码目录
+go build -o ./bin/spage ./cmd/server
+```
+
