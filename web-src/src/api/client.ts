@@ -1,7 +1,7 @@
 import axios from "axios";
 import { camelToSnakeObj, snakeToCamelObj } from "field-conv";
 
-const API_SUFFIX = "./api/v1";
+const API_SUFFIX = "/api/v1";
 
 const axiosInstance = axios.create({
   baseURL: API_SUFFIX,

@@ -14,15 +14,10 @@ import (
 
 var (
 	ServerPort string
-	// 服务器端口 Server Port
-
-	Mode = constants.ModeProd
-	// 运行模式，支持dev和prod
-
+	// Mode 运行模式 dev/prod
+	Mode      = constants.ModeProd
 	JwtSecret string
-	// JWT密钥 JWT Secret
-
-	LogLevel = "info"
+	LogLevel  = "info"
 	// 日志级别 Log Level
 
 	AdminUsername = "admin"
@@ -39,26 +34,26 @@ var (
 	EmailPort     string // 邮箱服务器端口 Email Server Port
 	EmailPassword string // 邮箱密码 Email Password
 	EmailSSL      bool   // 是否启用SSL Enable SSL
-
+	// PageLimit 每页显示的文章数量，默认为40
 	PageLimit = 40
-	// 每页显示的文章数量，默认为40
-
+	// CaptchaType 验证码类型，支持turnstile、recaptcha和hcaptcha
 	CaptchaType = constants.CaptchaTypeDisable
-	// 验证码类型，支持turnstile、recaptcha和hcaptcha
 
 	CaptchaSiteKey   string // reCAPTCHA v3的站点密钥
 	CaptchaSecretKey string // reCAPTCHA v3的密钥
 	CaptchaUrl       string // for mcaptcha
 
-	TokenExpireTime = 60 * 5
-	// session过期时间，单位秒
-
+	TokenExpireTime        = 60 * 5
 	RefreshTokenExpireTime = 3600 * 24
-	// 刷新token过期时间，单位秒
 
 	BuildTime  = "0000-00-00 00:00:00" // 构建时间 Build Time
 	Version    = "0.0.0"               // 版本号 Version
 	CommitHash = "unknown"             // 提交哈希 Commit Hash
+
+	// Meta
+
+	Icon = "/apage.svg"
+	Name = "liteyuki spage"
 
 	ReleaseSavePath  = "./data/releases"
 	UploadsPath      = "./data/uploads"
@@ -143,6 +138,10 @@ func Init() error {
 	EmailPort = GetString("email.port", EmailPort)
 	EmailPassword = GetString("email.password", EmailPassword)
 	EmailSSL = GetBool("email.ssl", EmailSSL)
+
+	// Meta配置项
+	Icon = GetString("meta.icon", Icon)
+	Name = GetString("meta.name", Name)
 
 	// File存储配置项
 	ReleaseSavePath = GetString("file.release-path", ReleaseSavePath)

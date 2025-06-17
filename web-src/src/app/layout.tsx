@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
+import Nav from "@/components/Nav";
 import { DeviceProvider } from "@/contexts/DeviceContext";
+import { SessionProvider } from "@/contexts/SessionContext";
 import I18nProvider from "@/providers/I18nProvider";
 
-import "./globals.css";
+import "@/app/globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,11 +26,15 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-slate-100 dark:bg-slate-800`}>
         {/* ThemeProvider 只包裹 body 内容 */}
-        <DeviceProvider>
-          <I18nProvider>{children}</I18nProvider>
-        </DeviceProvider>
+        <SessionProvider>
+          <DeviceProvider>
+            <I18nProvider>
+              {children}
+            </I18nProvider>
+          </DeviceProvider>
+        </SessionProvider>
       </body>
     </html>
   );

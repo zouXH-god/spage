@@ -68,7 +68,7 @@ export default function LoginPage() {
     login({ username, password, captchaToken, remember })
       .then(() => {
         // 路由跳转
-        router.push("/");
+        router.push(redirectUrl);
       })
       .catch((err) => {
         setError(t("login.failed") + ": " + err.response?.data?.message || err.message);

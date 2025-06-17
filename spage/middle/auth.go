@@ -84,23 +84,28 @@ func (authType) UseAuth(block bool) app.HandlerFunc {
 	}
 }
 
-// GetUser 改进版
-func (authType) GetUser(ctx context.Context, c *app.RequestContext) *models.User {
-	userIDValue := ctx.Value("user")
-	if userIDValue == nil {
-		resps.Unauthorized(c, resps.UnauthorizedText)
+// GetUserWithBlock 当获取不到用户时响应错误
+func (authType) GetUserWithBlock(ctx context.Context, c *app.RequestContext) *models.User {
+	user := Auth.GetUser(ctx)
+	if user == nil {
+		resps.Unauthorized(c, "User not found or not authenticated")
 		c.Abort()
 		return nil
 	}
+	return user
+}
 
+// GetUser 获取当前用户信息，获取不到时为nil
+func (authType) GetUser(ctx context.Context) *models.User {
+	userIDValue := ctx.Value("user")
+	if userIDValue == nil {
+		return nil
+	}
 	userID := userIDValue.(uint)
 	user, err := store.User.GetByID(userID)
 	if err != nil || user == nil || user.ID == 0 {
-		resps.Unauthorized(c, resps.UnauthorizedText)
-		c.Abort()
 		return nil
 	}
-
 	return user
 }
 
@@ -136,7 +141,7 @@ func handleCookieTokenAuth(c *app.RequestContext) (bool, *utils.Claims, error) {
 // IsAdmin 是一个中间件，用于检查用户是否为管理员
 func (authType) IsAdmin() app.HandlerFunc {
 	return func(ctx context.Context, c *app.RequestContext) {
-		user := Auth.GetUser(ctx, c)
+		user := Auth.GetUserWithBlock(ctx, c)
 		if user.Role != constants.RoleAdmin {
 			resps.Forbidden(c, "Permission denied")
 			c.Abort()

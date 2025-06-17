@@ -1,7 +1,6 @@
 package handlers
 
 // OrganizationDTO 组织信息数据传输对象
-// Organization Information Data Transfer Object (DTO)
 type OrganizationDTO struct {
 	ID           uint      `json:"id"`            // 组织ID Organization ID
 	Name         string    `json:"name"`          // 组织名称 Organization Name
@@ -23,8 +22,8 @@ type CreateOrgReq struct {
 }
 
 // UpdateOrgReq 用于更新组织信息的请求体
-// Request body for updating organization information
 type UpdateOrgReq struct {
+	Name        string  `json:"name"`         // 组织名称 Organization Name
 	DisplayName *string `json:"display_name"` // 显示名称 Display Name
 	Email       *string `json:"email"`        // 邮箱地址 Email Address
 	Description *string `json:"description"`  // 描述信息 Description
@@ -32,7 +31,6 @@ type UpdateOrgReq struct {
 }
 
 // GetOrgProjectReq 用于获取组织项目的请求体
-// Request body for getting organization projects
 type GetOrgProjectReq struct {
 	Page    int    `json:"page" binding:"required"`  // 页码 Page number
 	Limit   int    `json:"limit" binding:"required"` // 每页项目数量 Number of projects per page
@@ -40,7 +38,6 @@ type GetOrgProjectReq struct {
 }
 
 // OrgUserReq 用于添加或删除组织用户的请求体
-// Request body for adding or removing organization users
 type OrgUserReq struct {
 	UserID uint   `json:"user_id" binding:"required"` // 用户ID User ID
 	Role   string `json:"role" binding:"required"`    // 角色 Role

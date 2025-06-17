@@ -14,6 +14,7 @@ import type {
   UserProjectsResponse,
   UserResponse,
 } from "./user.models";
+import { PAGE_LIMIT } from "@/consts";
 
 export function login(data: LoginRequest): Promise<AxiosResponse<LoginResponse, unknown>> {
   return client.post<LoginResponse>("/user/login", data);
@@ -39,8 +40,10 @@ export function updateUser(data: User): Promise<AxiosResponse<BaseResponse, unkn
 
 export function getUserProjects(
   userId: number,
+  page: number = 1,
+  limit: number = PAGE_LIMIT,
 ): Promise<AxiosResponse<UserProjectsResponse, unknown>> {
-  return client.get<UserProjectsResponse>(`/user/${userId}/projects`);
+  return client.get<UserProjectsResponse>(`/user/${userId}/projects?page=${page}&limit=${limit}`);
 }
 
 export function getUserOrganizations(

@@ -5,6 +5,8 @@ import Gravatar from "react-gravatar";
 
 import Image from "next/image";
 
+import { User } from "@/api/user.models";
+
 interface GravatarAvatarProps {
   email: string;
   size?: number;
@@ -42,5 +44,20 @@ const GravatarAvatar: React.FC<GravatarAvatarProps> = ({
     />
   );
 };
+
+export function getGravatarByUser(user?: User, className: string = ""): React.ReactElement {
+  if (!user) {
+    return <GravatarAvatar email="" />;
+  }
+  return (
+    <GravatarAvatar
+      email={user.email || ""}
+      size={40}
+      className={className}
+      alt={user.displayName || user.name}
+      url={user.avatarUrl} // 使用用户的自定义头像URL
+    />
+  );
+}
 
 export default GravatarAvatar;

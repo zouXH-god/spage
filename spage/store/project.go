@@ -39,25 +39,16 @@ func (p *projectType) UserIsOwner(project *models.Project, userID uint) bool {
 }
 
 // ListByOwner 通过用户ID获取项目列表，支持分页和从新到旧排序
-// Get Project List by UserID, support pagination and new to old sorting
 func (p *projectType) ListByOwner(ownerType, ownerID string, page, limit int) (projects []models.Project, total int64, err error) {
-	tableName := ""
-	switch ownerType {
-	case constants.OwnerTypeUser:
-		tableName = models.User{}.TableName()
-	case constants.OwnerTypeOrg:
-		tableName = models.Organization{}.TableName()
-	default:
-		err = fmt.Errorf("invalid owner type")
-		return
+	if ownerType != constants.OwnerTypeUser && ownerType != constants.OwnerTypeOrg {
+		return nil, 0, fmt.Errorf("owner type not allowed")
 	}
-
 	projects, total, err = Paginate[models.Project](
 		DB,
 		page,
 		limit,
 		"owner_type = ? AND owner_id = ?",
-		tableName,
+		ownerType,
 		ownerID,
 	)
 	return

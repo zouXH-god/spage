@@ -113,12 +113,16 @@ func Run() error {
 			nodeGroup.POST("") // 注册节点（由节点自行请求）
 		}
 
+		metaGroup := apiV1WithoutAuth.Group("/meta")
+		{
+			metaGroup.GET("/info", handlers.Meta.GetMetaInfo) // 获取版本信息 Get version info
+		}
 	}
 
 	// 设置静态文件目录 Set static file directory
-	web := H.Group("")
+	staticGroup := H.Group("")
 	{
-		web.GET("/*any", handlers.WebHandler)
+		staticGroup.GET("/*any", handlers.WebHandler)
 	}
 
 	// 运行服务 Run service

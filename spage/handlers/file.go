@@ -80,7 +80,7 @@ func (FileApi) UploadFileStream(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 数据库索引建立
-	crtUser := middle.Auth.GetUser(ctx, c)
+	crtUser := middle.Auth.GetUserWithBlock(ctx, c)
 	fileModel := &models.File{
 		Hash:       hash,
 		UploaderID: crtUser.ID,

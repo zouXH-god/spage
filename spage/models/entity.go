@@ -1,6 +1,8 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 // User 用户模型
 type User struct {
@@ -19,14 +21,11 @@ type User struct {
 	Password      *string         `gorm:"column:password"`                 // 用户的密码（经过哈希处理），仅用于本地身份验证 User's password (hashed), only used for local authentication
 }
 
-// TableName 用户
-// User
 func (User) TableName() string {
 	return "users"
 }
 
 // Organization 组织模型
-// Organization Model
 type Organization struct {
 	gorm.Model
 	Name         string  `gorm:"not null;unique"`                 // 组织的唯一名称 Organization's unique name
@@ -40,14 +39,11 @@ type Organization struct {
 	ProjectLimit int     `gorm:"default:0"`                       // 组织的项目限制，0：遵循策略，-1：无限制 Organization's project limit, 0: follow the policy, -1: unlimited
 }
 
-// TableName 组织
-// Organization
 func (Organization) TableName() string {
 	return "organizations"
 }
 
 // Project 项目模型
-// Project Model
 type Project struct {
 	gorm.Model
 	Name        string  `gorm:"not null;unique"`            // 项目的唯一名称 Project's unique name
@@ -61,8 +57,6 @@ type Project struct {
 	IsPrivate   bool    `gorm:"default:false"`
 }
 
-// TableName 项目
-// Project
 func (Project) TableName() string {
 	return "projects"
 }

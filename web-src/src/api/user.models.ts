@@ -57,6 +57,7 @@ export interface UserResponse extends BaseResponse {
 
 export interface UserProjectsResponse extends BaseResponse {
   projects: Project[];
+  total: number;
 }
 
 export interface UserOrganizationsResponse extends BaseResponse {

@@ -15,7 +15,7 @@ var Owner = &ownerType{}
 
 func (ownerType) GetByName(ctx context.Context, c *app.RequestContext) {
 	name := c.Param("name")
-	crtUser := middle.Auth.GetUser(ctx, c)
+	crtUser := middle.Auth.GetUserWithBlock(ctx, c)
 
 	// try user
 	user, err := store.User.GetByName(name)

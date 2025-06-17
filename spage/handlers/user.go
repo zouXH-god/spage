@@ -90,7 +90,7 @@ func (userApi) GetCaptcha(ctx context.Context, c *app.RequestContext) {
 // GetOrgs 获取用户的组织
 func (userApi) GetOrgs(ctx context.Context, c *app.RequestContext) {
 	userID := c.Param("id")
-	crtUser := middle.Auth.GetUser(ctx, c)
+	crtUser := middle.Auth.GetUserWithBlock(ctx, c)
 	if userID != strconv.Itoa(int(crtUser.ID)) {
 		resps.Forbidden(c, resps.PermissionDenied)
 		return
@@ -116,7 +116,7 @@ func (userApi) GetOrgs(ctx context.Context, c *app.RequestContext) {
 // GetProjects 获取用户的项目
 func (userApi) GetProjects(ctx context.Context, c *app.RequestContext) {
 	userID := c.Param("id")
-	crtUser := middle.Auth.GetUser(ctx, c)
+	crtUser := middle.Auth.GetUserWithBlock(ctx, c)
 	if userID != strconv.Itoa(int(crtUser.ID)) {
 		resps.Forbidden(c, resps.PermissionDenied)
 	}
@@ -139,22 +139,37 @@ func (userApi) GetProjects(ctx context.Context, c *app.RequestContext) {
 
 // GetUser 获取用户信息
 func (userApi) GetUser(ctx context.Context, c *app.RequestContext) {
-	userID := c.Param("id")
-	crtUser := middle.Auth.GetUser(ctx, c)
-	if userID == "" {
-		userID = strconv.Itoa(int(crtUser.ID))
-	}
-	if userID == strconv.Itoa(int(crtUser.ID)) {
-		// 本人
+	userIDString := c.Param("id")
+	crtUser := middle.Auth.GetUserWithBlock(ctx, c)
+	// 如果未提供用户ID或ID为空，则获取当前登录用户的信息
+	if userIDString == "" {
 		resps.Ok(c, "ok", map[string]any{
 			"user": User.ToDTO(crtUser, true),
 		})
-	} else {
-		// 其他人
-		resps.Ok(c, "ok", map[string]any{
-			"user": User.ToDTO(crtUser, false),
-		})
+		return
 	}
+	// 尝试将ID转换为整数
+	userID, err := strconv.Atoi(userIDString)
+	if err != nil {
+		resps.BadRequest(c, "Invalid user ID")
+		return
+	}
+	// 如果请求的是当前用户自己的信息
+	if uint(userID) == crtUser.ID {
+		resps.Ok(c, "ok", map[string]any{
+			"user": User.ToDTO(crtUser, true),
+		})
+		return
+	}
+	// 获取其他用户的信息
+	targetUser, err := store.User.GetByID(uint(userID))
+	if err != nil {
+		resps.NotFound(c, "User not found")
+		return
+	}
+	resps.Ok(c, "ok", map[string]any{
+		"user": User.ToDTO(targetUser, false),
+	})
 }
 
 // Register 用户注册
@@ -208,20 +223,22 @@ func (userApi) UpdateUser(ctx context.Context, c *app.RequestContext) {
 		resps.BadRequest(c, resps.ParameterError)
 		return
 	}
-
-	crtUser := middle.Auth.GetUser(ctx, c)
+	// 校验用户名称是否合法
+	if !utils.IsValidEntityName(userDTO.Name) {
+		resps.BadRequest(c, "Username is invalid")
+		return
+	}
+	crtUser := middle.Auth.GetUserWithBlock(ctx, c)
 	crtUser.Name = userDTO.Name
 	crtUser.DisplayName = userDTO.DisplayName
 	crtUser.Email = userDTO.Email
 	crtUser.Description = userDTO.Description
 	crtUser.AvatarURL = userDTO.Avatar
 	crtUser.Language = userDTO.Language
-
 	if err := store.User.Update(crtUser); err != nil {
 		resps.InternalServerError(c, "Failed to update user")
 		return
 	}
-
 	resps.Ok(c, resps.OK, map[string]any{})
 }
 
@@ -233,7 +250,7 @@ func (userApi) CreateApiToken(ctx context.Context, c *app.RequestContext) {
 		resps.BadRequest(c, resps.ParameterError)
 		return
 	}
-	crtUser := middle.Auth.GetUser(ctx, c)
+	crtUser := middle.Auth.GetUserWithBlock(ctx, c)
 	token, err := utils.Token.CreateApiToken(crtUser.ID, time.Duration(createTokenReq.Expire)*time.Second, middle.ApiTokenPersistentHandler)
 	if err != nil {
 		resps.InternalServerError(c, "Failed to create token: "+err.Error())
@@ -254,7 +271,7 @@ func (userApi) RevokeApiToken(ctx context.Context, c *app.RequestContext) {
 		resps.BadRequest(c, "Invalid token ID")
 		return
 	}
-	crtUser := middle.Auth.GetUser(ctx, c)
+	crtUser := middle.Auth.GetUserWithBlock(ctx, c)
 	token, err := store.Token.GetApiTokenByID(uint(tokenId))
 	if err != nil || token == nil {
 		resps.InternalServerError(c, resps.TargetNotFound)
@@ -276,7 +293,7 @@ func (userApi) RevokeApiToken(ctx context.Context, c *app.RequestContext) {
 // ListApiToken 列出ApiToken
 func (userApi) ListApiToken(ctx context.Context, c *app.RequestContext) {
 	page, limit := utils.Ctx.GetPageLimit(c)
-	crtUser := middle.Auth.GetUser(ctx, c)
+	crtUser := middle.Auth.GetUserWithBlock(ctx, c)
 	tokens, total, err := store.Token.ListApiTokens(crtUser.ID, page, limit)
 	if err != nil {
 		resps.BadRequest(c, resps.ParameterError)
