@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/LiteyukiStudio/spage/constants"
 	"github.com/LiteyukiStudio/spage/spage/models"
+	"github.com/sirupsen/logrus"
 
 	"gorm.io/gorm"
 )
@@ -81,6 +82,7 @@ func (u *userType) FindOrCreateByEmail(email, name string) (*models.User, error)
 
 // Update 更新用户信息
 func (u *userType) Update(user *models.User) error {
+	logrus.Println("Updating user:", user.ID, user.Name, user.Email, user.Role)
 	return DB.Updates(user).Error
 }
 

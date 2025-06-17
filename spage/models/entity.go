@@ -10,7 +10,7 @@ type User struct {
 	Email         *string         `gorm:"unique"`                          // 用户的电子邮件地址，只有用户的电子邮件地址是唯一的（用于 oidc 身份验证） User's email address, only the user's email address is unique (used for oidc authentication)
 	Description   string          `gorm:"default:'No description.'"`       // 用户描述 User description
 	AvatarURL     *string         `gorm:"column:avatar_url"`               // 留空以使用 Gravatar Leave blank to use Gravatar
-	Role          string          `gorm:"not null;default:member"`         // 用户的全局角色 User's global role
+	Role          string          `gorm:"not null;default:user"`           // 用户的全局角色 User's global role
 	Organizations []*Organization `gorm:"many2many:organization_members;"` // 隶属于许多组织 Many organizations the user belongs to
 	ProjectLimit  int             `gorm:"default:-1"`                      // 用户的项目限制，0 表示无限制 User's project limit, 0 means no limit
 	Language      string          `gorm:"default:'zh-cn'"`                 // 用户的语言，默认为英语 User's language, default to English

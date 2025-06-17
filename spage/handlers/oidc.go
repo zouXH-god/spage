@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/LiteyukiStudio/spage/config"
+	"github.com/LiteyukiStudio/spage/constants"
 	"github.com/LiteyukiStudio/spage/resps"
 	"github.com/LiteyukiStudio/spage/spage/middle"
 	"github.com/LiteyukiStudio/spage/spage/store"
@@ -127,7 +128,6 @@ func (oidcType) LoginOidcConfig(ctx context.Context, c *app.RequestContext) {
 		resps.InternalServerError(c, "获取访问令牌失败")
 		return
 	}
-
 	// 请求用户信息
 	userInfo, err := requestUserInfo(client, oidcConfig.UserInfoEndpoint, tokenResult.AccessToken)
 	if err != nil {
@@ -135,7 +135,6 @@ func (oidcType) LoginOidcConfig(ctx context.Context, c *app.RequestContext) {
 		resps.InternalServerError(c, "获取用户信息失败")
 		return
 	}
-
 	// 处理用户登录
 	user, err := store.User.FindOrCreateByEmail(userInfo.Email, userInfo.Name)
 	if err != nil {
@@ -143,7 +142,20 @@ func (oidcType) LoginOidcConfig(ctx context.Context, c *app.RequestContext) {
 		resps.InternalServerError(c, "用户处理失败")
 		return
 	}
-
+	// 校验允许组
+	if !matchGroups(userInfo.Groups, oidcConfig.AllowedGroups, true) {
+		resps.Forbidden(c, "用户不在允许的组中")
+	}
+	// 校验管理组
+	if matchGroups(userInfo.Groups, oidcConfig.AdminGroups, false) {
+		user.Role = constants.RoleAdmin
+		err = store.User.Update(user)
+		if err != nil {
+			logrus.Errorf("更新用户失败: %v", err)
+			resps.InternalServerError(c, "更新用户失败")
+			return
+		}
+	}
 	middle.Auth.SetTokenForCookie(c, user, false)
 	resps.Redirect(c, config.BaseUrl)
 }
@@ -172,8 +184,24 @@ type TokenResponse struct {
 
 // UserInfo 定义用户信息结构
 type UserInfo struct {
-	Sub     string `json:"sub"`
-	Name    string `json:"name"`
-	Email   string `json:"email"`
-	Picture string `json:"picture,omitempty"`
+	Sub     string   `json:"sub"`
+	Name    string   `json:"name"`
+	Email   string   `json:"email"`
+	Picture string   `json:"picture,omitempty"`
+	Groups  []string `json:"groups,omitempty"` // 可选字段，OIDC提供的用户组信息
+}
+
+// 匹配用户是否属于指定组列表中
+func matchGroups(userGroups []string, groups []string, defaultMatch bool) bool {
+	if len(groups) == 0 || len(groups) >= 1 && groups[0] == "*" {
+		return defaultMatch
+	}
+	for _, userGroup := range userGroups {
+		for _, group := range groups {
+			if userGroup == group {
+				return true
+			}
+		}
+	}
+	return false
 }
