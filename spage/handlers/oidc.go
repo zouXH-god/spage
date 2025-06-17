@@ -144,8 +144,8 @@ func (oidcType) LoginOidcConfig(ctx context.Context, c *app.RequestContext) {
 	// 校验允许组
 	if !matchGroups(userInfo.Groups, oidcConfig.AllowedGroups, true) {
 		resps.Forbidden(c, "用户不在允许的组中")
+		return
 	}
-	// 校验管理组
 	if matchGroups(userInfo.Groups, oidcConfig.AdminGroups, false) {
 		user.Role = constants.RoleAdmin
 		err = store.User.Update(user)

@@ -29,3 +29,9 @@ func (oidcType) GetByName(name string) (oidcConfig *models.OIDCConfig, err error
 	err = DB.Where("name = ?", name).First(oidcConfig).Error
 	return
 }
+
+func (oidcType) GetByID(id uint) (oidcConfig *models.OIDCConfig, err error) {
+	oidcConfig = &models.OIDCConfig{}
+	err = DB.Where("id = ?", id).First(oidcConfig).Error
+	return
+}

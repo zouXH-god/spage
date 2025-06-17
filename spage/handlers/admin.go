@@ -63,40 +63,50 @@ func (adminApi) CreateOidcConfig(ctx context.Context, c *app.RequestContext) {
 func (adminApi) UpdateOidcConfig(ctx context.Context, c *app.RequestContext) {
 	idString := c.Param("id")
 	id, err := strconv.Atoi(idString)
+	// 验证ID是否存在
+	existingConfig, err := store.Oidc.GetByID(uint(id))
+	if err != nil || existingConfig == nil {
+		existingConfig = &models.OIDCConfig{}
+	}
+
 	if err != nil {
 		resps.BadRequest(c, resps.ParameterError)
 		return
 	}
-
 	var oidcDtp = OidcDto{}
 	err = c.BindJSON(&oidcDtp)
 	if err != nil {
 		resps.BadRequest(c, resps.ParameterError)
 		return
 	}
-	oidcConfig := &models.OIDCConfig{
-		Name:             oidcDtp.Name,
-		AdminGroups:      oidcDtp.AdminGroups,
-		AllowedGroups:    oidcDtp.AllowedGroups,
-		ClientID:         oidcDtp.ClientID,
-		ClientSecret:     oidcDtp.ClientSecret,
-		DisplayName:      oidcDtp.DisplayName,
-		GroupsClaim:      &oidcDtp.GroupClaims,
-		Icon:             &oidcDtp.Icon,
-		OidcDiscoveryUrl: oidcDtp.OidcDiscoveryUrl,
-		Enabled:          true,
+	existingConfig = &models.OIDCConfig{
+		Name:          oidcDtp.Name,
+		AdminGroups:   oidcDtp.AdminGroups,
+		AllowedGroups: oidcDtp.AllowedGroups,
+		ClientID:      oidcDtp.ClientID,
+		ClientSecret:  oidcDtp.ClientSecret,
+		DisplayName:   oidcDtp.DisplayName,
+		GroupsClaim:   &oidcDtp.GroupClaims,
+		Icon:          &oidcDtp.Icon,
+		OidcDiscoveryUrl: func() string {
+			if oidcDtp.OidcDiscoveryUrl != "" {
+				return oidcDtp.OidcDiscoveryUrl
+			}
+			return existingConfig.OidcDiscoveryUrl
+		}(),
+		Enabled: true,
 	}
-	oidcConfig.ID = uint(id)
-	err = updateOidcConfigFromUrl(oidcConfig.OidcDiscoveryUrl, oidcConfig)
+	existingConfig.ID = uint(id)
+	err = updateOidcConfigFromUrl(existingConfig.OidcDiscoveryUrl, existingConfig)
 	if err != nil {
 		resps.BadRequest(c, fmt.Sprintf("请求OIDC发现端点失败: %v", err))
 		return
 	}
-	if err = store.Oidc.UpdateOidcConfig(oidcConfig); err != nil {
+	if err = store.Oidc.UpdateOidcConfig(existingConfig); err != nil {
 		resps.InternalServerError(c, err.Error())
 		return
 	}
-	resps.Ok(c, resps.OK, map[string]any{"id": oidcConfig.ID})
+	resps.Ok(c, resps.OK, map[string]any{"id": existingConfig.ID})
 }
 
 type oidcDiscoveryResp struct {
