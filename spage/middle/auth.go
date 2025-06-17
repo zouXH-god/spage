@@ -145,3 +145,29 @@ func (authType) IsAdmin() app.HandlerFunc {
 		c.Next(ctx)
 	}
 }
+
+// SetTokenForCookie 设置令牌到 Cookie 中 自动响应错误和返回，无需处理错误
+func (authType) SetTokenForCookie(c *app.RequestContext, user *models.User, response bool) {
+	token, err := utils.Token.CreateJsonWebToken(user.ID, time.Duration(config.TokenExpireTime)*time.Second, false, JwtPersistentHandler)
+	if err != nil {
+		resps.InternalServerError(c, "Failed to create token")
+		return
+	}
+	refreshToken, err := utils.Token.CreateJsonWebToken(user.ID, time.Duration(config.RefreshTokenExpireTime)*time.Second, false, JwtPersistentHandler)
+	if err != nil {
+		resps.InternalServerError(c, "Failed to create refresh token")
+		return
+	}
+	c.SetCookie("token", token, config.TokenExpireTime, "/", "", protocol.CookieSameSiteLaxMode, true, true)
+	c.SetCookie("refresh_token", refreshToken, config.RefreshTokenExpireTime, "/", "", protocol.CookieSameSiteLaxMode, true, true)
+
+	if !response {
+		return
+	}
+	resps.Ok(c, "Login successful", map[string]any{
+		"token":         token,
+		"refresh_token": refreshToken,
+		"user_id":       user.ID,
+	})
+	return
+}

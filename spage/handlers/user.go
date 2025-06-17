@@ -40,7 +40,7 @@ func (userApi) ToDTO(user *models.User, self bool) UserDTO {
 // Login 用户登录
 func (userApi) Login(ctx context.Context, c *app.RequestContext) {
 	loginReq := &LoginReq{}
-	// TODO: 这里需要验证验证码
+	// TODO 校验Captcha验证码
 	err := c.BindJSON(loginReq)
 	if err != nil {
 		resps.BadRequest(c, "Parameter error")
@@ -64,24 +64,7 @@ func (userApi) Login(ctx context.Context, c *app.RequestContext) {
 		return
 	} else {
 		if utils.Password.VerifyPassword(loginReq.Password, *user.Password, config.JwtSecret) {
-			token, err := utils.Token.CreateJsonWebToken(user.ID, time.Duration(config.TokenExpireTime)*time.Second, false, middle.JwtPersistentHandler)
-			if err != nil {
-				resps.InternalServerError(c, "Failed to create token")
-				return
-			}
-			refreshToken, err := utils.Token.CreateJsonWebToken(user.ID, time.Duration(config.RefreshTokenExpireTime)*time.Second, true, middle.JwtPersistentHandler)
-			if err != nil {
-				resps.InternalServerError(c, "Failed to create refresh token")
-				return
-			}
-			c.SetCookie("token", token, config.TokenExpireTime, "/", "", protocol.CookieSameSiteLaxMode, true, true)
-			c.SetCookie("refresh_token", refreshToken, config.RefreshTokenExpireTime, "/", "", protocol.CookieSameSiteLaxMode, true, true)
-			resps.Ok(c, "Login successful", map[string]any{
-				"token":         token,
-				"refresh_token": refreshToken,
-				"user_id":       user.ID,
-			})
-			return
+			middle.Auth.SetTokenForCookie(c, user, true)
 		} else {
 			resps.Forbidden(c, "Incorrect password")
 			return

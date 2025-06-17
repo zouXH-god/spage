@@ -20,5 +20,12 @@ func (oidcType) UpdateOidcConfig(oidcConfig *models.OIDCConfig) error {
 }
 
 func (oidcType) DeleteOidcConfig(oidcConfig *models.OIDCConfig) error {
+	oidcConfig = &models.OIDCConfig{}
 	return DB.Delete(oidcConfig).Error
+}
+
+func (oidcType) GetByName(name string) (oidcConfig *models.OIDCConfig, err error) {
+	oidcConfig = &models.OIDCConfig{}
+	err = DB.Where("name = ?", name).First(oidcConfig).Error
+	return
 }

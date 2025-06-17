@@ -58,6 +58,27 @@ func (u *userType) GetByEmail(email string) (user *models.User, err error) {
 	return user, nil
 }
 
+// FindOrCreateByEmail 根据邮箱查找或创建用户
+func (u *userType) FindOrCreateByEmail(email, name string) (*models.User, error) {
+	user := &models.User{}
+	// 尝试查找用户 Try to find user
+	err := DB.Where("email = ?", email).First(user).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			// 用户不存在，创建新用户 User does not exist, create a new user
+			user.Email = &email
+			user.Name = name
+			err = DB.Create(user).Error
+			if err != nil {
+				return nil, err // 创建失败时返回错误 Return error if creation fails
+			}
+		} else {
+			return nil, err // 查找失败时返回错误 Return error if search fails
+		}
+	}
+	return user, nil // 返回找到或创建的用户 Return found or created user
+}
+
 // Update 更新用户信息
 func (u *userType) Update(user *models.User) error {
 	return DB.Updates(user).Error
