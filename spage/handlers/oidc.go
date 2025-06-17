@@ -50,7 +50,7 @@ func (oidcType) ListOidcConfig(ctx context.Context, c *app.RequestContext) {
 	})
 }
 
-// 请求访问令牌
+// requestToken 请求访问令牌
 func requestToken(client *resty.Client, tokenEndpoint, clientID, clientSecret, code, redirectURI string) (*TokenResponse, error) {
 	tokenResp, err := client.R().
 		SetFormData(map[string]string{
@@ -71,11 +71,10 @@ func requestToken(client *resty.Client, tokenEndpoint, clientID, clientSecret, c
 	if tokenResp.StatusCode() != 200 {
 		return nil, fmt.Errorf("状态码: %d，响应: %s", tokenResp.StatusCode(), tokenResp.String())
 	}
-
 	return tokenResp.Result().(*TokenResponse), nil
 }
 
-// 请求用户信息
+// requestUserInfo 请求用户信息
 func requestUserInfo(client *resty.Client, userInfoEndpoint, accessToken string) (*UserInfo, error) {
 	userInfoResp, err := client.R().
 		SetHeader("Authorization", "Bearer "+accessToken).
