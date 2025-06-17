@@ -1,12 +1,7 @@
 
-<<<<<<< HEAD
-<center><img src="https://socialify.git.ci/LiteyukiStudio/spage/image?description=1&font=Bitter&forks=1&issues=1&logo=https%3A%2F%2Fcdn.liteyuki.icu%2Flogos%2Fapage.png&name=1&pattern=Overlapping+Hexagons&pulls=1&stargazers=1&theme=Auto" alt="spage" width="780" height="320" />
-    <a href="./README.md">简体中文</a>
-=======
 
 <center><img src="https://socialify.git.ci/LiteyukiStudio/spage/image?description=1&font=Bitter&forks=1&issues=1&logo=https%3A%2F%2Fcdn.liteyuki.org%2Flogos%2Fapage.png&name=1&pattern=Overlapping+Hexagons&pulls=1&stargazers=1&theme=Auto" alt="spage" width="780" height="320" />
     <!-- <a href="./README.md">简体中文</a>
->>>>>>> c0a64c114d395d38fce1285f73e6ff47a9be43b8
     |
     <a href="./README/en.md">English</a>
     |
