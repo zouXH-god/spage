@@ -1,4 +1,5 @@
 "use client";
+
 import Nav from "@/components/Nav";
 import "@/utils/i18n";
 

@@ -7,31 +7,28 @@
  * 文件 File
  */
 export interface File {
-    creatorId: number;
-    id: number;
-    isPrivate: boolean;
-    [property: string]: unknown;
+  creatorId: number;
+  id: number;
+  isPrivate: boolean;
+  [property: string]: unknown;
 }
 
 /**
  * 标签 Label
  */
 export interface Label {
-    color?: string;
-    name: string;
-    ownerId: number;
-    ownerType: "org" | "user";
-    value?: string;
-    [property: string]: unknown;
+  color?: string;
+  name: string;
+  ownerId: number;
+  ownerType: "org" | "user";
+  value?: string;
+  [property: string]: unknown;
 }
-
-
-
 
 /**
  * base response
  */
 export interface BaseResponse {
-    message: string | null;
-    [property: string]: unknown;
+  message: string | null;
+  [property: string]: unknown;
 }

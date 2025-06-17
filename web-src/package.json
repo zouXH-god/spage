@@ -23,15 +23,15 @@
     "react-i18next": "^15.5.3"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.1",
     "@tailwindcss/postcss": "^4.1.10",
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/i18next": "^13.0.0",
     "@types/node": "^20.19.1",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@types/react-gravatar": "^2.6.14",
-    "eslint": "^9.29.0",
-    "eslint-config-next": "15.3.3",
+    "prettier": "^3.5.3",
+    "prettier-plugin-tailwindcss": "^0.6.12",
     "tailwindcss": "^4.1.10",
     "typescript": "^5.8.3"
   }

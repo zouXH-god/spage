@@ -1,6 +1,6 @@
 export enum EntityTypeEnum {
-    USER = "user",
-    ORG = "organization",
-    PROJECT = "project",
-    SITE = "site",
+  USER = "user",
+  ORG = "organization",
+  PROJECT = "project",
+  SITE = "site",
 }

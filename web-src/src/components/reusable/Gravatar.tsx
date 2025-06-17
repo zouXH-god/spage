@@ -1,8 +1,9 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
 import Gravatar from "react-gravatar";
+
+import Image from "next/image";
 
 interface GravatarAvatarProps {
   email: string;

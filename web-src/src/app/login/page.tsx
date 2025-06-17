@@ -1,19 +1,25 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Image from "next/image";
-import { login, getCaptchaConfig, getUser, getOidcConfig } from "@/api/user.api";
-import AIOCaptchaWidget from "@/components/captcha/AIOCaptcha";
-import { CaptchaProps, CaptchaProvider } from "@/types/captcha";
+import { useEffect, useState } from "react";
+
 import { t } from "i18next";
-import { useDevice } from "@/contexts/DeviceContext";
-import { useRouter } from "next/navigation";
-import { OidcConfig } from "@/api/user.models";
 import { CircleUserRound, ShieldCheck } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+
+import { getCaptchaConfig, getOidcConfig, getUser, login } from "@/api/user.api";
+import { OidcConfig } from "@/api/user.models";
+import AIOCaptchaWidget from "@/components/captcha/AIOCaptcha";
+import { useDevice } from "@/contexts/DeviceContext";
+import { CaptchaProps, CaptchaProvider } from "@/types/captcha";
 
 export default function LoginPage() {
   const { isMobile } = useDevice();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams.get("redirect") || "/";
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -21,14 +27,16 @@ export default function LoginPage() {
   const [captchaProps, setCaptchaProps] = useState<CaptchaProps | null>(null);
   const [captchaKey, setCaptchaKey] = useState(Date.now()); // 新增
   const [oidcConfigs, setOidcConfigs] = useState<OidcConfig[]>([]); // 从服务端拉取oidc配置
-  const [remember, setRemember] = useState(false);  // 记住设备
+  const [remember, setRemember] = useState(false); // 记住设备
 
   useEffect(() => {
-    getUser().then(() => {
-      router.push("/"); // 如果已登录，直接跳转到首页
-    }).catch((error) => {
-      console.error("Error fetching user data:", error);
-    });
+    getUser()
+      .then(() => {
+        router.push(redirectUrl); // 如果已登录，直接跳转到重定向地址
+      })
+      .catch((error) => {
+        console.error("Error fetching user data:", error);
+      });
     getCaptchaConfig()
       .then((response) => {
         const config = response.data;
@@ -41,21 +49,19 @@ export default function LoginPage() {
         });
       })
       .catch(() => setError("login.captcha.fetchFailed"));
-  }, [router]);
+  }, [redirectUrl, router]);
 
   useEffect(() => {
     getOidcConfig()
       .then((response) => {
         const configs = response.data.oidcConfigs || [];
         setOidcConfigs(configs);
-      }
-      )
+      })
       .catch((error) => {
         console.error("获取 OIDC 配置失败:", error);
         setError("login.oidc.fetchFailed");
-      }
-      );
-  }, [])
+      });
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,7 +71,7 @@ export default function LoginPage() {
         router.push("/");
       })
       .catch((err) => {
-        setError(t("login.failed") + ": " + err.response?.data?.message || err.message)
+        setError(t("login.failed") + ": " + err.response?.data?.message || err.message);
         console.error("登录失败:", err);
         setCaptchaToken("");
         setCaptchaKey(Date.now());
@@ -97,7 +103,7 @@ export default function LoginPage() {
               type="text"
               placeholder={t("login.usernameOrEmail")}
               value={username}
-              onChange={e => setUsername(e.target.value)}
+              onChange={(e) => setUsername(e.target.value)}
               className="w-full pl-10 pr-4 py-2 rounded-3xl border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -110,26 +116,30 @@ export default function LoginPage() {
               type="password"
               placeholder={t("login.password")}
               value={password}
-              onChange={e => setPassword(e.target.value)}
+              onChange={(e) => setPassword(e.target.value)}
               className="w-full pl-10 pr-4 py-2 rounded-3xl border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
         </div>
         {/* 记住设备和忘记密码 */}
         <div className="flex items-center justify-between mb-2 px-1 text-sm">
-            <label className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
-              <input
-                type="checkbox"
-                className="accent-blue-600"
-                checked={remember}
-                onChange={e => setRemember(e.target.checked)}
-              />
-              {t("login.remember")}
-            </label>
-            <a href="/forgot-password" className="text-blue-600 hover:underline">{t("login.forgotPassword")}</a>
-          </div>
+          <label className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+            <input
+              type="checkbox"
+              className="accent-blue-600"
+              checked={remember}
+              onChange={(e) => setRemember(e.target.checked)}
+            />
+            {t("login.remember")}
+          </label>
+          <Link href="/forgot-password" className="text-blue-600 hover:underline">
+            {t("login.forgotPassword")}
+          </Link>
+        </div>
         {/* Captcha组件 */}
-        <div className={`flex justify-center (${![CaptchaProvider.DISABLE, CaptchaProvider.RECAPTCHA].includes(captchaProps?.provider ?? CaptchaProvider.DISABLE) ? "my-4" : ""})`}>
+        <div
+          className={`flex justify-center (${![CaptchaProvider.DISABLE, CaptchaProvider.RECAPTCHA].includes(captchaProps?.provider ?? CaptchaProvider.DISABLE) ? "my-4" : ""})`}
+        >
           <AIOCaptchaWidget
             key={captchaKey}
             {...(captchaProps || {
@@ -138,15 +148,13 @@ export default function LoginPage() {
               url: "",
               onSuccess: (token: string) => setCaptchaToken(token),
               onError: () => {
-                setError("login.captcha.failed")
+                setError("login.captcha.failed");
                 setCaptchaKey(Date.now()); // 重新生成key以重置验证码组件
               },
             })}
           />
         </div>
-        {error && (
-          <div className="text-red-500 text-sm text-center mb-2">{t(error)}</div>
-        )}
+        {error && <div className="text-red-500 text-sm text-center mb-2">{t(error)}</div>}
         {/* 登录按钮 */}
         <button
           type="submit"
@@ -162,23 +170,20 @@ export default function LoginPage() {
         </button>
         {/* oidc登录按钮 */}
         {oidcConfigs.map((config) => (
-          <a
+          <Link
             key={config.name}
             href={config.loginUrl}
             className="w-full py-2 mt-4 rounded-3xl bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white text-center font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
           >
             <div className="flex items-center justify-center gap-2">
               <div className="flex-shrink-0 w-6 h-6 relative">
-                <Image
-                  src={config.icon}
-                  alt={config.displayName}
-                  fill
-                  className="object-contain"
-                />
+                <Image src={config.icon} alt={config.displayName} fill className="object-contain" />
               </div>
-              <span className="text-base">{t("login.oidc.use", { provider: t(config.displayName) })}</span>
+              <span className="text-base">
+                {t("login.oidc.use", { provider: t(config.displayName) })}
+              </span>
             </div>
-          </a>
+          </Link>
         ))}
       </form>
     </div>
