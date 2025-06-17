@@ -28,6 +28,7 @@ export interface LoginRequest {
     username: string;
     password: string;
     captchaToken: string;
+    remember: boolean;
 }
 
 export interface LoginResponse extends BaseResponse {

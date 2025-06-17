@@ -62,7 +62,7 @@ func (userApi) Login(ctx context.Context, c *app.RequestContext) {
 		return
 	} else {
 		if utils.Password.VerifyPassword(loginReq.Password, *user.Password, config.JwtSecret) {
-			middle.Auth.SetTokenForCookie(c, user, true)
+			middle.Auth.SetTokenForCookie(c, user, true, loginReq.Remember)
 		} else {
 			resps.Forbidden(c, "Incorrect password")
 			return

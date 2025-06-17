@@ -147,19 +147,26 @@ func (authType) IsAdmin() app.HandlerFunc {
 }
 
 // SetTokenForCookie 设置令牌到 Cookie 中 自动响应错误和返回，无需处理错误
-func (authType) SetTokenForCookie(c *app.RequestContext, user *models.User, response bool) {
+func (authType) SetTokenForCookie(c *app.RequestContext, user *models.User, response bool, remember bool) {
 	token, err := utils.Token.CreateJsonWebToken(user.ID, time.Duration(config.TokenExpireTime)*time.Second, false, JwtPersistentHandler)
 	if err != nil {
 		resps.InternalServerError(c, "Failed to create token")
 		return
 	}
-	refreshToken, err := utils.Token.CreateJsonWebToken(user.ID, time.Duration(config.RefreshTokenExpireTime)*time.Second, false, JwtPersistentHandler)
+
+	// 根据 remember 参数决定 refresh token 的过期时间
+	refreshExpire := config.RefreshTokenExpireTime
+	if remember {
+		refreshExpire = config.RefreshTokenExpireTime * 7 // 延长7倍
+	}
+
+	refreshToken, err := utils.Token.CreateJsonWebToken(user.ID, time.Duration(refreshExpire)*time.Second, false, JwtPersistentHandler)
 	if err != nil {
 		resps.InternalServerError(c, "Failed to create refresh token")
 		return
 	}
 	c.SetCookie("token", token, config.TokenExpireTime, "/", "", protocol.CookieSameSiteLaxMode, true, true)
-	c.SetCookie("refresh_token", refreshToken, config.RefreshTokenExpireTime, "/", "", protocol.CookieSameSiteLaxMode, true, true)
+	c.SetCookie("refresh_token", refreshToken, refreshExpire, "/", "", protocol.CookieSameSiteLaxMode, true, true)
 
 	if !response {
 		return

@@ -13,6 +13,7 @@ type LoginReq struct {
 	Username     string `json:"username" binding:"required"`      // 用户名 Username
 	Password     string `json:"password" binding:"required"`      // 密码 Password
 	CaptchaToken string `json:"captcha_token" binding:"required"` // 验证码 Token
+	Remember     bool   `json:"remember"`                         // 记住我 Remember me
 }
 
 // CreateTokenReq 创建Token请求

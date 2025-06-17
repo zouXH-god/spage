@@ -97,22 +97,20 @@ func requestUserInfo(client *resty.Client, userInfoEndpoint, accessToken string)
 func (oidcType) LoginOidcConfig(ctx context.Context, c *app.RequestContext) {
 	name := c.Param("name")
 	code := c.Query("code")
-	state := c.Query("state") // 暂时只记录state，不做校验
+	state := c.Query("state") // TODO 暂时只记录state，不做校验
 	logrus.Println("state:", state)
 
 	oidcConfig, err := store.Oidc.GetByName(name)
 	if err != nil || oidcConfig == nil {
-		resps.BadRequest(c, "OIDC配置未找到: "+name)
+		resps.NotFound(c, "OIDC配置未找到: "+name)
 		return
 	}
 	if code == "" {
 		resps.BadRequest(c, "缺少授权码")
 		return
 	}
-
 	// 创建HTTP客户端
 	client := resty.New()
-
 	// 请求访问令牌
 	tokenResult, err := requestToken(
 		client,
@@ -155,7 +153,7 @@ func (oidcType) LoginOidcConfig(ctx context.Context, c *app.RequestContext) {
 			return
 		}
 	}
-	middle.Auth.SetTokenForCookie(c, user, false)
+	middle.Auth.SetTokenForCookie(c, user, false, false)
 	resps.Redirect(c, config.BaseUrl)
 }
 
