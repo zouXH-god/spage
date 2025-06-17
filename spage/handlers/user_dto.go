@@ -18,7 +18,7 @@ type LoginReq struct {
 
 // CreateTokenReq 创建Token请求
 type CreateTokenReq struct {
-	Duration uint `json:"duration" binding:"required"`
+	Expire uint `json:"expire" binding:"required"`
 }
 
 // UserDTO 组织信息数据传输对象

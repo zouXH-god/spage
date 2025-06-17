@@ -69,7 +69,7 @@ export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // 初始化主题
+  // 初始化主题和系统主题变化监听
   useEffect(() => {
     if (typeof window !== "undefined") {
       const savedTheme = localStorage.getItem("theme") as Mode | null;
@@ -77,6 +77,18 @@ export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       const theme = savedTheme || systemTheme;
       setModeState(theme);
       document.documentElement.classList.toggle("dark", theme === "dark");
+
+      // 监听系统主题变动
+      const media = window.matchMedia("(prefers-color-scheme: dark)");
+      const handleChange = (e: MediaQueryListEvent) => {
+        if (!localStorage.getItem("theme")) {
+          const newTheme = e.matches ? "dark" : "light";
+          setModeState(newTheme);
+          document.documentElement.classList.toggle("dark", newTheme === "dark");
+        }
+      };
+      media.addEventListener("change", handleChange);
+      return () => media.removeEventListener("change", handleChange);
     }
   }, []);
 

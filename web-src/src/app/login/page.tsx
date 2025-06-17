@@ -9,7 +9,7 @@ import { t } from "i18next";
 import { useDevice } from "@/contexts/DeviceContext";
 import { useRouter } from "next/navigation";
 import { OidcConfig } from "@/api/user.models";
-import { CircleUserRound, Lock } from "lucide-react";
+import { CircleUserRound, ShieldCheck } from "lucide-react";
 
 export default function LoginPage() {
   const { isMobile } = useDevice();
@@ -60,8 +60,7 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     login({ username, password, captchaToken, remember })
-      .then((response) => {
-        console.log("登录成功:", response.data);
+      .then(() => {
         // 路由跳转
         router.push("/");
       })
@@ -74,13 +73,13 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen flex items-center justify-center bg-slate-100 dark:bg-gray-900">
       <form
         onSubmit={handleSubmit}
         className={
           isMobile
             ? "w-full min-h-screen flex flex-col justify-center px-10 bg-white dark:bg-gray-800"
-            : "w-[400px] h-[420px] bg-white dark:bg-gray-800 rounded-2xl shadow-2xl px-8 py-55 flex flex-col justify-center"
+            : "w-[400px] h-[420px] bg-white dark:bg-gray-800 rounded-3xl shadow-2xl px-8 py-55 flex flex-col justify-center"
         }
         style={isMobile ? {} : { minWidth: 320, minHeight: 380 }}
       >
@@ -89,23 +88,23 @@ export default function LoginPage() {
         </h2>
         {/* 账号密码输入框 */}
         <div className="space-y-4 mb-4">
-          {/* 用户名输入框带图标 */}
+          {/* 用户名输入框 */}
           <div className="relative w-full">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
               <CircleUserRound className="w-5 h-5" />
             </span>
             <input
               type="text"
-              placeholder={t("login.username")}
+              placeholder={t("login.usernameOrEmail")}
               value={username}
               onChange={e => setUsername(e.target.value)}
               className="w-full pl-10 pr-4 py-2 rounded-3xl border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          {/* 密码输入框带图标 */}
+          {/* 密码输入框 */}
           <div className="relative w-full">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-              <Lock className="w-5 h-5" />
+              <ShieldCheck className="w-5 h-5" />
             </span>
             <input
               type="password"
@@ -125,9 +124,9 @@ export default function LoginPage() {
                 checked={remember}
                 onChange={e => setRemember(e.target.checked)}
               />
-              记住此设备
+              {t("login.remember")}
             </label>
-            <a href="/forgot-password" className="text-blue-600 hover:underline">忘记密码？</a>
+            <a href="/forgot-password" className="text-blue-600 hover:underline">{t("login.forgotPassword")}</a>
           </div>
         {/* Captcha组件 */}
         <div className={`flex justify-center (${![CaptchaProvider.DISABLE, CaptchaProvider.RECAPTCHA].includes(captchaProps?.provider ?? CaptchaProvider.DISABLE) ? "my-4" : ""})`}>
@@ -177,7 +176,7 @@ export default function LoginPage() {
                   className="object-contain"
                 />
               </div>
-              <span className="text-base">{t("login.useOidc", { provider: t(config.displayName) })}</span>
+              <span className="text-base">{t("login.oidc.use", { provider: t(config.displayName) })}</span>
             </div>
           </a>
         ))}

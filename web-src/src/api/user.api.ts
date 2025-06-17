@@ -15,7 +15,6 @@ import type {
 import type { AxiosResponse } from "axios";
 
 export function login(data: LoginRequest): Promise<AxiosResponse<LoginResponse, unknown>> {
-    console.log("Logging in with data:", data.captchaToken);
     return client.post<LoginResponse>("/user/login", data);
 }
 

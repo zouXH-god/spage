@@ -234,7 +234,7 @@ func (userApi) CreateApiToken(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	crtUser := middle.Auth.GetUser(ctx, c)
-	token, err := utils.Token.CreateApiToken(crtUser.ID, time.Duration(createTokenReq.Duration)*time.Second, middle.ApiTokenPersistentHandler)
+	token, err := utils.Token.CreateApiToken(crtUser.ID, time.Duration(createTokenReq.Expire)*time.Second, middle.ApiTokenPersistentHandler)
 	if err != nil {
 		resps.InternalServerError(c, "Failed to create token: "+err.Error())
 		return
