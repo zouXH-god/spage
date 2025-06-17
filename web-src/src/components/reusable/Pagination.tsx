@@ -120,8 +120,8 @@ export const Pagination: React.FC<PaginationProps> = ({
       {showPageSize && (
         <select
           className="px-2 py-1 rounded-md bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border-none"
-          onChange={(e) => {
-            // 这里需要添加改变页面大小的回调
+          onChange={() => {
+            
           }}
           value={pageSize}
         >

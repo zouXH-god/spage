@@ -13,7 +13,7 @@ export function UserPage({ id }: { id: number }) {
   const [user, setUser] = useState<User | null>(null);
   // 项目分页查询
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, ] = useState(10);
   const [totalItems, setTotalItems] = useState(0);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(false);
