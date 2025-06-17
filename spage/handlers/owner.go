@@ -25,7 +25,7 @@ func (ownerType) GetByName(ctx context.Context, c *app.RequestContext) {
 			return
 		}
 		resps.Ok(c, resps.OK, map[string]any{
-			"type": constants.OwnerTypeOrg,
+			"type": constants.OwnerTypeUser,
 			"id":   user.ID,
 		})
 		return
