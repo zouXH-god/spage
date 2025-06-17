@@ -50,10 +50,10 @@ var (
 	CaptchaSecretKey string // reCAPTCHA v3的密钥
 	CaptchaUrl       string // for mcaptcha
 
-	TokenExpireTime = 3600 * 24
+	TokenExpireTime = 60 * 5
 	// session过期时间，单位秒
 
-	RefreshTokenExpireTime = 3600 * 144
+	RefreshTokenExpireTime = 3600 * 24
 	// 刷新token过期时间，单位秒
 
 	BuildTime  = "0000-00-00 00:00:00" // 构建时间 Build Time

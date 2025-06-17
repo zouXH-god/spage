@@ -160,7 +160,7 @@ func (authType) SetTokenForCookie(c *app.RequestContext, user *models.User, resp
 		refreshExpire = config.RefreshTokenExpireTime * 7 // 延长7倍
 	}
 
-	refreshToken, err := utils.Token.CreateJsonWebToken(user.ID, time.Duration(refreshExpire)*time.Second, false, JwtPersistentHandler)
+	refreshToken, err := utils.Token.CreateJsonWebToken(user.ID, time.Duration(refreshExpire)*time.Second, true, JwtPersistentHandler)
 	if err != nil {
 		resps.InternalServerError(c, "Failed to create refresh token")
 		return
