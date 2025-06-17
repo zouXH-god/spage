@@ -172,9 +172,8 @@ func (authType) SetTokenForCookie(c *app.RequestContext, user *models.User, resp
 		return
 	}
 	resps.Ok(c, "Login successful", map[string]any{
-		"token":         token,
-		"refresh_token": refreshToken,
-		"user_id":       user.ID,
+		"token":   token,
+		"user_id": user.ID,
 	})
 	return
 }
