@@ -193,6 +193,24 @@ make plugin name=sqlite
 - 开发模式下，请求是先到达前端开发服务器，然后通过next rewrites转发到后端开发服务器
 - 构建产物中，请求是直接到达后端服务器
 
+#### Next.js的注意事项
+
+Next.js是一个React.js框架，由Vercel开发，使用了Server-Side Rendering(SSR)和Static Site Generation(SSG)等技术
+但是我们项目构建方式是前后端完全分离的SPA(单页面应用程式)，有许多SSR特性是无法使用的
+
+- 所有SSR特性
+- App Router 动态路由
+- API Routes
+- next中间件
+- 域内路由 next/link 组件
+- 服务器数据获取和渲染
+- 服务端组件
+- Draft Mode
+
+其他特性请阅读[Next.js文档](https://nextjs.org/docs)了解更多
+
+尽管有些特性在开发服务器中可以使用，但是在静态构建时是不被允许的，建议在贡献前先
+
 善用AI，但不能滥用AI，AI只能作为辅助工具
 
 ## 构建须知
