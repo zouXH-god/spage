@@ -14,6 +14,7 @@ type PasswordType struct {
 var Password = PasswordType{}
 
 // HashPassword 密码哈希函数
+// hash password function
 func (u *PasswordType) HashPassword(password string, salt string) (string, error) {
 	saltedPassword := Password.addSalt(password, salt)
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(saltedPassword), bcrypt.DefaultCost)
@@ -24,6 +25,8 @@ func (u *PasswordType) HashPassword(password string, salt string) (string, error
 }
 
 // VerifyPassword 验证密码
+// verify password
+
 func (u *PasswordType) VerifyPassword(password, hashedPassword string, salt string) bool {
 	saltedPassword := Password.addSalt(password, salt)
 	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(saltedPassword))
@@ -34,6 +37,10 @@ func (u *PasswordType) VerifyPassword(password, hashedPassword string, salt stri
 // password: 原始密码
 // salt: 盐值
 // 返回值: 加盐后的密码
+// Add salt function
+// password: original password
+// salt: salt value
+// return value: salted password
 func (u *PasswordType) addSalt(password string, salt string) string {
 	combined := password + salt
 	hash := sha256.New()
@@ -45,12 +52,17 @@ func (u *PasswordType) addSalt(password string, salt string) string {
 // password: 待检查的密码
 // level: 复杂度级别(1-4)
 // 返回值: 是否满足复杂度要求
+// Check password complexity based on the specified level
+// password: the password to be checked
+// level: complexity level (1-4)
+// return value: whether it meets the complexity requirements
 func (u *PasswordType) CheckPasswordComplexity(password string, level int) bool {
 	if len(password) <= 8 {
 		return false
 	}
 
 	// 定义各种字符类型的检查标志
+	// Define flags for checking various character types
 	var (
 		hasLower   bool
 		hasUpper   bool

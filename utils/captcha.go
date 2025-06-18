@@ -2,7 +2,6 @@ package utils
 
 import (
 	"fmt"
-
 	"github.com/LiteyukiStudio/spage/constants"
 	"github.com/go-resty/resty/v2"
 )
@@ -18,6 +17,7 @@ type CaptchaConfig struct {
 }
 
 // VerifyCaptcha 根据提供的配置和令牌验证验证码
+// Verify captcha based on provided configuration and token
 func (captchaType) VerifyCaptcha(restyClient *resty.Client, captchaConfig *CaptchaConfig, captchaToken string) (bool, error) {
 	switch captchaConfig.Type {
 	case constants.CaptchaTypeDisable:

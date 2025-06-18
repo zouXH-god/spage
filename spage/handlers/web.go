@@ -11,6 +11,7 @@ import (
 )
 
 // getMimeType 根据文件扩展名返回相应的 MIME 类型
+// as the file extension returns the corresponding MIME type
 func getMimeType(path string) string {
 	// 这里可以根据文件扩展名返回相应的 MIME 类型
 	ext := filepath.Ext(path)
@@ -18,6 +19,7 @@ func getMimeType(path string) string {
 }
 
 // WebHandler 处理静态文件请求的 Handler
+// Handler for static file requests
 func WebHandler(ctx context.Context, c *app.RequestContext) {
 	path := "dist" + string(c.Path())
 	file, err := static.WebFS.Open(path)

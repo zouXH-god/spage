@@ -3,9 +3,6 @@ package store
 import (
 	"errors"
 	"fmt"
-	"plugin"
-	"runtime"
-
 	"github.com/LiteyukiStudio/spage/config"
 	"github.com/LiteyukiStudio/spage/constants"
 	"github.com/LiteyukiStudio/spage/spage/models"
@@ -14,6 +11,8 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+	"plugin"
+	"runtime"
 )
 
 var DB *gorm.DB
@@ -21,13 +20,13 @@ var DB *gorm.DB
 // DBConfig 数据库配置结构体
 type DBConfig struct {
 	Driver   string // 数据库驱动类型，例如 "sqlite" 或 "postgres" Database driver type, e.g., "sqlite" or "postgres"
-	Path     string // 路径
-	Host     string // PostgreSQL 主机名
-	Port     int    // PostgreSQL 端口
-	User     string // PostgreSQL 用户名
-	Password string // PostgreSQL 密码
-	DBName   string // PostgreSQL 数据库名
-	SSLMode  string // PostgreSQL SSL 模式
+	Path     string // SQLite 路径 SQLite path
+	Host     string // PostgreSQL 主机名 PostgreSQL hostname
+	Port     int    // PostgreSQL 端口 PostgreSQL port
+	User     string // PostgreSQL 用户名 PostgreSQL username
+	Password string // PostgreSQL 密码 PostgreSQL password
+	DBName   string // PostgreSQL 数据库名 PostgreSQL database name
+	SSLMode  string // PostgreSQL SSL 模式 PostgreSQL SSL mode
 }
 
 // loadDBConfig 从配置文件加载数据库配置
