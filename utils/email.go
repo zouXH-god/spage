@@ -24,7 +24,6 @@ type EmailConfig struct {
 }
 
 // SendTemplate 发送HTML模板，从配置文件中读取邮箱配置
-// Send HTML template, read email configuration from the configuration file
 func SendTemplate(emailConfig *EmailConfig, target, htmlTemplate string, placeholders map[string]string) error {
 	for placeholder, value := range placeholders {
 		htmlTemplate = strings.ReplaceAll(htmlTemplate, placeholder, value)
@@ -37,10 +36,8 @@ func SendTemplate(emailConfig *EmailConfig, target, htmlTemplate string, placeho
 }
 
 // SendEmail 发送邮件
-// Send Email
 func SendEmail(emailConfig *EmailConfig, target, content string, isHTML bool) error {
 	// 如果配置未启用，则直接返回nil
-	// If the configuration is not enabled, return nil directly
 	if !emailConfig.Enable {
 		return nil
 	}
@@ -61,7 +58,6 @@ func SendEmail(emailConfig *EmailConfig, target, content string, isHTML bool) er
 	}
 
 	// 在函数退出时关闭连接
-	// Close the connection when the function exits
 	defer func(conn net.Conn) {
 		err := conn.Close()
 		if err != nil {
@@ -117,14 +113,12 @@ func SendEmail(emailConfig *EmailConfig, target, content string, isHTML bool) er
 			// todo: Handle errors when closing the writer
 		}
 	}(writer)
-
 	var message string
 	if isHTML {
 		message = fmt.Sprintf("From: %s\r\nTo: %s\r\nSubject: Notification\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n%s", emailConfig.Address, target, content)
 	} else {
 		message = fmt.Sprintf("From: %s\r\nTo: %s\r\nSubject: Notification\r\n\r\n%s", emailConfig.Address, target, content)
 	}
-
 	_, err = writer.Write([]byte(message))
 	return err
 }
