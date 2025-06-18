@@ -14,12 +14,10 @@ type Site struct {
 	Domains     []string `gorm:"type:json;default:'[]'"`                                            // 允许的域名，json格式 Allowed domains, json format
 }
 
-// 站点表名 Site table name
 func (Site) TableName() string {
 	return "sites"
 }
 
-// 站点发布表 Site release table
 type SiteRelease struct {
 	gorm.Model
 	SiteID uint   `gorm:"not null"` // 站点ID Site ID
@@ -29,7 +27,6 @@ type SiteRelease struct {
 	File   File   `gorm:"foreignKey:FileID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"` // 版本文件 Version file
 }
 
-// 站点发布表名 Site release table name
 func (SiteRelease) TableName() string {
 	return "site_releases"
 }

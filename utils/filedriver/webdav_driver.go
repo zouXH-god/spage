@@ -2,6 +2,10 @@ package filedriver
 
 import (
 	"bytes"
+	"fmt"
+	"github.com/LiteyukiStudio/spage/constants"
+	"github.com/LiteyukiStudio/spage/resps"
+	"github.com/cloudwego/hertz/pkg/app"
 	"io"
 	"os"
 	"path"
@@ -11,12 +15,13 @@ import (
 
 type WebDAVClientDriver struct {
 	client   *gowebdav.Client
+	config   *DriverConfig
 	BasePath string
 }
 
 func NewWebDAVClientDriver(driverConfig *DriverConfig) *WebDAVClientDriver {
 	c := gowebdav.NewClient(driverConfig.WebDavUrl, driverConfig.WebDavUser, driverConfig.WebDavPassword)
-	return &WebDAVClientDriver{client: c, BasePath: driverConfig.BasePath}
+	return &WebDAVClientDriver{client: c, BasePath: driverConfig.BasePath, config: driverConfig}
 }
 
 func (d *WebDAVClientDriver) fullPath(p string) string {
@@ -26,7 +31,7 @@ func (d *WebDAVClientDriver) fullPath(p string) string {
 	return path.Join(d.BasePath, p)
 }
 
-func (d *WebDAVClientDriver) Save(p string, r io.Reader) error {
+func (d *WebDAVClientDriver) Save(ctx *app.RequestContext, p string, r io.Reader) error {
 	data, err := io.ReadAll(r)
 	if err != nil {
 		return err
@@ -34,7 +39,7 @@ func (d *WebDAVClientDriver) Save(p string, r io.Reader) error {
 	return d.client.Write(d.fullPath(p), data, 0644)
 }
 
-func (d *WebDAVClientDriver) Open(p string) (io.ReadCloser, error) {
+func (d *WebDAVClientDriver) Open(ctx *app.RequestContext, p string) (io.ReadCloser, error) {
 	data, err := d.client.Read(d.fullPath(p))
 	if err != nil {
 		return nil, err
@@ -42,14 +47,30 @@ func (d *WebDAVClientDriver) Open(p string) (io.ReadCloser, error) {
 	return io.NopCloser(bytes.NewReader(data)), nil
 }
 
-func (d *WebDAVClientDriver) Delete(p string) error {
+func (d *WebDAVClientDriver) Get(ctx *app.RequestContext, p string) {
+	if d.config.WebDavPolicy == constants.WebDavPolicyRedirect {
+		ctx.Redirect(302, []byte(d.config.WebDavUrl+d.fullPath(p)))
+		return
+	} else {
+		data, err := d.client.Read(d.fullPath(p))
+		if err != nil {
+			resps.InternalServerError(ctx, err.Error())
+			return
+		}
+		ctx.SetBodyStream(bytes.NewReader(data), len(data))
+		ctx.Response.Header.Set("Content-Type", "application/octet-stream")
+		ctx.Response.Header.Set("Content-Length", fmt.Sprintf("%d", len(data)))
+	}
+}
+
+func (d *WebDAVClientDriver) Delete(ctx *app.RequestContext, p string) error {
 	return d.client.Remove(d.fullPath(p))
 }
 
-func (d *WebDAVClientDriver) Stat(p string) (os.FileInfo, error) {
+func (d *WebDAVClientDriver) Stat(ctx *app.RequestContext, p string) (os.FileInfo, error) {
 	return d.client.Stat(d.fullPath(p))
 }
 
-func (d *WebDAVClientDriver) ListDir(p string) ([]os.FileInfo, error) {
+func (d *WebDAVClientDriver) ListDir(ctx *app.RequestContext, p string) ([]os.FileInfo, error) {
 	return d.client.ReadDir(d.fullPath(p))
 }

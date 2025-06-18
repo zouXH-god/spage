@@ -4,9 +4,10 @@ import "gorm.io/gorm"
 
 type OIDCConfig struct {
 	gorm.Model
-	AdminGroups []string `gorm:"type:json;column:admin_groups;default:'[]'"` // 平台管理员组，默认为：[]string{}，*为匹配所有组，储存为逗号分隔的字符串
+	Name        string                   `gorm:"uniqueIndex"`
+	AdminGroups GenericJsonArray[string] `gorm:"type:json;column:admin_groups;default:'[]'"` // 平台管理员组，默认为：[]string{}，*为匹配所有组，储存为逗号分隔的字符串
 	// Admin groups, default is: []string{}, * matches all groups, stored as a comma-separated string
-	AllowedGroups []string `gorm:"type:json;column:allowed_groups;default:'[\"*\"]'"` // 允许登录的组，默认为：[]string{"*"}，*为匹配所有组，储存为逗号分隔的字符串
+	AllowedGroups GenericJsonArray[string] `gorm:"type:json;column:allowed_groups;default:'[\"*\"]'"` // 允许登录的组，默认为：[]string{"*"}，*为匹配所有组，储存为逗号分隔的字符串
 	// Allowed groups for login, default is: []string{"*"}, * matches all groups, stored as a comma-separated string
 	ClientID string `gorm:"column:client_id"` // 客户端ID
 	// Client ID
@@ -18,8 +19,22 @@ type OIDCConfig struct {
 	// Groups claim, default is: "groups"
 	Icon *string `gorm:"column:icon"` // 图标url，为空则使用内置默认图标
 	// Icon URL, if empty use the built-in default icon
-	OidcDiscoveryURL string `gorm:"column:oidc_discovery_url"` // OpenID自动发现URL，例如 ：https://pass.liteyuki.icu/.well-known/openid-configuration
+	OidcDiscoveryUrl string `gorm:"column:oidc_discovery_url"` // OpenID自动发现URL，例如 ：https://pass.liteyuki.icu/.well-known/openid-configuration
 	// OpenID auto-discovery URL, e.g., https://pass.liteyuki.icu/.well-known/openid-configuration
+	Enabled bool `gorm:"column:enabled;default:true"` // 是否启用
+
+	// 以下为自动获取字段
+	Issuer string
+
+	AuthorizationEndpoint string
+
+	TokenEndpoint string
+
+	UserInfoEndpoint string
+
+	JwksUri string
+
+	RedirectUrl string `gorm:"column:redirect_url"` // 自动生成
 }
 
 // TableName 重写表名

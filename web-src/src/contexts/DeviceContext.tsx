@@ -1,6 +1,7 @@
-"use client"
+"use client";
 
-import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
+
 import i18n, { getDefaultLang } from "@/utils/i18n";
 
 type Mode = "light" | "dark";
@@ -14,22 +15,22 @@ interface DeviceContextProps {
   lang: Lang;
   setLang: (lang: Lang) => void;
   viewport: {
-    width: number,
-    height: number
-  }
+    width: number;
+    height: number;
+  };
 }
 
 const DeviceContext = createContext<DeviceContextProps>({
   isMobile: false,
   mode: "light",
-  setMode: () => { },
-  toggleMode: () => { },
+  setMode: () => {},
+  toggleMode: () => {},
   lang: "zh",
-  setLang: () => { },
+  setLang: () => {},
   viewport: {
     width: 0,
     height: 0,
-  }
+  },
 });
 
 export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -38,9 +39,8 @@ export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [lang, setLangState] = useState<Lang>(getDefaultLang());
   const [viewport, setViewport] = useState({
     width: typeof window !== "undefined" ? window.innerWidth : 0,
-    height: typeof window !== "undefined" ? window.innerHeight : 0
+    height: typeof window !== "undefined" ? window.innerHeight : 0,
   });
-
 
   // 检查系统主题
   const getSystemTheme = () =>
@@ -69,7 +69,7 @@ export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // 初始化主题
+  // 初始化主题和系统主题变化监听
   useEffect(() => {
     if (typeof window !== "undefined") {
       const savedTheme = localStorage.getItem("theme") as Mode | null;
@@ -77,6 +77,18 @@ export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       const theme = savedTheme || systemTheme;
       setModeState(theme);
       document.documentElement.classList.toggle("dark", theme === "dark");
+
+      // 监听系统主题变动
+      const media = window.matchMedia("(prefers-color-scheme: dark)");
+      const handleChange = (e: MediaQueryListEvent) => {
+        if (!localStorage.getItem("theme")) {
+          const newTheme = e.matches ? "dark" : "light";
+          setModeState(newTheme);
+          document.documentElement.classList.toggle("dark", newTheme === "dark");
+        }
+      };
+      media.addEventListener("change", handleChange);
+      return () => media.removeEventListener("change", handleChange);
     }
   }, []);
 
@@ -100,7 +112,7 @@ export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }, []);
 
   const toggleMode = useCallback(() => {
-    setModeState(prev => {
+    setModeState((prev) => {
       const newMode = prev === "dark" ? "light" : "dark";
       document.documentElement.classList.toggle("dark", newMode === "dark");
       if (newMode === getSystemTheme()) {
@@ -119,7 +131,9 @@ export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }, []);
 
   return (
-    <DeviceContext.Provider value={{ isMobile, mode, setMode, toggleMode, lang, setLang, viewport }}>
+    <DeviceContext.Provider
+      value={{ isMobile, mode, setMode, toggleMode, lang, setLang, viewport }}
+    >
       {children}
     </DeviceContext.Provider>
   );

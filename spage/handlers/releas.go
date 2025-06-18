@@ -86,8 +86,7 @@ func (ReleaseApi) Create(ctx context.Context, c *app.RequestContext) {
 	}
 	// 创建文件记录
 	file := models.File{
-		Path: releaseSavePath,
-		MD5:  fileHash,
+		Hash: fileHash,
 	}
 	if err := store.File.Create(&file); err != nil {
 		resps.InternalServerError(c, "create file record error")
@@ -132,7 +131,6 @@ func (ReleaseApi) Delete(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	// 删除文件
-	err = os.RemoveAll(release.File.Path)
 	if err != nil {
 		resps.InternalServerError(c, "delete file error")
 		return

@@ -1,8 +1,10 @@
 package utils
 
 import (
+	"crypto/rand"
 	"github.com/LiteyukiStudio/spage/config"
 	"github.com/LiteyukiStudio/spage/spage/models"
+	"math/big"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -20,12 +22,20 @@ type Claims struct {
 	Stateful bool `json:"stateful"` // 是否为有状态Token Whether it is a stateful Token
 }
 
-// CreateToken 生成用户会话令牌（默认24小时有效）
-// stateful=false的无状态Token不会做持久化，在实例重启后失效
-// Create a user session token (default 24 hours valid)
-// stateful=false tokens are not persistent, and they will expire after the instance restarts
-func (TokenType) CreateToken(userID uint, duration time.Duration, stateful bool, persistentHandler func(uint) (*models.Token, error)) (string, error) {
-	var tokenModel *models.Token
+// GenerateRandomString 生成随机字符串
+func GenerateRandomString(length int) string {
+	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	result := make([]byte, length)
+	for i := 0; i < length; i++ {
+		index, _ := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
+		result[i] = charset[index.Int64()]
+	}
+	return string(result)
+}
+
+// CreateJsonWebToken 生成用户会话令牌（默认24小时有效）
+func (TokenType) CreateJsonWebToken(userID uint, duration time.Duration, stateful bool, persistentHandler func(uint) (*models.JsonWebToken, error)) (string, error) {
+	var tokenModel *models.JsonWebToken
 	var err error
 	if stateful {
 		tokenModel, err = persistentHandler(userID)
@@ -33,7 +43,7 @@ func (TokenType) CreateToken(userID uint, duration time.Duration, stateful bool,
 			return "", err
 		}
 	} else {
-		tokenModel = &models.Token{
+		tokenModel = &models.JsonWebToken{
 			Model: gorm.Model{
 				ID: 0,
 			},
@@ -53,9 +63,8 @@ func (TokenType) CreateToken(userID uint, duration time.Duration, stateful bool,
 	return token.SignedString([]byte(config.JwtSecret))
 }
 
-// ParseToken 解析JWT令牌
-// Parse JWT token
-func (TokenType) ParseToken(tokenString string, revokeChecker func(uint) bool) (*Claims, error) {
+// ParseJsonWebToken 解析JWT令牌
+func (TokenType) ParseJsonWebToken(tokenString string, revokeChecker func(uint) bool) (*Claims, error) {
 	claims := &Claims{}
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (any, error) {
 		return []byte(config.JwtSecret), nil
@@ -70,11 +79,37 @@ func (TokenType) ParseToken(tokenString string, revokeChecker func(uint) bool) (
 	}
 
 	// 有状态token被吊销也视为过期
-	// Revoked stateful tokens are considered expired
 	if claims.Stateful {
 		if revokeChecker(claims.UserID) {
 			return nil, jwt.ErrTokenExpired
 		}
 	}
 	return claims, nil
+}
+
+// CreateApiToken 生成API令牌
+func (TokenType) CreateApiToken(userID uint, duration time.Duration, persistentHandler func(*models.ApiToken) error) (string, error) {
+	expiration := time.Now().Add(duration)
+	apiToken := &models.ApiToken{
+		UserID:    userID,
+		Token:     "spat_" + GenerateRandomString(32), // 生成随机字符串作为令牌
+		ExpiresAt: expiration,
+	}
+	err := persistentHandler(apiToken)
+	if err != nil {
+		return "", err
+	}
+	return apiToken.Token, nil
+}
+
+// ParseApiToken 解析API令牌
+func (TokenType) ParseApiToken(tokenString string, isValidFunc func(string) (*models.ApiToken, error)) (*models.ApiToken, error) {
+	apiToken, err := isValidFunc(tokenString)
+	if err != nil {
+		return nil, err
+	}
+	if apiToken == nil || apiToken.ExpiresAt.Before(time.Now()) {
+		return nil, jwt.ErrTokenExpired
+	}
+	return apiToken, nil
 }
