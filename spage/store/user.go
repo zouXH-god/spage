@@ -2,6 +2,7 @@ package store
 
 import (
 	"errors"
+
 	"github.com/LiteyukiStudio/spage/constants"
 	"github.com/LiteyukiStudio/spage/spage/models"
 
@@ -20,10 +21,10 @@ func (u *userType) Create(user *models.User) (err error) {
 
 // GetByName 根据名称获取用户
 func (u *userType) GetByName(name string) (user *models.User, err error) {
-	user = &models.User{} // 初始化指针 // Initialize pointer
+	user = &models.User{} // 初始化指针
 	err = DB.Where("name = ?", name).First(user).Error
 	if err != nil {
-		return nil, err // 出错时返回nil When an error occurs, return nil
+		return nil, err // 出错时返回
 	}
 	return user, nil
 }
@@ -73,27 +74,26 @@ func (u *userType) DeleteByID(id uint) (err error) {
 }
 
 // UpdateSystemAdmin 更新系统管理员用户，不存在则创建
-// Update System Admin User, create if not exist
 func (u *userType) UpdateSystemAdmin(user *models.User) (err error) {
-	// 设置该用户为系统管理员 Set this user as a system admin
+	// 设置该用户为系统管理员
 	user.Flag = constants.FlagSystemAdmin
 	user.Role = constants.RoleAdmin
 
-	// 尝试查找系统管理员 Try to find system admin
+	// 尝试查找系统管理员
 	existingAdmin := models.User{}
 	result := DB.Where("flag = ?", constants.FlagSystemAdmin).First(&existingAdmin)
 
 	if result.Error != nil {
-		// 如果不存在系统管理员（记录未找到），则创建一个 If there is no system admin (record not found), create one
+		// 如果不存在系统管理员（记录未找到），则创建一个
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			// 创建新的系统管理员 Create new system admin
+			// 创建新的系统管理员
 			return DB.Create(user).Error
 		}
-		// 其他错误则直接返回 Other errors are returned directly
+		// 其他错误则直接返回
 		return result.Error
 	}
-	// 系统管理员已存在，更新信息 System admin exists, update information
-	// 保留ID，更新其他字段 Keep ID, update other fields
+	// 系统管理员已存在，更新信息
+	// 保留ID，更新其他字段
 	user.ID = existingAdmin.ID
 	return DB.Model(&existingAdmin).Updates(user).Error
 }

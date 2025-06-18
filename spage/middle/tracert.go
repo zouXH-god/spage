@@ -14,7 +14,6 @@ type traceType struct{}
 var Trace = traceType{}
 
 // UseTrace 中间件函数，用于记录请求日志
-// Middleware function for request logging
 func (traceType) UseTrace() app.HandlerFunc {
 	return func(ctx context.Context, c *app.RequestContext) {
 		start := time.Now()
