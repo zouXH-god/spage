@@ -145,7 +145,7 @@ func (oidcType) LoginOidcConfig(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	if matchGroups(userInfo.Groups, oidcConfig.AdminGroups, false) {
-		user.Role = constants.RoleAdmin
+		user.Role = constants.GlobalRoleAdmin
 		err = store.User.Update(user)
 		if err != nil {
 			logrus.Errorf("更新用户失败: %v", err)

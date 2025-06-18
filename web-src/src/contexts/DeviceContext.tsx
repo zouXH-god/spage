@@ -25,7 +25,7 @@ const DeviceContext = createContext<DeviceContextProps>({
   mode: "light",
   setMode: () => {},
   toggleMode: () => {},
-  lang: "zh",
+  lang: "zh-cn",
   setLang: () => {},
   viewport: {
     width: 0,

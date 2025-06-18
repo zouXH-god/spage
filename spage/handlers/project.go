@@ -317,3 +317,91 @@ func (ProjectApi) GetSites(ctx context.Context, c *app.RequestContext) {
 		"total": total,
 	})
 }
+
+// HasReadPermissionMiddleware 是否为项目成员中间件
+func (ProjectApi) HasReadPermissionMiddleware(ctx context.Context, c *app.RequestContext) {
+	projectIdString := c.Param("id")
+	projectId, err := strconv.Atoi(projectIdString)
+	if err != nil {
+		resps.BadRequest(c, resps.ParameterError)
+		return
+	}
+	crtUser := middle.Auth.GetUserWithBlock(ctx, c)
+	pass, err := hasReadPermission(crtUser.ID, uint(projectId))
+	if !pass || err != nil {
+		resps.NotFound(c, resps.TargetNotFound)
+		return
+	}
+	c.Next(ctx)
+}
+
+func hasReadPermission(userId, projectId uint) (bool, error) {
+	project, err := store.Project.GetByID(projectId)
+	if err != nil {
+		return false, err
+	}
+	// 用户是项目主人
+	isProjectOwnerPass, _ := hasWritePermission(userId, projectId)
+	if isProjectOwnerPass {
+		return true, nil
+	}
+	// 用户在项目成员列表中
+	for _, member := range project.Members {
+		if member.ID == userId {
+			return true, nil
+		}
+	}
+	// 组织项目 - 组织成员也可读
+	if project.OwnerType == constants.OwnerTypeOrg {
+		org, _ := store.Org.GetOrgById(project.OwnerID)
+		for _, member := range org.Members {
+			if member.ID == userId {
+				return true, nil
+			}
+		}
+	}
+	// 若不为私有则可公开访问
+	return !project.IsPrivate, nil
+}
+
+// HasWritePermissionMiddleware 是否为项目所有者中间件
+func (ProjectApi) HasWritePermissionMiddleware(ctx context.Context, c *app.RequestContext) {
+	projectIdString := c.Param("id")
+	projectId, err := strconv.Atoi(projectIdString)
+	if err != nil {
+		resps.BadRequest(c, resps.ParameterError)
+		return
+	}
+	crtUser := middle.Auth.GetUserWithBlock(ctx, c)
+	pass, err := hasWritePermission(crtUser.ID, uint(projectId))
+	if !pass || err != nil {
+		resps.Forbidden(c, resps.PermissionDenied)
+		return
+	}
+	c.Next(ctx)
+}
+
+func hasWritePermission(userId, projectId uint) (bool, error) {
+	project, err := store.Project.GetByID(projectId)
+	if err != nil {
+		return false, err
+	}
+	// 情况1: 用户是项目直接拥有者
+	if project.OwnerType == constants.OwnerTypeUser && project.OwnerID == userId {
+		return true, nil
+	}
+	// 情况2: 用户在项目所有者列表中
+	for _, owner := range project.Owners {
+		if owner.ID == userId {
+			return true, nil
+		}
+	}
+	// 情况3: 组织项目 - 检查用户是否为组织所有者
+	if project.OwnerType == constants.OwnerTypeOrg {
+		org, _ := store.Org.GetOrgById(project.OwnerID)
+		if org != nil && store.Org.GetUserAuth(org, userId) == "owner" {
+			return true, nil
+		}
+	}
+	return false, nil
+}

@@ -1,6 +1,7 @@
 package store
 
 import (
+	"github.com/LiteyukiStudio/spage/constants"
 	"github.com/LiteyukiStudio/spage/spage/models"
 )
 
@@ -19,7 +20,7 @@ func (s *SiteType) Create(site *models.Site) (err error) {
 // Get Site Info by ID
 func (s *SiteType) GetByID(id uint) (site *models.Site, err error) {
 	site = &models.Site{}
-	err = DB.Where("id = ?", id).Preload("Project").First(site).Error
+	err = DB.Where("id = ?", id).Preload(constants.PreloadFieldProject).First(site).Error
 	return
 }
 
@@ -32,19 +33,19 @@ func (s *SiteType) Delete(site *models.Site) (err error) {
 }
 
 func (s *SiteType) GetReleaseList(siteID uint) (releases []*models.SiteRelease, err error) {
-	err = DB.Where("site_id = ?", siteID).Preload("File").Find(&releases).Error
+	err = DB.Where("site_id = ?", siteID).Preload(constants.PreloadFieldFile).Find(&releases).Error
 	return
 }
 
 func (s *SiteType) GetReleaseById(id uint) (release *models.SiteRelease, err error) {
 	release = &models.SiteRelease{}
-	err = DB.Where("id = ?", id).Preload("File").First(release).Error
+	err = DB.Where("id = ?", id).Preload(constants.PreloadFieldFile).First(release).Error
 	return
 }
 
 func (s *SiteType) GetLatestRelease(site *models.Site) (release *models.SiteRelease, err error) {
 	release = &models.SiteRelease{}
-	err = DB.Where("site_id = ? AND tag = ?", site.ID, "latest").Preload("File").First(release).Error
+	err = DB.Where("site_id = ? AND tag = ?", site.ID, "latest").Preload(constants.PreloadFieldFile).First(release).Error
 	return
 }
 

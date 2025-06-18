@@ -24,6 +24,4 @@ i18n.use(initReactI18next).init({
   },
 });
 
-console.log("i18n initialized with language:", i18n.language);
-
 export default i18n;

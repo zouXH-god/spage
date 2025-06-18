@@ -83,7 +83,7 @@ func Init() error {
 	user := &models.User{
 		Name:     config.AdminUsername,
 		Password: &hashedPassword,
-		Role:     constants.RoleAdmin,
+		Role:     constants.GlobalRoleAdmin,
 	}
 	if err = User.UpdateSystemAdmin(user); err != nil {
 		logrus.Error("Failed to update admin user:", err)

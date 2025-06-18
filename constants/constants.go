@@ -1,9 +1,20 @@
 package constants
 
 const (
-	RoleAdmin       = "admin"        // 管理员 Admin
-	RoleUser        = "user"         // 普通用户 User
-	FlagSystemAdmin = "system_admin" // 系统管理员标志 SystemAdmin
+	GlobalRoleAdmin   = "admin"        // 管理员 Admin
+	GlobalRoleUser    = "user"         // 普通用户 User
+	OrgRoleOwner      = "owner"        // 组织所有者 Organization Owner
+	OrgRoleMember     = "member"       // 组织成员 Organization Member
+	ProjectRoleOwner  = "owner"        // 项目所有者 Project Owner
+	ProjectRoleMember = "member"       // 项目成员 Project Member
+	FlagSystemAdmin   = "system_admin" // 系统管理员标志 SystemAdmin
+
+	// DB
+
+	PreloadFieldMembers = "Members"
+	PreloadFieldOwners  = "Owners"
+	PreloadFieldProject = "Project"
+	PreloadFieldFile    = "File"
 
 	CaptchaTypeDisable   = "disable"     // 禁用验证码 Captcha
 	CaptchaTypeTurnstile = "turnstile"   // 云flare turnstile

@@ -99,7 +99,7 @@ func (u *userType) DeleteByID(id uint) (err error) {
 func (u *userType) UpdateSystemAdmin(user *models.User) (err error) {
 	// 设置该用户为系统管理员 Set this user as a system admin
 	user.Flag = constants.FlagSystemAdmin
-	user.Role = constants.RoleAdmin
+	user.Role = constants.GlobalRoleAdmin
 
 	// 尝试查找系统管理员 Try to find system admin
 	existingAdmin := models.User{}

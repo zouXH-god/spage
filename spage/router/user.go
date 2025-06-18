@@ -21,15 +21,19 @@ func registerUserGroup(group *route.RouterGroup, groupWithoutAuth *route.RouterG
 		}
 	}
 
-	userGroup := group.Group("/user")
+	userInfoGroup := group.Group("/user-info")
 	{
-		userGroup.PUT("", handlers.User.UpdateUser) // 更新用户信息 Update user info
-		userGroup.GET("", handlers.User.GetUser)    // 获取用户信息 Get user info
-		userGroup.POST("/token", handlers.User.CreateApiToken)
-		userGroup.GET("/token/list", handlers.User.ListApiToken)
-		userGroup.DELETE("/token/:id", handlers.User.RevokeApiToken)
-		userGroup.GET("/:id", handlers.User.GetUser)              // 获取用户信息 Get user info
-		userGroup.GET("/:id/projects", handlers.User.GetProjects) // 获取用户项目 Get user projects
-		userGroup.GET("/:id/orgs", handlers.User.GetOrgs)         // 获取用户组织 Get user orgs
+		userInfoGroup.PUT("", handlers.User.UpdateUser)               // 更新用户信息 Update user info
+		userInfoGroup.GET("", handlers.User.GetUser)                  // 获取用户信息 Get user info
+		userInfoGroup.GET("/:id", handlers.User.GetUser)              // 获取用户信息 Get user info
+		userInfoGroup.GET("/:id/projects", handlers.User.GetProjects) // 获取用户项目 Get user projects
+		userInfoGroup.GET("/:id/orgs", handlers.User.GetOrgs)         // 获取用户组织 Get user orgs
+	}
+
+	userTokenGroup := group.Group("/user-token")
+	{
+		userTokenGroup.POST("", handlers.User.CreateApiToken)
+		userTokenGroup.GET("/list", handlers.User.ListApiToken)
+		userTokenGroup.DELETE("/:id", handlers.User.RevokeApiToken)
 	}
 }
