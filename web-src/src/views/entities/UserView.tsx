@@ -7,9 +7,9 @@ import { User } from "@/api/user.models";
 import { getGravatarByUser } from "@/components/reusable/Gravatar";
 import { Project } from "@/api/project.models";
 import { Pagination } from "@/components/reusable/Pagination";
-import { ProjectCard } from "./ProjectCard";
+import { ProjectCard } from "@/components/entities/ProjectCard";
 
-export function UserPage({ id }: { id: number }) {
+export default function UserView({ id }: { id: number }) {
   const [user, setUser] = useState<User | null>(null);
   // 项目分页查询
   const [page, setPage] = useState(1);
@@ -65,7 +65,7 @@ export function UserPage({ id }: { id: number }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 to-slate-300 dark:from-gray-900 dark:to-gray-800 flex justify-center items-start py-10">
+    <div className="min-h-screen bg-gradient-to-br flex justify-center items-start py-10">
       <div className="flex w-full max-w-6xl gap-8">
         {/* 侧边栏：用户信息卡片 */}
         <aside className="w-full max-w-xs">

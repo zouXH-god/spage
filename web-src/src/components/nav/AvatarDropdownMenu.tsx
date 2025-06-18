@@ -74,7 +74,6 @@ export function AvatarDropdownMenu({
             <Link href="/help">帮助</Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
-        
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link href="/admin">管理后台</Link>

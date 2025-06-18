@@ -15,7 +15,7 @@ import AIOCaptchaWidget from "@/components/captcha/AIOCaptcha";
 import { useDevice } from "@/contexts/DeviceContext";
 import { CaptchaProps, CaptchaProvider } from "@/types/captcha";
 
-export default function LoginPage() {
+export default function LoginView() {
   const { isMobile } = useDevice();
   const router = useRouter();
   const searchParams = useSearchParams();

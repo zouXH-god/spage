@@ -89,7 +89,7 @@ export default function Nav() {
   const menuItems = MENU_CONFIGS[menuType];
 
   return (
-    <nav className="sticky top-0 z-10 pt-4 px-4 w-full border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+    <nav className="sticky top-0 z-10 pt-4 px-4 w-full border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
       {/* 使用网格布局替换原来的flex布局 */}
       <div className="grid grid-cols-3 pb-4 items-center">
         {/* 左侧区域：品牌信息 */}

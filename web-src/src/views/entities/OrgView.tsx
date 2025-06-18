@@ -2,6 +2,6 @@
 
 // import React from "react";
 
-export function OrgPage({ id }: { id: number }) {
+export default function OrgView({ id }: { id: number }) {
   return null;
 }
