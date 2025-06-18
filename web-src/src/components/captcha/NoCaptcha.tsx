@@ -1,9 +1,10 @@
-import { CaptchaProps } from '@/types/captcha'
-import { useEffect } from 'react'
+import { useEffect } from "react";
+
+import { CaptchaProps } from "@/types/captcha";
 
 export default function NoCaptchaWidget(props: CaptchaProps) {
-    useEffect(() => {
-        props.onSuccess("no-captcha")
-    }, [props.onSuccess])
-    return null
+  useEffect(() => {
+    props.onSuccess("no-captcha");
+  }, [props, props.onSuccess]);
+  return null;
 }

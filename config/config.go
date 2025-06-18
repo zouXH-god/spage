@@ -14,25 +14,18 @@ import (
 
 var (
 	ServerPort string
-	// 服务器端口 Server Port
-
-	Mode = constants.ModeProd
-	// 运行模式，支持dev和prod
-
+	// Mode 运行模式 dev/prod
+	Mode      = constants.ModeProd
 	JwtSecret string
-	// JWT密钥 JWT Secret
-
-	FrontEndURL string
-	// 前端URL Frontend URL
-
-	LogLevel = "info"
+	LogLevel  = "info"
 	// 日志级别 Log Level
 
 	AdminUsername = "admin"
-	// 管理员用户名 Admin Username
-
 	AdminPassword = "admin"
-	// 管理员密码 Admin Password
+
+	// BaseUrl 基础路径
+	BaseUrl = "http://localhost:3000"
+	OidcUri = "/api/v1/user/oidc/login"
 
 	EmailEnable   bool   // 是否启用邮箱发送 Enable Email Sending
 	EmailUsername string // 邮箱用户名 Email Username
@@ -41,26 +34,26 @@ var (
 	EmailPort     string // 邮箱服务器端口 Email Server Port
 	EmailPassword string // 邮箱密码 Email Password
 	EmailSSL      bool   // 是否启用SSL Enable SSL
-
+	// PageLimit 每页显示的文章数量，默认为40
 	PageLimit = 40
-	// 每页显示的文章数量，默认为40
-
+	// CaptchaType 验证码类型，支持turnstile、recaptcha和hcaptcha
 	CaptchaType = constants.CaptchaTypeDisable
-	// 验证码类型，支持turnstile、recaptcha和hcaptcha
 
 	CaptchaSiteKey   string // reCAPTCHA v3的站点密钥
 	CaptchaSecretKey string // reCAPTCHA v3的密钥
 	CaptchaUrl       string // for mcaptcha
 
-	TokenExpireTime = 3600 * 24
-	// session过期时间，单位秒
-
-	RefreshTokenExpireTime = 3600 * 144
-	// 刷新token过期时间，单位秒
+	TokenExpireTime        = 60 * 5
+	RefreshTokenExpireTime = 3600 * 24
 
 	BuildTime  = "0000-00-00 00:00:00" // 构建时间 Build Time
 	Version    = "0.0.0"               // 版本号 Version
-	CommitHash = "unknown"             // 提交哈希 Commit MD5
+	CommitHash = "unknown"             // 提交哈希 Commit Hash
+
+	// Meta
+
+	Icon = "/apage.svg"
+	Name = "liteyuki spage"
 
 	ReleaseSavePath  = "./data/releases"
 	UploadsPath      = "./data/uploads"
@@ -125,6 +118,7 @@ func Init() error {
 	ServerPort = GetString("server.port", ServerPort)
 	Mode = GetString("mode", Mode)
 	LogLevel = GetString("log.level", LogLevel)
+	BaseUrl = GetString("base-url", BaseUrl)
 
 	// Admin配置项
 	AdminUsername = GetString("admin.username", AdminUsername)
@@ -145,6 +139,10 @@ func Init() error {
 	EmailPassword = GetString("email.password", EmailPassword)
 	EmailSSL = GetBool("email.ssl", EmailSSL)
 
+	// Meta配置项
+	Icon = GetString("meta.icon", Icon)
+	Name = GetString("meta.name", Name)
+
 	// File存储配置项
 	ReleaseSavePath = GetString("file.release-path", ReleaseSavePath)
 	UploadsPath = GetString("file.uploads-path", UploadsPath)
@@ -153,9 +151,10 @@ func Init() error {
 	FileDriverConfig = &filedriver.DriverConfig{
 		Type:           GetString("file.driver.type", constants.FileDriverLocal),
 		BasePath:       UploadsPath,
-		WebDavUrl:      GetString("file.driver.webdav.url", UploadsPath),
+		WebDavUrl:      GetString("file.driver.webdav.url", ""),
 		WebDavUser:     GetString("file.driver.webdav.user", ""),
 		WebDavPassword: GetString("file.driver.webdav.password", ""),
+		WebDavPolicy:   GetString("file.driver.webdav.policy", constants.WebDavPolicyProxy),
 	}
 
 	// 分页查询限制
@@ -168,7 +167,7 @@ func Init() error {
 
 	// 从启动参数拿取一些配置项mode frontend-url
 	argsMap := Cmd.GetArgsMap(os.Args[1:])
-	queryKeys := []string{"mode", "frontend-url", "port"}
+	queryKeys := []string{"mode", "port"}
 	for _, key := range queryKeys {
 		if value, ok := argsMap[key]; ok {
 			switch key {
@@ -176,8 +175,6 @@ func Init() error {
 				Mode = value
 			case "port":
 				ServerPort = value
-			case "frontend-url":
-				FrontEndURL = value
 			}
 		}
 	}

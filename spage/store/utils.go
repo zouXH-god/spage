@@ -6,9 +6,6 @@ import (
 )
 
 // Paginate 封装通用的分页查询逻辑
-// T 是任意数据模型类型
-// Paginate generic pagination query logic
-// T is any data model type
 func Paginate[T any](db *gorm.DB, page, limit int, conditions ...any) (items []T, total int64, err error) {
 	// 查询总记录数
 	countDB := db
@@ -43,7 +40,6 @@ func Paginate[T any](db *gorm.DB, page, limit int, conditions ...any) (items []T
 }
 
 // WithPreloads 添加预加载关系的辅助函数
-// Add a helper function to add preloaded relationships
 func WithPreloads(db *gorm.DB, preloads ...string) *gorm.DB {
 	for _, preload := range preloads {
 		db = db.Preload(preload)

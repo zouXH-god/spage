@@ -1,9 +1,9 @@
-import zhCN from "./zh-cn"
-import enUS from "./en-us"
+import enUS from "./en-us";
+import zhCN from "./zh-cn";
 
 const resources = {
-    "zh-CN": zhCN,
-    "en-US": enUS,
-}
+  "zh-CN": zhCN,
+  "en-US": enUS,
+};
 
-export default resources
+export default resources;
