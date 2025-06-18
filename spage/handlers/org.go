@@ -17,7 +17,6 @@ type OrgApi struct{}
 var Org = OrgApi{}
 
 // OrganizationDTO 组织信息数据传输对象
-// Organization Information Data Transfer Object (DTO)
 func getOrg(ctx context.Context) *models.Organization {
 	org, ok := ctx.Value("userOrg").(*models.Organization)
 	if !ok {
@@ -27,7 +26,6 @@ func getOrg(ctx context.Context) *models.Organization {
 }
 
 // UserOrgAuth 组织权限检查
-// Organization permission check
 func (OrgApi) UserOrgAuth(ctx context.Context, c *app.RequestContext) {
 	user := middle.Auth.GetUser(ctx, c)
 	// 当 id 为空的 POST 请求默认为 create
@@ -49,7 +47,7 @@ func (OrgApi) UserOrgAuth(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	// 判断权限 (GET 请求需要用户权限，其他请求需要管理员权限)
-	// Determine permissions (GET requests require user permissions, other requests require admin permissions)
+	
 	var authType string
 	if string(c.Method()) == "GET" {
 		authType = "member"
@@ -67,7 +65,6 @@ func (OrgApi) UserOrgAuth(ctx context.Context, c *app.RequestContext) {
 }
 
 // OrganizationDTO 组织信息数据传输对象
-// Organization Information Data Transfer Object (DTO)
 func (OrgApi) ToDTO(org *models.Organization) OrganizationDTO {
 	return OrganizationDTO{
 		ID:           org.ID,
@@ -81,23 +78,22 @@ func (OrgApi) ToDTO(org *models.Organization) OrganizationDTO {
 }
 
 // CreateOrganization 创建组织
-// Create Organization
 func (OrgApi) CreateOrganization(ctx context.Context, c *app.RequestContext) {
 	// 绑定参数
-	// Bind parameters
+	
 	req := &CreateOrgReq{}
 	if err := c.BindAndValidate(&req); err != nil {
 		resps.BadRequest(c, resps.ParameterError)
 		return
 	}
 	// 检验组织名称是否存在
-	// Check if the organization name already exists
+	
 	if store.Org.OrgNameIsExist(req.Name) {
 		resps.BadRequest(c, "organization name already exists")
 		return
 	}
 	// 创建组织
-	// Create organization
+	
 	user := middle.Auth.GetUser(ctx, c)
 	org := models.Organization{
 		Name:        req.Name,
@@ -118,7 +114,6 @@ func (OrgApi) CreateOrganization(ctx context.Context, c *app.RequestContext) {
 }
 
 // UpdateOrganization 更新组织信息
-// Update Organization Information
 func (OrgApi) UpdateOrganization(ctx context.Context, c *app.RequestContext) {
 	req := &UpdateOrgReq{}
 	if err := c.BindAndValidate(&req); err != nil {
@@ -126,7 +121,7 @@ func (OrgApi) UpdateOrganization(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	org := getOrg(ctx)
-	// 更新 Update
+	// 更新
 	org.DisplayName = req.DisplayName
 	org.Email = req.Email
 	org.Description = *req.Description
@@ -141,7 +136,6 @@ func (OrgApi) UpdateOrganization(ctx context.Context, c *app.RequestContext) {
 }
 
 // GetOrganizationProject 获取组织项目
-// Get Organization Projects
 func (OrgApi) GetOrganizationProject(ctx context.Context, c *app.RequestContext) {
 	req := &GetOrgProjectReq{}
 	if err := c.BindAndValidate(&req); err != nil {
@@ -149,7 +143,7 @@ func (OrgApi) GetOrganizationProject(ctx context.Context, c *app.RequestContext)
 		return
 	}
 	org := getOrg(ctx)
-	// 查询 Query
+	// 查询
 	projects, total, err := store.Project.ListByOwner(constants.OwnerTypeOrg, strconv.Itoa(int(org.ID)), req.Page, req.Limit)
 	if err != nil {
 		resps.InternalServerError(c, "Failed to get projects")
@@ -167,7 +161,6 @@ func (OrgApi) GetOrganizationProject(ctx context.Context, c *app.RequestContext)
 }
 
 // DeleteOrganization 删除组织
-// Delete Organization
 func (OrgApi) DeleteOrganization(ctx context.Context, c *app.RequestContext) {
 	org := getOrg(ctx)
 	// 删除组织
@@ -179,7 +172,6 @@ func (OrgApi) DeleteOrganization(ctx context.Context, c *app.RequestContext) {
 }
 
 // GetOrganization 获取组织信息
-// Get Organization Information
 func (OrgApi) GetOrganization(ctx context.Context, c *app.RequestContext) {
 	org := getOrg(ctx)
 	resps.Ok(c, resps.OK, map[string]any{
@@ -188,7 +180,6 @@ func (OrgApi) GetOrganization(ctx context.Context, c *app.RequestContext) {
 }
 
 // GetOrganizationUsers 获取组织用户
-// Get Organization Users
 func (OrgApi) GetOrganizationUsers(ctx context.Context, c *app.RequestContext) {
 	org := getOrg(ctx)
 	resps.Ok(c, resps.OK, map[string]any{
@@ -208,20 +199,19 @@ func (OrgApi) GetOrganizationUsers(ctx context.Context, c *app.RequestContext) {
 }
 
 // AddOrganizationUser 添加组织用户
-// Add Organization User
 func (OrgApi) AddOrganizationUser(ctx context.Context, c *app.RequestContext) {
 	req := &OrgUserReq{}
 	if err := c.BindAndValidate(&req); err != nil {
 		resps.BadRequest(c, resps.ParameterError)
 		return
 	}
-	// 查询 Query
+	// 查询
 	user, err := store.User.GetByID(req.UserID)
 	if err != nil || user == nil {
 		resps.NotFound(c, resps.TargetNotFound)
 		return
 	}
-	// 新增 Add
+	// 新增
 	org := getOrg(ctx)
 	if req.Role == "member" {
 		org.Members = append(org.Members, user)
@@ -240,20 +230,19 @@ func (OrgApi) AddOrganizationUser(ctx context.Context, c *app.RequestContext) {
 }
 
 // DeleteOrganizationUser 删除组织用户
-// Delete Organization User
 func (OrgApi) DeleteOrganizationUser(ctx context.Context, c *app.RequestContext) {
 	req := &OrgUserReq{}
 	if err := c.BindAndValidate(&req); err != nil {
 		resps.BadRequest(c, resps.ParameterError)
 		return
 	}
-	// 查询 Query
+	// 查询
 	user, err := store.User.GetByID(req.UserID)
 	if err != nil || user == nil {
 		resps.NotFound(c, resps.TargetNotFound)
 		return
 	}
-	// 删除 Delete
+	// 删除
 	org := getOrg(ctx)
 	if req.Role == "member" {
 		for i, member := range org.Members {
