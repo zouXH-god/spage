@@ -2,7 +2,6 @@ package middle
 
 import (
 	"context"
-
 	"github.com/LiteyukiStudio/spage/config"
 	"github.com/LiteyukiStudio/spage/constants"
 	"github.com/LiteyukiStudio/spage/utils"
@@ -22,6 +21,7 @@ type CaptchaReq struct {
 }
 
 // UseCaptcha 中间件函数，用于验证验证码
+// Middleware function for captcha verification
 func (captchaType) UseCaptcha() app.HandlerFunc {
 	captchaConfig := &utils.CaptchaConfig{
 		Type:        config.CaptchaType,
@@ -38,6 +38,7 @@ func (captchaType) UseCaptcha() app.HandlerFunc {
 		}
 		if config.Mode == constants.ModeDev && req.CaptchaToken == constants.CaptchaDevPasscode {
 			// 开发模式密钥
+			// Dev mode passkey
 			c.Next(ctx)
 			return
 		}
@@ -56,6 +57,7 @@ func (captchaType) UseCaptcha() app.HandlerFunc {
 			return
 		}
 		c.Next(ctx) // 如果验证码验证成功，则继续下一个处理程序
+		// If captcha verification is successful, continue to the next handler
 
 		return
 	}

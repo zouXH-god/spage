@@ -1,12 +1,13 @@
 package handlers
 
 // OrganizationDTO 组织信息数据传输对象
+// Organization Information Data Transfer Object (DTO)
 type OrganizationDTO struct {
-	ID           uint      `json:"id"`            // 组织ID
-	Name         string    `json:"name"`          // 组织名称
-	DisplayName  *string   `json:"display_name"`  // 显示名称
-	Email        *string   `json:"email"`         // 邮箱地址
-	Description  string    `json:"description"`   // 描述信息
+	ID           uint      `json:"id"`            // 组织ID Organization ID
+	Name         string    `json:"name"`          // 组织名称 Organization Name
+	DisplayName  *string   `json:"display_name"`  // 显示名称 Display Name
+	Email        *string   `json:"email"`         // 邮箱地址 Email Address
+	Description  string    `json:"description"`   // 描述信息 Description
 	AvatarURL    *string   `json:"avatar_url"`    // 头像URL Avatar URL
 	ProjectLimit int       `json:"project_limit"` // 项目数量限制 Project Limit
 	Members      []UserDTO `json:"members"`       // 组织成员 Members

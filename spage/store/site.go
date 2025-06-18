@@ -10,11 +10,13 @@ type SiteType struct {
 var Site = SiteType{}
 
 // Create 创建站点
+// Create Site
 func (s *SiteType) Create(site *models.Site) (err error) {
 	return DB.Create(site).Error
 }
 
 // GetByID 根据id获取站点信息
+// Get Site Info by ID
 func (s *SiteType) GetByID(id uint) (site *models.Site, err error) {
 	site = &models.Site{}
 	err = DB.Where("id = ?", id).Preload("Project").First(site).Error

@@ -2,10 +2,9 @@ package handlers
 
 import (
 	"context"
-	"strconv"
-
 	"github.com/LiteyukiStudio/spage/spage/models"
 	"github.com/LiteyukiStudio/spage/spage/store"
+	"strconv"
 
 	"github.com/LiteyukiStudio/spage/resps"
 	"github.com/cloudwego/hertz/pkg/app"
@@ -17,6 +16,7 @@ type SiteApi struct {
 var Site = SiteApi{}
 
 // ToDTO 站点信息数据传输对象
+// Site Information Data Transfer Object (DTO)
 func (SiteApi) ToDTO(site *models.Site, full bool) SiteDTO {
 	siteDTO := SiteDTO{
 		Description: site.Description,
@@ -60,6 +60,7 @@ func (SiteApi) SiteAuth(ctx context.Context, c *app.RequestContext) {
 }
 
 // Create 创建站点
+// Create Site
 func (SiteApi) Create(ctx context.Context, c *app.RequestContext) {
 	req := CreateSiteReq{}
 	if err := c.BindAndValidate(&req); err != nil {
