@@ -32,11 +32,11 @@ export function register(data: RegisterRequest): Promise<AxiosResponse<RegisterR
 export function getUser(
   userId: number | null = null,
 ): Promise<AxiosResponse<UserResponse, unknown>> {
-  return client.get<UserResponse>(userId ? `/user/${userId}` : "/user");
+  return client.get<UserResponse>(userId ? `/user-info/${userId}` : "/user-info");
 }
 
 export function updateUser(data: User): Promise<AxiosResponse<BaseResponse, unknown>> {
-  return client.put<BaseResponse>("/user", data);
+  return client.put<BaseResponse>("/user-info", data);
 }
 
 export function getUserProjects(
@@ -44,13 +44,13 @@ export function getUserProjects(
   page: number = 1,
   limit: number = PAGE_LIMIT,
 ): Promise<AxiosResponse<UserProjectsResponse, unknown>> {
-  return client.get<UserProjectsResponse>(`/user/${userId}/projects?page=${page}&limit=${limit}`);
+  return client.get<UserProjectsResponse>(`/user-info/${userId}/projects?page=${page}&limit=${limit}`);
 }
 
 export function getUserOrganizations(
   userId: number,
 ): Promise<AxiosResponse<UserOrganizationsResponse, unknown>> {
-  return client.get<UserOrganizationsResponse>(`/user/${userId}/organizations`);
+  return client.get<UserOrganizationsResponse>(`/user-info/${userId}/orgs`);
 }
 
 export function getCaptchaConfig(): Promise<AxiosResponse<CaptchaConfig, unknown>> {
