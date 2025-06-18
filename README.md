@@ -207,7 +207,7 @@ Next.js是一个React.js框架，由Vercel开发，使用了Server-Side Renderin
 - 服务端组件
 - Draft Mode
 
-其他特性请阅读[Next.js文档](https://nextjs.org/docs)了解更多
+以上为常用特性，其他不可用特性请阅读[Next.js文档](https://nextjs.org/docs)了解更多
 
 尽管有些特性在开发服务器中可以使用，但是在静态构建时是不被允许的，建议在贡献前先
 
