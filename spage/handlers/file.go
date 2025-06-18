@@ -4,12 +4,16 @@ import (
 	"context"
 	"github.com/LiteyukiStudio/spage/config"
 	"github.com/LiteyukiStudio/spage/resps"
+	"github.com/LiteyukiStudio/spage/spage/middle"
+	"github.com/LiteyukiStudio/spage/spage/models"
+	"github.com/LiteyukiStudio/spage/spage/store"
 	"github.com/LiteyukiStudio/spage/utils"
 	"github.com/LiteyukiStudio/spage/utils/filedriver"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/sirupsen/logrus"
 	"io"
 	"path/filepath"
+	"strconv"
 )
 
 type FileApi struct{}
@@ -37,7 +41,7 @@ func (FileApi) UploadFileStream(ctx context.Context, c *app.RequestContext) {
 	if hashForm := string(c.FormValue("hash")); hashForm != "" {
 		dir, fileName := utils.FilePath(hashForm)
 		storagePath := filepath.Join(dir, fileName)
-		if _, err := driver.Stat(storagePath); err == nil {
+		if _, err := driver.Stat(c, storagePath); err == nil {
 			resps.Ok(c, "文件已存在", map[string]any{"hash": hashForm})
 			return
 		}
@@ -69,11 +73,48 @@ func (FileApi) UploadFileStream(ctx context.Context, c *app.RequestContext) {
 		resps.BadRequest(c, err.Error())
 		return
 	}
-	if err := driver.Save(storagePath, src); err != nil {
+	if err := driver.Save(c, storagePath, src); err != nil {
 		logrus.Error("保存文件失败: ", err)
 		resps.InternalServerError(c, err.Error())
 		return
 	}
 
-	resps.Ok(c, "文件上传成功", map[string]any{"hash": hash})
+	// 数据库索引建立
+	crtUser := middle.Auth.GetUserWithBlock(ctx, c)
+	fileModel := &models.File{
+		Hash:       hash,
+		UploaderID: crtUser.ID,
+	}
+
+	if err := store.File.Create(fileModel); err != nil {
+		logrus.Error("数据库索引建立失败: ", err)
+		resps.InternalServerError(c, "数据库索引建立失败")
+		return
+	}
+	resps.Ok(c, "文件上传成功", map[string]any{"hash": hash, "id": fileModel.ID})
+}
+
+func (FileApi) GetFile(ctx context.Context, c *app.RequestContext) {
+	// TODO 私有文件访问控制，目前暂时没有私有化文件，可以先不做
+	fileIdString := c.Param("id")
+	fileId, err := strconv.ParseUint(fileIdString, 10, 64)
+	if err != nil {
+		logrus.Error("无效的文件ID: ", err)
+		resps.BadRequest(c, "无效的文件ID")
+		return
+	}
+	fileModel, err := store.File.GetByID(uint(fileId))
+	if err != nil {
+		logrus.Error("获取文件信息失败: ", err)
+		resps.InternalServerError(c, "获取文件信息失败")
+		return
+	}
+	driver, err := filedriver.GetFileDriver(config.FileDriverConfig)
+	if err != nil {
+		logrus.Error("获取文件驱动失败: ", err)
+		resps.InternalServerError(c, "获取文件驱动失败")
+		return
+	}
+	filePath := filepath.Join(utils.FilePath(fileModel.Hash))
+	driver.Get(c, filePath)
 }

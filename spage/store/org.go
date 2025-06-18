@@ -10,7 +10,6 @@ type orgType struct {
 var Org = orgType{}
 
 // ListByUserID 通过UserID获取用户组织，支持分页和预加载关系
-// Get Organizations by UserID, support pagination and preload relationships
 func (o *orgType) ListByUserID(userID string, page, limit int) (orgs []models.Organization, err error) {
 	// 使用连接查询
 	query := DB.Joins("JOIN organization_members ON organizations.id = organization_members.organization_id").
@@ -28,14 +27,18 @@ func (o *orgType) ListByUserID(userID string, page, limit int) (orgs []models.Or
 }
 
 // GetOrgById 通过ID获取组织
-// Get Organization by ID
 func (o *orgType) GetOrgById(id uint) (org *models.Organization, err error) {
 	err = DB.Model(&models.Organization{}).Where("id = ?", id).Preload("Members").Preload("Owners").First(&org).Error
 	return
 }
 
+// GetOrgByName 通过名称获取组织
+func (o *orgType) GetOrgByName(name string) (org *models.Organization, err error) {
+	err = DB.Model(&models.Organization{}).Where("name = ?", name).Preload("Members").Preload("Owners").First(&org).Error
+	return
+}
+
 // OrgNameIsExist 判断组织名称是否存在
-// Check if the organization name exists
 func (o *orgType) OrgNameIsExist(name string) bool {
 	var count int64
 	DB.Model(&models.Organization{}).Where("name = ?", name).Count(&count)
@@ -43,7 +46,6 @@ func (o *orgType) OrgNameIsExist(name string) bool {
 }
 
 // GetUserAuth 获取用户在组织中的权限
-// Get User's Authority in Organization
 func (o *orgType) GetUserAuth(org *models.Organization, userID uint) (auth string) {
 	for _, owner := range org.Owners {
 		if owner.ID == userID {

@@ -6,6 +6,7 @@ import (
 	"github.com/LiteyukiStudio/spage/spage/middle"
 	"github.com/LiteyukiStudio/spage/spage/models"
 	store "github.com/LiteyukiStudio/spage/spage/store"
+	"github.com/LiteyukiStudio/spage/utils"
 	"strconv"
 
 	"github.com/LiteyukiStudio/spage/resps"
@@ -17,7 +18,6 @@ type OrgApi struct{}
 var Org = OrgApi{}
 
 // OrganizationDTO 组织信息数据传输对象
-// Organization Information Data Transfer Object (DTO)
 func getOrg(ctx context.Context) *models.Organization {
 	org, ok := ctx.Value("userOrg").(*models.Organization)
 	if !ok {
@@ -27,9 +27,8 @@ func getOrg(ctx context.Context) *models.Organization {
 }
 
 // UserOrgAuth 组织权限检查
-// Organization permission check
 func (OrgApi) UserOrgAuth(ctx context.Context, c *app.RequestContext) {
-	user := middle.Auth.GetUser(ctx, c)
+	user := middle.Auth.GetUserWithBlock(ctx, c)
 	// 当 id 为空的 POST 请求默认为 create
 	orgIdStr := c.Param("id")
 	if orgIdStr == "" && string(c.Method()) == "POST" {
@@ -66,8 +65,7 @@ func (OrgApi) UserOrgAuth(ctx context.Context, c *app.RequestContext) {
 	}
 }
 
-// OrganizationDTO 组织信息数据传输对象
-// Organization Information Data Transfer Object (DTO)
+// ToDTO 组织信息数据传输对象
 func (OrgApi) ToDTO(org *models.Organization) OrganizationDTO {
 	return OrganizationDTO{
 		ID:           org.ID,
@@ -81,24 +79,25 @@ func (OrgApi) ToDTO(org *models.Organization) OrganizationDTO {
 }
 
 // CreateOrganization 创建组织
-// Create Organization
 func (OrgApi) CreateOrganization(ctx context.Context, c *app.RequestContext) {
 	// 绑定参数
-	// Bind parameters
 	req := &CreateOrgReq{}
 	if err := c.BindAndValidate(&req); err != nil {
 		resps.BadRequest(c, resps.ParameterError)
 		return
 	}
+	// 校验组织名称是否合法
+	if !utils.IsValidEntityName(req.Name) {
+		resps.BadRequest(c, "organization name is invalid")
+		return
+	}
 	// 检验组织名称是否存在
-	// Check if the organization name already exists
 	if store.Org.OrgNameIsExist(req.Name) {
 		resps.BadRequest(c, "organization name already exists")
 		return
 	}
 	// 创建组织
-	// Create organization
-	user := middle.Auth.GetUser(ctx, c)
+	user := middle.Auth.GetUserWithBlock(ctx, c)
 	org := models.Organization{
 		Name:        req.Name,
 		DisplayName: &req.DisplayName,
@@ -118,11 +117,15 @@ func (OrgApi) CreateOrganization(ctx context.Context, c *app.RequestContext) {
 }
 
 // UpdateOrganization 更新组织信息
-// Update Organization Information
 func (OrgApi) UpdateOrganization(ctx context.Context, c *app.RequestContext) {
 	req := &UpdateOrgReq{}
 	if err := c.BindAndValidate(&req); err != nil {
 		resps.BadRequest(c, resps.ParameterError)
+		return
+	}
+	// 校验组织名称是否合法
+	if !utils.IsValidEntityName(req.Name) {
+		resps.BadRequest(c, "organization name is invalid")
 		return
 	}
 	org := getOrg(ctx)
@@ -141,7 +144,6 @@ func (OrgApi) UpdateOrganization(ctx context.Context, c *app.RequestContext) {
 }
 
 // GetOrganizationProject 获取组织项目
-// Get Organization Projects
 func (OrgApi) GetOrganizationProject(ctx context.Context, c *app.RequestContext) {
 	req := &GetOrgProjectReq{}
 	if err := c.BindAndValidate(&req); err != nil {
@@ -167,7 +169,6 @@ func (OrgApi) GetOrganizationProject(ctx context.Context, c *app.RequestContext)
 }
 
 // DeleteOrganization 删除组织
-// Delete Organization
 func (OrgApi) DeleteOrganization(ctx context.Context, c *app.RequestContext) {
 	org := getOrg(ctx)
 	// 删除组织
@@ -179,7 +180,6 @@ func (OrgApi) DeleteOrganization(ctx context.Context, c *app.RequestContext) {
 }
 
 // GetOrganization 获取组织信息
-// Get Organization Information
 func (OrgApi) GetOrganization(ctx context.Context, c *app.RequestContext) {
 	org := getOrg(ctx)
 	resps.Ok(c, resps.OK, map[string]any{
@@ -188,7 +188,6 @@ func (OrgApi) GetOrganization(ctx context.Context, c *app.RequestContext) {
 }
 
 // GetOrganizationUsers 获取组织用户
-// Get Organization Users
 func (OrgApi) GetOrganizationUsers(ctx context.Context, c *app.RequestContext) {
 	org := getOrg(ctx)
 	resps.Ok(c, resps.OK, map[string]any{
@@ -208,7 +207,6 @@ func (OrgApi) GetOrganizationUsers(ctx context.Context, c *app.RequestContext) {
 }
 
 // AddOrganizationUser 添加组织用户
-// Add Organization User
 func (OrgApi) AddOrganizationUser(ctx context.Context, c *app.RequestContext) {
 	req := &OrgUserReq{}
 	if err := c.BindAndValidate(&req); err != nil {
@@ -240,7 +238,6 @@ func (OrgApi) AddOrganizationUser(ctx context.Context, c *app.RequestContext) {
 }
 
 // DeleteOrganizationUser 删除组织用户
-// Delete Organization User
 func (OrgApi) DeleteOrganizationUser(ctx context.Context, c *app.RequestContext) {
 	req := &OrgUserReq{}
 	if err := c.BindAndValidate(&req); err != nil {

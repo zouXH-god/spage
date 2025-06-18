@@ -3,12 +3,12 @@ const isDev = process.env.NODE_ENV === "development";
 const nextConfig = isDev ?
   {
     async rewrites() {
-      const baseUrl = (process.env.NEXT_PUBLIC_API_BASE_URL || isDev ? "http://localhost:8888" : "")
-      console.log("Using development API base URL:", baseUrl);
+      const backendUrl = (process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8888")
+      console.log("Using development API base URL:", backendUrl);
       return [
         {
           source: '/api/:path*',
-          destination: baseUrl + '/api/:path*',
+          destination: backendUrl + '/api/:path*',
         },
       ]
     },

@@ -3,16 +3,18 @@ package filedriver
 import (
 	"fmt"
 	"github.com/LiteyukiStudio/spage/constants"
+	"github.com/cloudwego/hertz/pkg/app"
 	"io"
 	"os"
 )
 
 type FileDriver interface {
-	Save(path string, r io.Reader) error
-	Open(path string) (io.ReadCloser, error)
-	Delete(path string) error
-	Stat(path string) (os.FileInfo, error)
-	ListDir(path string) ([]os.FileInfo, error)
+	Save(ctx *app.RequestContext, path string, r io.Reader) error
+	Open(ctx *app.RequestContext, path string) (io.ReadCloser, error)
+	Delete(ctx *app.RequestContext, path string) error
+	Stat(ctx *app.RequestContext, path string) (os.FileInfo, error)
+	Get(ctx *app.RequestContext, path string)
+	ListDir(ctx *app.RequestContext, path string) ([]os.FileInfo, error)
 }
 
 type DriverConfig struct {
@@ -21,6 +23,7 @@ type DriverConfig struct {
 	WebDavUrl      string `mapstructure:"file.driver.webdav.url"`
 	WebDavUser     string `mapstructure:"file.driver.webdav.user"`
 	WebDavPassword string `mapstructure:"file.driver.webdav.password"`
+	WebDavPolicy   string `mapstructure:"file.driver.webdav.policy"` // proxy|redirect
 }
 
 func GetFileDriver(driverConfig *DriverConfig) (FileDriver, error) {

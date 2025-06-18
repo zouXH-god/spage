@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/LiteyukiStudio/spage/config"
 	"github.com/LiteyukiStudio/spage/constants"
-	models "github.com/LiteyukiStudio/spage/spage/models"
-	store "github.com/LiteyukiStudio/spage/spage/store"
+	"github.com/LiteyukiStudio/spage/spage/models"
+	"github.com/LiteyukiStudio/spage/spage/store"
 	"github.com/LiteyukiStudio/spage/utils"
 	"strings"
 	"time"
@@ -20,153 +20,128 @@ type authType struct{}
 
 var Auth = authType{}
 
-// PersistentHandler 持久化处理函数，使用依赖注入到 utils 中防止循环引用
-// Persistent Handler Function, using dependency injection to prevent circular references
-func PersistentHandler(userID uint) (*models.Token, error) {
-	token, err := store.JWT.CreateToken(userID)
+// JwtPersistentHandler 持久化处理函数，使用依赖注入到 utils 中防止循环引用
+func JwtPersistentHandler(userID uint) (*models.JsonWebToken, error) {
+	token, err := store.Token.CreateJsonWebToken(userID)
 	if err != nil {
 		return nil, err
 	}
 	return token, nil
 }
 
-// RevokeChecker 令牌撤销检查器，使用依赖注入到 utils 中防止循环引用
-// Token Revocation Checker, using dependency injection to prevent circular references
-func RevokeChecker(tokenID uint) bool {
-	return store.JWT.IsTokenRevoked(tokenID)
+func ApiTokenPersistentHandler(token *models.ApiToken) error {
+	return store.Token.CreateApiToken(token)
 }
 
-// UseAuth 中间件函数
-// Middleware function for authentication
-func (authType) UseAuth() app.HandlerFunc {
+// RevokeChecker 令牌撤销检查器，使用依赖注入到 utils 中防止循环引用
+func RevokeChecker(tokenID uint) bool {
+	return store.Token.IsJsonWebTokenRevoked(tokenID)
+}
+
+// IsApiTokenValid 检查API令牌是否有效
+func IsApiTokenValid(token string) (*models.ApiToken, error) {
+	return store.Token.GetApiTokenByToken(token)
+}
+
+// UseAuth Middleware function for authentication
+func (authType) UseAuth(block bool) app.HandlerFunc {
 	return func(ctx context.Context, c *app.RequestContext) {
-		// 1. 检查认证方式
-		// 1. Check authentication method
-		authHeader := string(c.GetHeader("Authorization"))
-
-		// 认证方式1：使用 Authorization Header
-		// Authentication method 1: Use Authorization Header
-		if authHeader != "" {
-			// 检查 token 是否以 "Bearer " 开头,如果是，则去掉前缀
-			// Check if the token starts with "Bearer ", if so, remove the prefix
-			token := authHeader
-			if strings.HasPrefix(token, "Bearer ") {
-				token = strings.TrimPrefix(token, "Bearer ")
-			}
-
-			// 验证令牌
-			// Verify token
-			claims, err := utils.Token.ParseToken(token, RevokeChecker)
-			if err != nil {
-				resps.Unauthorized(c, "Invalid token")
-				c.Abort()
-				return
-			}
-
-			// 将用户信息存储到上下文中
-			// Store user information in the context
-			c.Set("user", claims.UserID)
+		// 尝试 Cookie 认证
+		cookiePass, cookieClaims, cookieErr := handleCookieTokenAuth(c)
+		if cookiePass {
+			ctx = context.WithValue(ctx, "user", cookieClaims.UserID)
+			ctx = context.WithValue(ctx, "auth_type", "cookie")
 			c.Next(ctx)
 			return
 		}
 
-		// 认证方式2：使用 Cookie（启用无感刷新）
-		// Authentication method 2: Use Cookie (Enable silent refresh)
-		token := string(c.Cookie("token"))
-		if token == "" {
-			// 尝试通过 refresh_token 刷新
-			// Try to refresh by refresh_token
-			refreshToken := string(c.Cookie("refresh_token"))
-			if refreshToken == "" {
-				resps.BadRequest(c, "Refresh token not found 1")
-				c.Abort()
-				return
-			}
-
-			// 验证刷新令牌
-			// Verify refresh token
-			refreshClaims, err := utils.Token.ParseToken(refreshToken, RevokeChecker)
-			if err != nil {
-				resps.Unauthorized(c, "Refresh token expired or invalid 2")
-				c.Abort()
-				return
-			}
-
-			// 生成新的访问令牌
-			// Generate new access token
-			newToken, err := utils.Token.CreateToken(refreshClaims.UserID, time.Duration(config.TokenExpireTime)*time.Second, false, PersistentHandler)
-			if err != nil {
-				resps.InternalServerError(c, "Create access token failed 3")
-				c.Abort()
-				return
-			}
-
-			// 设置新的访问令牌
-			// Set new access token
-			c.SetCookie("token", newToken, config.TokenExpireTime, "/", "", protocol.CookieSameSiteLaxMode, true, true)
-
-			// 保存用户信息并继续请求
-			// Save user information and continue request
-			c.Set("user", refreshClaims.UserID)
+		// 尝试 Bearer 认证
+		apiPass, apiToken, apiErr := handleBearerTokenAuth(c)
+		if apiPass {
+			ctx = context.WithValue(ctx, "user", apiToken.UserID)
+			ctx = context.WithValue(ctx, "auth_type", "api")
 			c.Next(ctx)
 			return
 		}
 
-		// Cookie 中存在 token，验证其有效性
-		// Cookie contains token, verify its validity
-		claims, err := utils.Token.ParseToken(token, RevokeChecker)
-		if err != nil {
-			// token 无效，尝试刷新
-			// Token is invalid, try to refresh
-			refreshToken := string(c.Cookie("refresh_token"))
-			if refreshToken == "" {
-				resps.Unauthorized(c, "Refresh token not found 4")
-				c.Abort()
-				return
+		// 认证失败处理
+		if block {
+			// 可以记录具体的错误原因便于调试
+			if cookieErr != nil {
+				c.Set("auth_error_cookie", cookieErr.Error())
 			}
-
-			// 验证刷新令牌
-			// Verify refresh token
-			refreshClaims, err := utils.Token.ParseToken(refreshToken, RevokeChecker)
-			if err != nil {
-				fmt.Println(err)
-				resps.Unauthorized(c, "Refresh token expired or invalid 5")
-				c.Abort()
-				return
+			if apiErr != nil {
+				c.Set("auth_error_api", apiErr.Error())
 			}
-
-			// 生成新的访问令牌
-			// Generate new access token
-			newToken, err := utils.Token.CreateToken(refreshClaims.UserID, time.Duration(config.TokenExpireTime)*time.Second, false, PersistentHandler)
-			if err != nil {
-				resps.InternalServerError(c, "Create access token failed 6")
-				c.Abort()
-				return
-			}
-
-			// 设置新的访问令牌
-			// Set new access token
-			c.SetCookie("token", newToken, config.TokenExpireTime, "/", "", protocol.CookieSameSiteLaxMode, true, true)
-
-			// 保存用户信息并继续请求
-			// Save user information and continue request
-			c.Set("user", refreshClaims.UserID)
-			c.Next(ctx)
+			resps.Unauthorized(c, resps.UnauthorizedText)
+			c.Abort()
 			return
 		}
 
-		// token 有效，继续请求
-		// Token is valid, continue request
-		ctx = context.WithValue(ctx, "user", claims.UserID)
+		// 非阻塞模式，继续但标记未认证
+		ctx = context.WithValue(ctx, "authenticated", false)
 		c.Next(ctx)
 	}
 }
 
+// GetUserWithBlock 当获取不到用户时响应错误
+func (authType) GetUserWithBlock(ctx context.Context, c *app.RequestContext) *models.User {
+	user := Auth.GetUser(ctx)
+	if user == nil {
+		resps.Unauthorized(c, "User not found or not authenticated")
+		c.Abort()
+		return nil
+	}
+	return user
+}
+
+// GetUser 获取当前用户信息，获取不到时为nil
+func (authType) GetUser(ctx context.Context) *models.User {
+	userIDValue := ctx.Value("user")
+	if userIDValue == nil {
+		return nil
+	}
+	userID := userIDValue.(uint)
+	user, err := store.User.GetByID(userID)
+	if err != nil || user == nil || user.ID == 0 {
+		return nil
+	}
+	return user
+}
+
+// handleBearerTokenAuth
+func handleBearerTokenAuth(c *app.RequestContext) (bool, *models.ApiToken, error) {
+	token := strings.TrimPrefix(string(c.GetHeader("Authorization")), "Bearer ")
+	apiToken, err := utils.Token.ParseApiToken(token, IsApiTokenValid)
+	if err != nil {
+		return false, nil, err
+	}
+	if apiToken == nil || apiToken.UserID == 0 {
+		return false, nil, fmt.Errorf("invalid API token")
+	}
+	return true, apiToken, nil
+}
+
+// handleCookieTokenAuth
+func handleCookieTokenAuth(c *app.RequestContext) (bool, *utils.Claims, error) {
+	if claims, err := utils.Token.ParseJsonWebToken(string(c.Cookie("token")), RevokeChecker); err == nil {
+		return true, claims, err
+	}
+	if refreshClaims, err := utils.Token.ParseJsonWebToken(string(c.Cookie("refresh_token")), RevokeChecker); err == nil {
+		newToken, err := utils.Token.CreateJsonWebToken(refreshClaims.UserID, time.Duration(config.TokenExpireTime)*time.Second, false, JwtPersistentHandler)
+		if err != nil {
+			return false, nil, err
+		}
+		c.SetCookie("token", newToken, config.TokenExpireTime, "/", "", protocol.CookieSameSiteLaxMode, true, true)
+		return true, refreshClaims, nil
+	}
+	return false, nil, fmt.Errorf("authentication failed")
+}
+
 // IsAdmin 是一个中间件，用于检查用户是否为管理员
-// IsAdmin is a middleware that checks if the user is an admin
 func (authType) IsAdmin() app.HandlerFunc {
 	return func(ctx context.Context, c *app.RequestContext) {
-		user := Auth.GetUser(ctx, c)
+		user := Auth.GetUserWithBlock(ctx, c)
 		if user.Role != constants.RoleAdmin {
 			resps.Forbidden(c, "Permission denied")
 			c.Abort()
@@ -176,26 +151,34 @@ func (authType) IsAdmin() app.HandlerFunc {
 	}
 }
 
-// GetUser 从已认证的上下文中获取用户信息,如果用户不存在则终止请求并返回
-// GetUser retrieves user information from the authenticated context, if the user does not exist it terminates the request and returns
-func (authType) GetUser(ctx context.Context, c *app.RequestContext) *models.User {
-	userID := ctx.Value("user").(uint)
-	if userID == 0 {
-		resps.Unauthorized(c, resps.TargetNotFound)
-		c.Abort()
-		return nil
+// SetTokenForCookie 设置令牌到 Cookie 中 自动响应错误和返回，无需处理错误
+func (authType) SetTokenForCookie(c *app.RequestContext, user *models.User, response bool, remember bool) {
+	token, err := utils.Token.CreateJsonWebToken(user.ID, time.Duration(config.TokenExpireTime)*time.Second, false, JwtPersistentHandler)
+	if err != nil {
+		resps.InternalServerError(c, "Failed to create token")
+		return
 	}
 
-	user, err := store.User.GetByID(uint(userID))
+	// 根据 remember 参数决定 refresh token 的过期时间
+	refreshExpire := config.RefreshTokenExpireTime
+	if remember {
+		refreshExpire = config.RefreshTokenExpireTime * 7 // 延长7倍
+	}
+
+	refreshToken, err := utils.Token.CreateJsonWebToken(user.ID, time.Duration(refreshExpire)*time.Second, true, JwtPersistentHandler)
 	if err != nil {
-		resps.Unauthorized(c, resps.TargetNotFound)
-		c.Abort()
-		return nil
+		resps.InternalServerError(c, "Failed to create refresh token")
+		return
 	}
-	if user == nil {
-		resps.Unauthorized(c, resps.TargetNotFound)
-		c.Abort()
-		return nil
+	c.SetCookie("token", token, config.TokenExpireTime, "/", "", protocol.CookieSameSiteLaxMode, true, true)
+	c.SetCookie("refresh_token", refreshToken, refreshExpire, "/", "", protocol.CookieSameSiteLaxMode, true, true)
+
+	if !response {
+		return
 	}
-	return user
+	resps.Ok(c, "Login successful", map[string]any{
+		"token":   token,
+		"user_id": user.ID,
+	})
+	return
 }
