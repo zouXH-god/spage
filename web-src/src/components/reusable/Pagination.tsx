@@ -46,7 +46,6 @@ export const Pagination: React.FC<PaginationProps> = ({
       <div className="text-sm text-gray-500 dark:text-gray-400">
         共 {totalItems} 项，第 {currentPage} 页 / 共 {totalPages} 页
       </div>
-      
       {/* 分页控制 */}
       <div className="flex items-center">
         {/* 上一页按钮 */}
@@ -101,7 +100,6 @@ export const Pagination: React.FC<PaginationProps> = ({
             </button>
           </>
         )}
-        
         {/* 下一页按钮 */}
         <button
           onClick={() => currentPage < totalPages && onPageChange(currentPage + 1)}

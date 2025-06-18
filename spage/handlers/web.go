@@ -31,14 +31,12 @@ func WebHandler(ctx context.Context, c *app.RequestContext) {
 			return
 		}
 		defer file.Close()
-
 		c.SetContentType("text/html; charset=utf-8")
 	} else {
 		defer file.Close()
 		mimeType := getMimeType(path)
 		c.SetContentType(mimeType)
 	}
-	// 更安全的写法，直接拷贝到响应流
 	stat, err := file.Stat()
 	if err != nil {
 		c.String(500, "Read file stat failed")
