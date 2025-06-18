@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from 'react';
+import React, { useMemo } from "react";
 
 interface PaginationProps {
   currentPage: number;
@@ -16,7 +16,7 @@ export const Pagination: React.FC<PaginationProps> = ({
   totalItems,
   pageSize,
   onPageChange,
-  className = '',
+  className = "",
   showPageSize = false,
 }) => {
   // 计算总页数
@@ -53,14 +53,16 @@ export const Pagination: React.FC<PaginationProps> = ({
           onClick={() => currentPage > 1 && onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
           className={`px-3 py-1 mx-1 rounded-md 
-                    ${currentPage === 1 
-                      ? 'bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-600 cursor-not-allowed' 
-                      : 'bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300'}`}
+                    ${
+                      currentPage === 1
+                        ? "bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-600 cursor-not-allowed"
+                        : "bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300"
+                    }`}
           aria-label="上一页"
         >
           上一页
         </button>
-        
+
         {/* 首页 */}
         {pageNumbers[0] > 1 && (
           <>
@@ -73,25 +75,29 @@ export const Pagination: React.FC<PaginationProps> = ({
             {pageNumbers[0] > 2 && <span className="mx-1">...</span>}
           </>
         )}
-        
+
         {/* 页码按钮 */}
-        {pageNumbers.map(page => (
+        {pageNumbers.map((page) => (
           <button
             key={page}
             onClick={() => onPageChange(page)}
             className={`px-3 py-1 mx-1 rounded-md 
-                      ${currentPage === page 
-                        ? 'bg-blue-500 text-white' 
-                        : 'bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300'}`}
+                      ${
+                        currentPage === page
+                          ? "bg-blue-500 text-white"
+                          : "bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300"
+                      }`}
           >
             {page}
           </button>
         ))}
-        
+
         {/* 尾页 */}
         {pageNumbers[pageNumbers.length - 1] < totalPages && (
           <>
-            {pageNumbers[pageNumbers.length - 1] < totalPages - 1 && <span className="mx-1">...</span>}
+            {pageNumbers[pageNumbers.length - 1] < totalPages - 1 && (
+              <span className="mx-1">...</span>
+            )}
             <button
               onClick={() => onPageChange(totalPages)}
               className="px-3 py-1 mx-1 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300"
@@ -105,22 +111,22 @@ export const Pagination: React.FC<PaginationProps> = ({
           onClick={() => currentPage < totalPages && onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
           className={`px-3 py-1 mx-1 rounded-md 
-                    ${currentPage === totalPages 
-                      ? 'bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-600 cursor-not-allowed' 
-                      : 'bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300'}`}
+                    ${
+                      currentPage === totalPages
+                        ? "bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-600 cursor-not-allowed"
+                        : "bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300"
+                    }`}
           aria-label="下一页"
         >
           下一页
         </button>
       </div>
-      
+
       {/* 可选的页面大小选择器 */}
       {showPageSize && (
         <select
           className="px-2 py-1 rounded-md bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border-none"
-          onChange={() => {
-            
-          }}
+          onChange={() => {}}
           value={pageSize}
         >
           <option value={5}>5条/页</option>

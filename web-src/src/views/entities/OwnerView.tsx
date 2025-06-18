@@ -1,11 +1,12 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+
 import { getOwnerByName } from "@/api/owner.api";
+import { EntityTypeEnum } from "@/types/entity";
 import OrgView from "@/views/entities/OrgView";
 import UserView from "@/views/entities/UserView";
-import { EntityTypeEnum } from "@/types/entity";
-import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
 
 interface OwnerProps {
   type: string;
@@ -16,10 +17,10 @@ export default function OwnerView() {
   const [ownerProps, setOwnerProps] = useState<OwnerProps | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // 使用 react-router-dom 的 useParams
   const params = useParams();
-  
+
   useEffect(() => {
     console.log("Owner params:", params); // 调试日志
     if (!params.owner) {
@@ -35,7 +36,7 @@ export default function OwnerView() {
         if (owner && owner.data) {
           setOwnerProps({
             type: owner.data.type,
-            id: owner.data.id
+            id: owner.data.id,
           });
         } else {
           setError("未找到用户");
@@ -51,9 +52,11 @@ export default function OwnerView() {
   }, [params.owner]);
 
   if (loading) {
-    return <div className="text-center p-8 text-slate-700 dark:text-slate-100">正在加载用户数据...</div>;
+    return (
+      <div className="text-center p-8 text-slate-700 dark:text-slate-100">正在加载用户数据...</div>
+    );
   }
-  
+
   if (error) {
     return <div className="text-center p-8 text-red-500">{error}</div>;
   }

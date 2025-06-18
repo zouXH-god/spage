@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 import { t } from "i18next";
 import { CircleUserRound, ShieldCheck } from "lucide-react";
 import Image from "next/image";
-import { Link } from "react-router-dom";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 

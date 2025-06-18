@@ -4,9 +4,7 @@ export default function MainView() {
       <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-4">
         Welcome to the Main View
       </h1>
-      <p className="text-gray-600 dark:text-gray-400">
-        This is the main view of your application.
-      </p>
+      <p className="text-gray-600 dark:text-gray-400">This is the main view of your application.</p>
     </div>
   );
 }

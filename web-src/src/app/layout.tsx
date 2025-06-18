@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+
+import "@/app/globals.css";
 import { DeviceProvider } from "@/contexts/DeviceContext";
 import { SessionProvider } from "@/contexts/SessionContext";
 import I18nProvider from "@/providers/I18nProvider";
-
-import "@/app/globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,9 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`bg-slate-100 dark:bg-slate-800`}>
         <SessionProvider>
           <DeviceProvider>
-            <I18nProvider>
-              {children}
-            </I18nProvider>
+            <I18nProvider>{children}</I18nProvider>
           </DeviceProvider>
         </SessionProvider>
       </body>

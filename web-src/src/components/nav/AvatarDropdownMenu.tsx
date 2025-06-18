@@ -1,8 +1,7 @@
 import React, { ReactNode } from "react";
-import { useSession } from "@/contexts/SessionContext";
-import { logout } from "@/api/user.api";
-import { LOGIN_PATH } from "@/consts";
 import { Link } from "react-router-dom";
+
+import { logout } from "@/api/user.api";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,7 +10,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
+import { LOGIN_PATH } from "@/consts";
+import { useSession } from "@/contexts/SessionContext";
 
 interface AvatarDropdownMenuProps {
   /** 自定义触发器 */
@@ -24,20 +25,19 @@ interface AvatarDropdownMenuProps {
   onClose?: () => void;
 }
 
-export function AvatarDropdownMenu({ 
+export function AvatarDropdownMenu({
   trigger,
   menuItems = [],
   isMobile = false,
-  onClose = () => {}
+  onClose = () => {},
 }: AvatarDropdownMenuProps) {
   const { currentUser } = useSession();
 
   const handleLogout = async () => {
-    const currentUrl = window.location.pathname +
-      (window.location.search || '') +
-      (window.location.hash || '');
+    const currentUrl =
+      window.location.pathname + (window.location.search || "") + (window.location.hash || "");
     const redirectUrl = encodeURIComponent(currentUrl);
-    
+
     try {
       await logout();
       onClose();
@@ -49,14 +49,10 @@ export function AvatarDropdownMenu({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        {trigger}
-      </DropdownMenuTrigger>
+      <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end">
-        <DropdownMenuLabel>
-          已登录用户 {currentUser?.name}
-        </DropdownMenuLabel>
-        
+        <DropdownMenuLabel>已登录用户 {currentUser?.name}</DropdownMenuLabel>
+
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
             <Link to={`/${currentUser?.name}`}>个人信息</Link>
@@ -78,11 +74,9 @@ export function AvatarDropdownMenu({
         <DropdownMenuItem asChild>
           <Link to="/admin">管理后台</Link>
         </DropdownMenuItem>
-        
+
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout}>
-          退出
-        </DropdownMenuItem>
+        <DropdownMenuItem onClick={handleLogout}>退出</DropdownMenuItem>
         {isMobile && menuItems.length > 0 && (
           <>
             <DropdownMenuSeparator />
@@ -96,5 +90,5 @@ export function AvatarDropdownMenu({
         )}
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }

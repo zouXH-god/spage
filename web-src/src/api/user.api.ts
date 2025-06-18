@@ -1,5 +1,7 @@
 import type { AxiosResponse } from "axios";
 
+import { PAGE_LIMIT } from "@/consts";
+
 import type { BaseResponse } from "./base.models";
 import client from "./client";
 import type {
@@ -14,7 +16,6 @@ import type {
   UserProjectsResponse,
   UserResponse,
 } from "./user.models";
-import { PAGE_LIMIT } from "@/consts";
 
 export function login(data: LoginRequest): Promise<AxiosResponse<LoginResponse, unknown>> {
   return client.post<LoginResponse>("/user/login", data);
