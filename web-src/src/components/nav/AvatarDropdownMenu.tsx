@@ -84,8 +84,6 @@ export function AvatarDropdownMenu({
         <DropdownMenuItem onClick={handleLogout}>
           退出
         </DropdownMenuItem>
-        
-        {/* 移动端显示页面菜单项 */}
         {isMobile && menuItems.length > 0 && (
           <>
             <DropdownMenuSeparator />
