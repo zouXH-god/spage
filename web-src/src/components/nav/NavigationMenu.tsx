@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import Link from "next/link"
+import { Link } from 'react-router-dom';
 import { CircleCheckIcon, CircleHelpIcon, CircleIcon } from "lucide-react"
 
 import {
@@ -58,7 +58,7 @@ export function NavigationMenuDemo() {
             <NavigationMenuList>
                 <NavigationMenuItem>
                     <NavigationMenuLink asChild>
-                        <Link href="/">Overview</Link>
+                        <Link to="/">Overview</Link>
                     </NavigationMenuLink>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
@@ -79,7 +79,7 @@ export function NavigationMenuDemo() {
                 </NavigationMenuItem>
                 <NavigationMenuItem>
                     <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                        <Link href="/docs">Docs</Link>
+                        <Link to="/docs">Docs</Link>
                     </NavigationMenuLink>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
@@ -88,7 +88,7 @@ export function NavigationMenuDemo() {
                         <ul className="grid w-[300px] gap-4">
                             <li>
                                 <NavigationMenuLink asChild>
-                                    <Link href="#">
+                                    <Link to="#">
                                         <div className="font-medium">Components</div>
                                         <div className="text-muted-foreground">
                                             Browse all components in the library.
@@ -96,7 +96,7 @@ export function NavigationMenuDemo() {
                                     </Link>
                                 </NavigationMenuLink>
                                 <NavigationMenuLink asChild>
-                                    <Link href="#">
+                                    <Link to="#">
                                         <div className="font-medium">Documentation</div>
                                         <div className="text-muted-foreground">
                                             Learn how to use the library.
@@ -104,7 +104,7 @@ export function NavigationMenuDemo() {
                                     </Link>
                                 </NavigationMenuLink>
                                 <NavigationMenuLink asChild>
-                                    <Link href="#">
+                                    <Link to="#">
                                         <div className="font-medium">Blog</div>
                                         <div className="text-muted-foreground">
                                             Read our latest blog posts.
@@ -121,13 +121,13 @@ export function NavigationMenuDemo() {
                         <ul className="grid w-[200px] gap-4">
                             <li>
                                 <NavigationMenuLink asChild>
-                                    <Link href="#">Components</Link>
+                                    <Link to="#">Components</Link>
                                 </NavigationMenuLink>
                                 <NavigationMenuLink asChild>
-                                    <Link href="#">Documentation</Link>
+                                    <Link to="#">Documentation</Link>
                                 </NavigationMenuLink>
                                 <NavigationMenuLink asChild>
-                                    <Link href="#">Blocks</Link>
+                                    <Link to="#">Blocks</Link>
                                 </NavigationMenuLink>
                             </li>
                         </ul>
@@ -139,19 +139,19 @@ export function NavigationMenuDemo() {
                         <ul className="grid w-[200px] gap-4">
                             <li>
                                 <NavigationMenuLink asChild>
-                                    <Link href="#" className="flex-row items-center gap-2">
+                                    <Link to="#" className="flex-row items-center gap-2">
                                         <CircleHelpIcon />
                                         Backlog
                                     </Link>
                                 </NavigationMenuLink>
                                 <NavigationMenuLink asChild>
-                                    <Link href="#" className="flex-row items-center gap-2">
+                                    <Link to="#" className="flex-row items-center gap-2">
                                         <CircleIcon />
                                         To Do
                                     </Link>
                                 </NavigationMenuLink>
                                 <NavigationMenuLink asChild>
-                                    <Link href="#" className="flex-row items-center gap-2">
+                                    <Link to="#" className="flex-row items-center gap-2">
                                         <CircleCheckIcon />
                                         Done
                                     </Link>
@@ -174,7 +174,7 @@ function ListItem({
     return (
         <li {...props}>
             <NavigationMenuLink asChild>
-                <Link href={href}>
+                <Link to={href}>
                     <div className="text-sm leading-none font-medium">{title}</div>
                     <p className="text-muted-foreground line-clamp-2 text-sm leading-snug">
                         {children}

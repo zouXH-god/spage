@@ -3,16 +3,16 @@
 import { useDevice } from "@/contexts/DeviceContext";
 import { useState, ReactNode, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import Image from "next/image";
 import { GetMetaInfoResponse } from "@/api/meta.models";
 import { getMetaInfo } from "@/api/meta.api";
 import { useSession } from "@/contexts/SessionContext";
 import { logout } from "@/api/user.api";
 import { LOGIN_PATH } from "@/consts";
-import { getGravatarByUser } from "./reusable/Gravatar";
+import { getGravatarByUser } from "../reusable/Gravatar";
 import { NavigationMenuDemo } from "./NavigationMenu";
-import { AvatarDropdownMenu } from "./nav/AvatarDropdownMenu";
+import { AvatarDropdownMenu } from "./AvatarDropdownMenu";
 
 type NavMenuProps = {
   children: ReactNode;
@@ -94,7 +94,7 @@ export default function Nav() {
       <div className="grid grid-cols-3 pb-4 items-center">
         {/* 左侧区域：品牌信息 */}
         <div className="flex items-center">
-          <Link href="/" className="flex items-center">
+          <Link to="/" className="flex items-center">
             <div className="h-10 relative" style={{ aspectRatio: 'auto' }}>
               <Image
                 src={metaInfo?.icon || "/apage.svg"}

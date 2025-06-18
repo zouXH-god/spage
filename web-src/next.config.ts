@@ -30,5 +30,4 @@ const nextConfig = isDev ?
       unoptimized: true,
     },
   }
-
 module.exports = nextConfig

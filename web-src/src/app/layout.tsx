@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={`...`}>
+      <body className={`bg-slate-100 dark:bg-slate-800`}>
         <SessionProvider>
           <DeviceProvider>
             <I18nProvider>

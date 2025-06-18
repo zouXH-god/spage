@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import Link from 'next/link';
+import {Link} from 'react-router-dom';
 
 interface ProjectProps {
   id: number;
@@ -26,7 +26,7 @@ export const ProjectCard: FC<ProjectProps> = ({
         {/* 左侧：项目信息 */}
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
-            <Link href={`/${id}`}>
+            <Link to={`/${id}`}>
               <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400">
                 {name}
               </h2>

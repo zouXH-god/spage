@@ -1,6 +1,6 @@
 "use client";
 
-import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import MainView from '@/views/MainView';
 import OwnerView from '@/views/entities/OwnerView';
@@ -25,17 +25,16 @@ export default function App() {
     }
     return (
         <BrowserRouter>
-        BBBB
             <Routes>
                 {/* 带导航栏的主布局 */}
-                <Route element={<MainLayout><Outlet /></MainLayout>}>
-                
+                <Route element={<MainLayout />}>
                     <Route path="/" element={<MainView />} />
                     <Route path="/:owner" element={<OwnerView />} />
                     <Route path="/:owner/:project" element={<ProjectView />} />
                 </Route>
+                
                 {/* 无导航栏的认证布局 */}
-                <Route element={<EmptyLayout><Outlet /></EmptyLayout>}>
+                <Route element={<EmptyLayout />}>
                     <Route path="/-/login" element={<LoginView />} />
                 </Route>
             </Routes>

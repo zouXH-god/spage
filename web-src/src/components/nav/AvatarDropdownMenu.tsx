@@ -2,7 +2,7 @@ import React, { ReactNode } from "react";
 import { useSession } from "@/contexts/SessionContext";
 import { logout } from "@/api/user.api";
 import { LOGIN_PATH } from "@/consts";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -59,24 +59,24 @@ export function AvatarDropdownMenu({
         
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
-            <Link href={`/${currentUser?.name}`}>个人信息</Link>
+            <Link to={`/${currentUser?.name}`}>个人信息</Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href="/starred">已点赞</Link>
+            <Link to="/starred">已点赞</Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href="/notifications">订阅</Link>
+            <Link to="/notifications">订阅</Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href="/settings">设置</Link>
+            <Link to="/settings">设置</Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href="/help">帮助</Link>
+            <Link to="/help">帮助</Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href="/admin">管理后台</Link>
+          <Link to="/admin">管理后台</Link>
         </DropdownMenuItem>
         
         <DropdownMenuSeparator />
@@ -89,7 +89,7 @@ export function AvatarDropdownMenu({
             <DropdownMenuLabel>当前页面菜单</DropdownMenuLabel>
             {menuItems.map((item) => (
               <DropdownMenuItem key={item.label} asChild>
-                <Link href={item.href}>{item.label}</Link>
+                <Link to={item.href}>{item.label}</Link>
               </DropdownMenuItem>
             ))}
           </>

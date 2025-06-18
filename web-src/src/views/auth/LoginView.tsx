@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { t } from "i18next";
 import { CircleUserRound, ShieldCheck } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 
@@ -132,7 +132,7 @@ export default function LoginView() {
             />
             {t("login.remember")}
           </label>
-          <Link href="/forgot-password" className="text-blue-600 hover:underline">
+          <Link to="/forgot-password" className="text-blue-600 hover:underline">
             {t("login.forgotPassword")}
           </Link>
         </div>
@@ -172,7 +172,7 @@ export default function LoginView() {
         {oidcConfigs.map((config) => (
           <Link
             key={config.name}
-            href={config.loginUrl}
+            to={config.loginUrl}
             className="w-full py-2 mt-4 rounded-3xl bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white text-center font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
           >
             <div className="flex items-center justify-center gap-2">
