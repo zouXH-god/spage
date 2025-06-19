@@ -32,7 +32,6 @@ export default function LoginView() {
   useEffect(() => {
     getUser()
       .then(() => {
-        // 使用 navigate 替代 router.push
         navigate(redirectUrl);
       })
       .catch((error) => {
@@ -51,7 +50,7 @@ export default function LoginView() {
       })
       .catch(() => setError("login.captcha.fetchFailed"));
   }, [redirectUrl, navigate]);
-
+  console.log("captcha Token:", captchaToken);
   useEffect(() => {
     getOidcConfig()
       .then((response) => {
@@ -140,7 +139,7 @@ export default function LoginView() {
         <div
           className={`flex justify-center (${![CaptchaProvider.DISABLE, CaptchaProvider.RECAPTCHA].includes(captchaProps?.provider ?? CaptchaProvider.DISABLE) ? "my-4" : ""})`}
         >
-          <AIOCaptchaWidget
+          {captchaProps && <AIOCaptchaWidget
             key={captchaKey}
             {...(captchaProps || {
               provider: CaptchaProvider.DISABLE,
@@ -152,7 +151,7 @@ export default function LoginView() {
                 setCaptchaKey(Date.now());
               },
             })}
-          />
+          />}
         </div>
         {error && <div className="text-red-500 text-sm text-center mb-2">{t(error)}</div>}
         {/* 登录按钮 */}
