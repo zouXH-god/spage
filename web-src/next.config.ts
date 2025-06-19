@@ -10,6 +10,17 @@ const nextConfig = isDev ?
           source: '/api/:path*',
           destination: backendUrl + '/api/:path*',
         },
+        {
+          source: '/:path*',
+          destination: '/',
+          has: [
+            {
+              type: 'header',
+              key: 'accept',
+              value: '.*text/html.*',
+            },
+          ],
+        },
       ]
     },
   } :
@@ -19,5 +30,4 @@ const nextConfig = isDev ?
       unoptimized: true,
     },
   }
-
 module.exports = nextConfig

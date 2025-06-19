@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 import { t } from "i18next";
 import { CircleUserRound, ShieldCheck } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useSearchParams } from "next/navigation";
+// 移除 Next.js 相关导入
+// import Image from "next/image";
+// import { useRouter } from "next/navigation";
+// import { useSearchParams } from "next/navigation";
 
 import { getCaptchaConfig, getOidcConfig, getUser, login } from "@/api/user.api";
 import { OidcConfig } from "@/api/user.models";
@@ -15,24 +16,30 @@ import AIOCaptchaWidget from "@/components/captcha/AIOCaptcha";
 import { useDevice } from "@/contexts/DeviceContext";
 import { CaptchaProps, CaptchaProvider } from "@/types/captcha";
 
-export default function LoginPage() {
+export default function LoginView() {
   const { isMobile } = useDevice();
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  // 替换 Next.js 路由为 React Router
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  // 使用 URLSearchParams 解析查询参数
+  const searchParams = new URLSearchParams(location.search);
   const redirectUrl = searchParams.get("redirect") || "/";
+  
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [captchaToken, setCaptchaToken] = useState("");
   const [captchaProps, setCaptchaProps] = useState<CaptchaProps | null>(null);
-  const [captchaKey, setCaptchaKey] = useState(Date.now()); // 新增
-  const [oidcConfigs, setOidcConfigs] = useState<OidcConfig[]>([]); // 从服务端拉取oidc配置
-  const [remember, setRemember] = useState(false); // 记住设备
+  const [captchaKey, setCaptchaKey] = useState(Date.now());
+  const [oidcConfigs, setOidcConfigs] = useState<OidcConfig[]>([]);
+  const [remember, setRemember] = useState(false);
 
   useEffect(() => {
     getUser()
       .then(() => {
-        router.push(redirectUrl); // 如果已登录，直接跳转到重定向地址
+        // 使用 navigate 替代 router.push
+        navigate(redirectUrl);
       })
       .catch((error) => {
         console.error("Error fetching user data:", error);
@@ -49,7 +56,7 @@ export default function LoginPage() {
         });
       })
       .catch(() => setError("login.captcha.fetchFailed"));
-  }, [redirectUrl, router]);
+  }, [redirectUrl, navigate]);
 
   useEffect(() => {
     getOidcConfig()
@@ -67,8 +74,8 @@ export default function LoginPage() {
     e.preventDefault();
     login({ username, password, captchaToken, remember })
       .then(() => {
-        // 路由跳转
-        router.push(redirectUrl);
+        // 使用 navigate 替代 router.push
+        navigate(redirectUrl);
       })
       .catch((err) => {
         setError(t("login.failed") + ": " + err.response?.data?.message || err.message);
@@ -132,7 +139,7 @@ export default function LoginPage() {
             />
             {t("login.remember")}
           </label>
-          <Link href="/forgot-password" className="text-blue-600 hover:underline">
+          <Link to="/forgot-password" className="text-blue-600 hover:underline">
             {t("login.forgotPassword")}
           </Link>
         </div>
@@ -149,7 +156,7 @@ export default function LoginPage() {
               onSuccess: (token: string) => setCaptchaToken(token),
               onError: () => {
                 setError("login.captcha.failed");
-                setCaptchaKey(Date.now()); // 重新生成key以重置验证码组件
+                setCaptchaKey(Date.now());
               },
             })}
           />
@@ -172,12 +179,17 @@ export default function LoginPage() {
         {oidcConfigs.map((config) => (
           <Link
             key={config.name}
-            href={config.loginUrl}
+            to={config.loginUrl}
             className="w-full py-2 mt-4 rounded-3xl bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white text-center font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
           >
             <div className="flex items-center justify-center gap-2">
               <div className="flex-shrink-0 w-6 h-6 relative">
-                <Image src={config.icon} alt={config.displayName} fill className="object-contain" />
+                {/* 替换 Next.js Image 为常规 img 标签 */}
+                <img 
+                  src={config.icon} 
+                  alt={config.displayName} 
+                  className="object-contain w-full h-full" 
+                />
               </div>
               <span className="text-base">
                 {t("login.oidc.use", { provider: t(config.displayName) })}

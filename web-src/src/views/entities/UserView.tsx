@@ -2,18 +2,18 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 
+import { Project } from "@/api/project.models";
 import { getUser, getUserProjects } from "@/api/user.api";
 import { User } from "@/api/user.models";
+import { ProjectCard } from "@/components/entities/ProjectCard";
 import { getGravatarByUser } from "@/components/reusable/Gravatar";
-import { Project } from "@/api/project.models";
 import { Pagination } from "@/components/reusable/Pagination";
-import { ProjectCard } from "./ProjectCard";
 
-export function UserPage({ id }: { id: number }) {
+export default function UserView({ id }: { id: number }) {
   const [user, setUser] = useState<User | null>(null);
   // 项目分页查询
   const [page, setPage] = useState(1);
-  const [pageSize, ] = useState(10);
+  const [pageSize] = useState(10);
   const [totalItems, setTotalItems] = useState(0);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(false);
@@ -61,11 +61,11 @@ export function UserPage({ id }: { id: number }) {
     if (newPage < 1 || newPage > totalPages || newPage === page) return;
     setPage(newPage);
     // 滚动到页面顶部，提升用户体验
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 to-slate-300 dark:from-gray-900 dark:to-gray-800 flex justify-center items-start py-10">
+    <div className="min-h-screen bg-gradient-to-br flex justify-center items-start py-10">
       <div className="flex w-full max-w-6xl gap-8">
         {/* 侧边栏：用户信息卡片 */}
         <aside className="w-full max-w-xs">
@@ -125,9 +125,7 @@ export function UserPage({ id }: { id: number }) {
                     <p className="mt-2 text-gray-600 dark:text-gray-400">加载中...</p>
                   </div>
                 ) : projects.length > 0 ? (
-                  projects.map((project) => (
-                    <ProjectCard key={project.id} {...project} />
-                  ))
+                  projects.map((project) => <ProjectCard key={project.id} {...project} />)
                 ) : (
                   <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                     没有找到项目

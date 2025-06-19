@@ -7,8 +7,8 @@ import (
 
 // IsValidEntityName 检查字符串是否符合Git仓库命名规范
 func IsValidEntityName(name string) bool {
-	// 仓库名不能为空
-	if name == "" {
+	// 仓库名长度限制
+	if len(name) <= 4 || len(name) > 20 {
 		return false
 	}
 	// 仓库名不能是 "." 或 ".."

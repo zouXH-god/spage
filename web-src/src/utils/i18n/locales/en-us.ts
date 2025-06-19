@@ -1,5 +1,6 @@
 const resources = {
   translation: {
+    name: "English",
     hello: "Hello",
     login: {
       login: "Login",

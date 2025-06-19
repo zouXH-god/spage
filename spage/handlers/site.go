@@ -40,7 +40,7 @@ func getSite(ctx context.Context) *models.Site {
 }
 
 func (SiteApi) SiteAuth(ctx context.Context, c *app.RequestContext) {
-	siteIDStr := c.Param("site_id")
+	siteIDStr := c.Param("id")
 	// 当id为空默认为创建
 	if siteIDStr == "" && string(c.Method()) == "POST" {
 		return

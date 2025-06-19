@@ -26,6 +26,7 @@ func Ok(c *app.RequestContext, message string, data ...map[string]any) {
 // Redirect 3xx for oidc
 func Redirect(c *app.RequestContext, url string) {
 	c.Redirect(302, []byte(url))
+	c.Abort()
 }
 
 // 4xx

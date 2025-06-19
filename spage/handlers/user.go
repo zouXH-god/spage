@@ -78,8 +78,8 @@ func (userApi) Logout(ctx context.Context, c *app.RequestContext) {
 	resps.Ok(c, "Logout successful")
 }
 
-// GetCaptcha 获取验证码
-func (userApi) GetCaptcha(ctx context.Context, c *app.RequestContext) {
+// GetCaptchaConfig 获取验证码
+func (userApi) GetCaptchaConfig(ctx context.Context, c *app.RequestContext) {
 	resps.Ok(c, "ok", map[string]any{
 		"provider": config.CaptchaType,
 		"site_key": config.CaptchaSiteKey,

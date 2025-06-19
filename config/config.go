@@ -26,7 +26,7 @@ var (
 	// BaseUrl 基础路径
 	BaseUrl = "http://localhost:3000"
 	OidcUri = "/api/v1/user/oidc/login"
-
+	// EmailEnable Email 相关配置项 Email Configuration
 	EmailEnable   bool   // 是否启用邮箱发送 Enable Email Sending
 	EmailUsername string // 邮箱用户名 Email Username
 	EmailAddress  string // 邮箱地址 Email Address
@@ -34,11 +34,12 @@ var (
 	EmailPort     string // 邮箱服务器端口 Email Server Port
 	EmailPassword string // 邮箱密码 Email Password
 	EmailSSL      bool   // 是否启用SSL Enable SSL
+	// DomainVerifyPolice 域名相关配置
+	DomainVerifyPolice = constants.DomainVerifyPolicyLoose // 域名验证策略，默认为宽松验证 Loose Domain Verification Policy
 	// PageLimit 每页显示的文章数量，默认为40
 	PageLimit = 40
 	// CaptchaType 验证码类型，支持turnstile、recaptcha和hcaptcha
-	CaptchaType = constants.CaptchaTypeDisable
-
+	CaptchaType      = constants.CaptchaTypeDisable
 	CaptchaSiteKey   string // reCAPTCHA v3的站点密钥
 	CaptchaSecretKey string // reCAPTCHA v3的密钥
 	CaptchaUrl       string // for mcaptcha
@@ -138,6 +139,9 @@ func Init() error {
 	EmailPort = GetString("email.port", EmailPort)
 	EmailPassword = GetString("email.password", EmailPassword)
 	EmailSSL = GetBool("email.ssl", EmailSSL)
+
+	// 域名配置项
+	DomainVerifyPolice = GetString("domain.verify-policy", DomainVerifyPolice)
 
 	// Meta配置项
 	Icon = GetString("meta.icon", Icon)

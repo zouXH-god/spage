@@ -26,45 +26,6 @@ func getOrg(ctx context.Context) *models.Organization {
 	return org
 }
 
-// UserOrgAuth 组织权限检查
-func (OrgApi) UserOrgAuth(ctx context.Context, c *app.RequestContext) {
-	user := middle.Auth.GetUserWithBlock(ctx, c)
-	// 当 id 为空的 POST 请求默认为 create
-	orgIdStr := c.Param("id")
-	if orgIdStr == "" && string(c.Method()) == "POST" {
-		return
-	}
-	// 查询 Check
-	orgId, err := strconv.Atoi(orgIdStr)
-	if err != nil {
-		resps.BadRequest(c, resps.ParameterError)
-		c.Abort()
-		return
-	}
-	org, err := store.Org.GetOrgById(uint(orgId))
-	if err != nil || org == nil {
-		resps.NotFound(c, resps.TargetNotFound)
-		c.Abort()
-		return
-	}
-	// 判断权限 (GET 请求需要用户权限，其他请求需要管理员权限)
-	// Determine permissions (GET requests require user permissions, other requests require admin permissions)
-	var authType string
-	if string(c.Method()) == "GET" {
-		authType = "member"
-	} else {
-		authType = "owner"
-	}
-	if authType == store.Org.GetUserAuth(org, user.ID) {
-		context.WithValue(ctx, "userOrg", org)
-		return
-	} else {
-		resps.BadRequest(c, resps.ParameterError)
-		c.Abort()
-		return
-	}
-}
-
 // ToDTO 组织信息数据传输对象
 func (OrgApi) ToDTO(org *models.Organization) OrganizationDTO {
 	return OrganizationDTO{
@@ -276,4 +237,67 @@ func (OrgApi) DeleteOrganizationUser(ctx context.Context, c *app.RequestContext)
 		}
 	}
 	resps.Ok(c, resps.OK)
+}
+
+// IsOrgMemberMiddleware 组织成员中间件
+func (OrgApi) IsOrgMemberMiddleware(ctx context.Context, c *app.RequestContext) {
+	orgIdString := c.Param("id")
+	orgId, err := strconv.Atoi(orgIdString)
+	if err != nil {
+		resps.BadRequest(c, resps.ParameterError)
+		return
+	}
+	crtUser := middle.Auth.GetUserWithBlock(ctx, c)
+	pass, err := isOrgMember(crtUser.ID, uint(orgId))
+	if err != nil || !pass {
+		resps.Forbidden(c, resps.PermissionDenied)
+		return
+	}
+	c.Next(ctx)
+	return
+}
+
+func isOrgMember(userId, orgId uint) (bool, error) {
+	org, err := store.Org.GetOrgById(orgId)
+	if err != nil {
+		return false, err
+	}
+	for _, member := range org.Members {
+		if member.ID == userId {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+// IsOrgOwnerMiddleware 组织所有者中间件
+func (OrgApi) IsOrgOwnerMiddleware(ctx context.Context, c *app.RequestContext) {
+	orgIdString := c.Param("id")
+	orgId, err := strconv.Atoi(orgIdString)
+	if err != nil {
+		resps.BadRequest(c, resps.ParameterError)
+		return
+	}
+	crtUser := middle.Auth.GetUserWithBlock(ctx, c)
+	pass, err := isOrgOwner(crtUser.ID, uint(orgId))
+	if err != nil || !pass {
+		resps.Forbidden(c, resps.PermissionDenied)
+		return
+	}
+	c.Next(ctx)
+	return
+}
+
+func isOrgOwner(userId, orgId uint) (bool, error) {
+	// owners 是一定在 members 子集中
+	org, err := store.Org.GetOrgById(orgId)
+	if err != nil {
+		return false, err
+	}
+	for _, owner := range org.Owners {
+		if owner.ID == userId {
+			return true, nil
+		}
+	}
+	return false, nil
 }

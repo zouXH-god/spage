@@ -1,6 +1,7 @@
 package store
 
 import (
+	"github.com/LiteyukiStudio/spage/constants"
 	"github.com/LiteyukiStudio/spage/spage/models"
 )
 
@@ -15,7 +16,7 @@ func (o *orgType) ListByUserID(userID string, page, limit int) (orgs []models.Or
 	query := DB.Joins("JOIN organization_members ON organizations.id = organization_members.organization_id").
 		Where("organization_members.user_id = ?", userID)
 	// 预加载关系
-	query = WithPreloads(query, "Members", "Owners")
+	query = WithPreloads(query, constants.PreloadFieldMembers, constants.PreloadFieldOwners)
 	// 使用通用分页方法
 	orgs, _, err = Paginate[models.Organization](
 		query,
@@ -28,13 +29,13 @@ func (o *orgType) ListByUserID(userID string, page, limit int) (orgs []models.Or
 
 // GetOrgById 通过ID获取组织
 func (o *orgType) GetOrgById(id uint) (org *models.Organization, err error) {
-	err = DB.Model(&models.Organization{}).Where("id = ?", id).Preload("Members").Preload("Owners").First(&org).Error
+	err = DB.Model(&models.Organization{}).Where("id = ?", id).Preload(constants.PreloadFieldMembers).Preload(constants.PreloadFieldOwners).First(&org).Error
 	return
 }
 
 // GetOrgByName 通过名称获取组织
 func (o *orgType) GetOrgByName(name string) (org *models.Organization, err error) {
-	err = DB.Model(&models.Organization{}).Where("name = ?", name).Preload("Members").Preload("Owners").First(&org).Error
+	err = DB.Model(&models.Organization{}).Where("name = ?", name).Preload(constants.PreloadFieldMembers).Preload(constants.PreloadFieldOwners).First(&org).Error
 	return
 }
 

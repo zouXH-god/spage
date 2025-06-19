@@ -142,7 +142,7 @@ func handleCookieTokenAuth(c *app.RequestContext) (bool, *utils.Claims, error) {
 func (authType) IsAdmin() app.HandlerFunc {
 	return func(ctx context.Context, c *app.RequestContext) {
 		user := Auth.GetUserWithBlock(ctx, c)
-		if user.Role != constants.RoleAdmin {
+		if user.Role != constants.GlobalRoleAdmin {
 			resps.Forbidden(c, "Permission denied")
 			c.Abort()
 			return
