@@ -3,6 +3,9 @@ package store
 import (
 	"errors"
 	"fmt"
+	"plugin"
+	"runtime"
+
 	"github.com/LiteyukiStudio/spage/config"
 	"github.com/LiteyukiStudio/spage/constants"
 	"github.com/LiteyukiStudio/spage/spage/models"
@@ -11,8 +14,6 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"plugin"
-	"runtime"
 )
 
 var DB *gorm.DB
@@ -32,7 +33,7 @@ type DBConfig struct {
 // loadDBConfig 从配置文件加载数据库配置
 func loadDBConfig() DBConfig {
 	return DBConfig{
-		Driver:   config.GetString("database.driver", "sqlite"),
+		Driver:   config.GetString("database.driver", "postgres"),
 		Path:     config.GetString("database.path", "./data/data.db"),
 		Host:     config.GetString("database.host", "postgres"),
 		Port:     config.GetInt("database.port", 5432),

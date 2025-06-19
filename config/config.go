@@ -3,10 +3,11 @@ package config
 import (
 	"embed"
 	"errors"
-	"github.com/LiteyukiStudio/spage/constants"
-	"github.com/LiteyukiStudio/spage/utils/filedriver"
 	"os"
 	"path/filepath"
+
+	"github.com/LiteyukiStudio/spage/constants"
+	"github.com/LiteyukiStudio/spage/utils/filedriver"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -99,13 +100,13 @@ func InitConfig() error {
 
 // Init 初始化配置文件和常量
 func Init() error {
-	// 设置配置文件路径
-	// Set the configuration file path
-	viper.AddConfigPath(".")
-	viper.SetConfigName("config")
-	viper.SetConfigType("yaml")
-	// 读取配置文件
-	// Read the configuration file
+	configPath := os.Getenv("CONFIG")
+	if configPath != "" {
+		configPath = filepath.Clean(configPath)
+	} else {
+		configPath = "./config.yaml"
+	}
+	viper.SetConfigFile(configPath)
 	if err := viper.ReadInConfig(); err != nil {
 		var configFileNotFoundError viper.ConfigFileNotFoundError
 		if errors.As(err, &configFileNotFoundError) {
@@ -168,20 +169,6 @@ func Init() error {
 	TokenExpireTime = GetInt("token.expire", TokenExpireTime)
 	RefreshTokenExpireTime = GetInt("token.refresh-expire", RefreshTokenExpireTime)
 	JwtSecret = GetString("token.secret", JwtSecret)
-
-	// 从启动参数拿取一些配置项mode frontend-url
-	argsMap := Cmd.GetArgsMap(os.Args[1:])
-	queryKeys := []string{"mode", "port"}
-	for _, key := range queryKeys {
-		if value, ok := argsMap[key]; ok {
-			switch key {
-			case "mode":
-				Mode = value
-			case "port":
-				ServerPort = value
-			}
-		}
-	}
 	logrus.Info("Configuration loaded successfully, mode: ", Mode)
 
 	// 设置日志级别

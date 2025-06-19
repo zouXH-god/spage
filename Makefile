@@ -41,6 +41,12 @@ spage-container: web spage
 	@echo "Building container image for $(GOOS)/$(GOARCH)"; \
 	docker build -t $(BIN_NAME):$(GOOS)-$(output) --build-arg GOOS=$(GOOS) --build-arg GOARCH=$(GOARCH) .
 
+# Apple native Linux container build, macOS 26 only
+.PHONY: spage-apple-container
+spage-apple-container: web spage
+	@echo "Building Apple container image for $(GOOS)/$(GOARCH)"; \
+	container build -t $(BIN_NAME):$(GOOS)-$(output) --build-arg GOOS=$(GOOS) --build-arg GOARCH=$(GOARCH)
+
 .PHONY: agent
 agent:
 	@echo "Building agent for $(GOOS)/$(GOARCH)";
