@@ -19,6 +19,7 @@ type CreateProjectReq struct {
 	Description string  `json:"description"`                                                     // 项目描述
 	OwnerType   string  `json:"owner_type" binding:"required"  vd:"in($,'user','organization')"` // 项目拥有者类型
 	OwnerID     uint    `json:"owner_id" binding:"required"`                                     // 项目拥有者ID
+	IsPrivate   bool    `json:"is_private"`                                                      // 是否为私有项目
 
 }
 

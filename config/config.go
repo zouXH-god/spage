@@ -52,6 +52,9 @@ var (
 	Version    = "0.0.0"               // 版本号 Version
 	CommitHash = "unknown"             // 提交哈希 Commit Hash
 
+	AllowRegisterByOidc = true // 是否允许通过OIDC注册 Allow Register by OIDC
+	AllowRegister       = true // 是否允许注册 Allow Register
+
 	// Meta
 
 	Icon = "/apage.svg"
@@ -125,6 +128,9 @@ func Init() error {
 	// Admin配置项
 	AdminUsername = GetString("admin.username", AdminUsername)
 	AdminPassword = GetString("admin.password", AdminPassword)
+	// 注册相关配置项
+	AllowRegisterByOidc = GetBool("allow-register-by-oidc", AllowRegisterByOidc)
+	AllowRegister = GetBool("allow-register", AllowRegister)
 
 	// Captcha配置项
 	CaptchaType = GetString("captcha.type", CaptchaType)

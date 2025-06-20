@@ -6,7 +6,6 @@ import (
 	"github.com/LiteyukiStudio/spage/spage/middle"
 	"github.com/LiteyukiStudio/spage/spage/models"
 	store "github.com/LiteyukiStudio/spage/spage/store"
-	"github.com/LiteyukiStudio/spage/utils"
 	"strconv"
 
 	"github.com/LiteyukiStudio/spage/resps"
@@ -48,7 +47,7 @@ func (OrgApi) CreateOrganization(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	// 校验组织名称是否合法
-	if !utils.IsValidEntityName(req.Name) {
+	if !store.Owner.IsNameAvailable(req.Name) {
 		resps.BadRequest(c, "organization name is invalid")
 		return
 	}
@@ -85,7 +84,7 @@ func (OrgApi) UpdateOrganization(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	// 校验组织名称是否合法
-	if !utils.IsValidEntityName(req.Name) {
+	if !store.Owner.IsNameAvailable(req.Name) {
 		resps.BadRequest(c, "organization name is invalid")
 		return
 	}
