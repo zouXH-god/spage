@@ -238,9 +238,9 @@ jobs:
             ${{ env.REG_GHCR }}/${{ env.NAMESPACE_GHCR }}/${{ env.BIN_NAME }}:${{ needs.backend.outputs.tag }}
             ${{ env.REG_GHCR }}/${{ env.NAMESPACE_GHCR }}/${{ env.BIN_NAME }}:latest
             ${{ env.REG_GHCR }}/${{ env.NAMESPACE_GHCR }}/${{ env.BIN_NAME }}:nightly
-            # ${{ env.REG_LCR }}/${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME }}:${{ needs.backend.outputs.tag }}
-            # ${{ env.REG_LCR }}/${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME }}:latest
-            # ${{ env.REG_LCR }}/${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME }}:nightly
+            ${{ env.REG_LCR }}/${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME }}:${{ needs.backend.outputs.tag }}
+            ${{ env.REG_LCR }}/${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME }}:latest
+            ${{ env.REG_LCR }}/${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME }}:nightly
           platforms: ${{ env.CONTAINER_PLATFORMS }}
 
       - name: Build & Push Docker Images ${{ env.BIN_NAME_AGENT }} (tag & latest)
@@ -257,9 +257,9 @@ jobs:
             ${{ env.REG_GHCR }}/${{ env.NAMESPACE_GHCR }}/${{ env.BIN_NAME_AGENT }}:${{ needs.backend.outputs.tag }}
             ${{ env.REG_GHCR }}/${{ env.NAMESPACE_GHCR }}/${{ env.BIN_NAME_AGENT }}:latest
             ${{ env.REG_GHCR }}/${{ env.NAMESPACE_GHCR }}/${{ env.BIN_NAME_AGENT }}:nightly
-            # ${{ env.REG_LCR }}/${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME_AGENT }}:${{ needs.backend.outputs.tag }}
-            # ${{ env.REG_LCR }}/${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME_AGENT }}:latest
-            # ${{ env.REG_LCR }}/${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME_AGENT }}:nightly
+            ${{ env.REG_LCR }}/${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME_AGENT }}:${{ needs.backend.outputs.tag }}
+            ${{ env.REG_LCR }}/${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME_AGENT }}:latest
+            ${{ env.REG_LCR }}/${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME_AGENT }}:nightly
           platforms: ${{ env.CONTAINER_PLATFORMS }}
 
       - name: Build & Push Docker Images ${{ env.BIN_NAME }} (nightly only)
@@ -270,9 +270,8 @@ jobs:
           file: Dockerfile.spage
           push: true
           tags: |
-            ${{ env.NAMESPACE_DOCKERHUB }}/${{ env.BIN_NAME }}:nightly
-            ${{ env.REG_GHCR }}/${{ env.NAMESPACE_GHCR }}/${{ env.BIN_NAME }}:nightly
-            # ${{ env.REG_LCR }}/${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME }}:nightly
+
+            ${{ env.REG_LCR }}/${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME }}:nightly
           platforms: ${{ env.CONTAINER_PLATFORMS }}
 
       - name: Build & Push Docker Images ${{ env.BIN_NAME_AGENT }} (nightly only)
@@ -283,9 +282,8 @@ jobs:
           file: Dockerfile.spage-agent
           push: true
           tags: |
-            ${{ env.NAMESPACE_DOCKERHUB }}/${{ env.BIN_NAME_AGENT }}:nightly
-            ${{ env.NAMESPACE_GHCR }}/${{ env.BIN_NAME_AGENT }}:nightly
-            # ${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME_AGENT }}:nightly
+
+            ${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME_AGENT }}:nightly
           platforms: ${{ env.CONTAINER_PLATFORMS }}
 
   release:
