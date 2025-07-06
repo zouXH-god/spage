@@ -6,8 +6,8 @@ RUN apk --no-cache add tzdata ca-certificates git
 
 ARG TARGETARCH
 
-COPY build/spage-linux-${TARGETARCH} /app/server
+COPY build/spage-linux-${TARGETARCH} /app/spage
 
-RUN chmod +x /app/server
+RUN chmod +x /app/spage
 
-ENTRYPOINT ["/app/server"]
+ENTRYPOINT ["/app/spage"]

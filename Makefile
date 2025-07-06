@@ -1,4 +1,5 @@
 BIN_NAME ?= spage
+BIN_NAME_AGENT ?= spage-agent
 GO_PKG_ROOT ?= github.com/LiteyukiStudio/spage
 GO_ENTRYPOINT_SERVER ?= ./cmd/server
 GO_ENTRYPOINT_AGENT ?= ./cmd/agent
@@ -31,8 +32,8 @@ spage:
 	CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH) GOARM=$(GOARM) GOAMD64=$(GOAMD64) GO386=$(GO386) \
 	go build -trimpath \
 	-ldflags "-X '$(GO_PKG_ROOT)/config.CommitHash=$$(git rev-parse HEAD)' \
-	-X '$(GO_PKG_ROOT)/config.BuildTime=$$(date -u +%Y-%m-%dT%H:%M:%SZ)' \
-	-X '$(GO_PKG_ROOT)/config.Version=$${VERSION}'" \
+	-X '$(GO_PKG_ROOT)/pkg/config.BuildTime=$$(date -u +%Y-%m-%dT%H:%M:%SZ)' \
+	-X '$(GO_PKG_ROOT)/pkg/config.Version=$${VERSION}'" \
 	-o build/$${OUTNAME} $(GO_ENTRYPOINT_SERVER) \
 	&& upx --lzma --best build/$${OUTNAME} || true \
 	)
@@ -50,9 +51,22 @@ spage-apple-container: web spage
 	@echo "Building Apple container image for $(GOOS)/$(GOARCH)"; \
 	container build -t $(BIN_NAME):$(GOOS)-$(output) --build-arg GOOS=$(GOOS) --build-arg GOARCH=$(GOARCH)
 
-.PHONY: agent
-agent:
-	@echo "Building agent for $(GOOS)/$(GOARCH)";
+.PHONY: spage-agent
+spage-agent:
+	@mkdir -p build
+	@( \
+	OUTNAME=$(BIN_NAME_AGENT)-$(GOOS)-$(output); \
+	VERSION=$$(git describe --tags --always 2>/dev/null || echo dev); \
+	echo "Building $$OUTNAME:$$VERSION for $(GOOS)/$(GOARCH)"; \
+	if [ "$(GOOS)" = "windows" ]; then OUTNAME=$${OUTNAME}.exe; fi; \
+	CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH) GOARM=$(GOARM) GOAMD64=$(GOAMD64) GO386=$(GO386) \
+	go build -trimpath \
+	-ldflags "-X '$(GO_PKG_ROOT)/config.CommitHash=$$(git rev-parse HEAD)' \
+	-X '$(GO_PKG_ROOT)/pkg/config.BuildTime=$$(date -u +%Y-%m-%dT%H:%M:%SZ)' \
+	-X '$(GO_PKG_ROOT)/pkg/config.Version=$${VERSION}'" \
+	-o build/$${OUTNAME} $(GO_ENTRYPOINT_AGENT) \
+	&& upx --lzma --best build/$${OUTNAME} || true \
+	)
 
 .PHONY: plugin
 

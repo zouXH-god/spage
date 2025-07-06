@@ -2,7 +2,7 @@ name: Build & Publish All-in-One
 
 on:
   push:
-    branches: [main]
+    branches: [main, dev]
     tags: [v*]
   workflow_dispatch:
 
@@ -10,6 +10,7 @@ env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   BOT_TOKEN: ${{ secrets.LITEYUKIFLOW_TOKEN }}
   BIN_NAME: spage
+  BIN_NAME_AGENT: spage-agent
   BIN_OUT: build
   FRONTEND_DIR: web-src
   # for container build
@@ -149,6 +150,7 @@ jobs:
           GO386: ${{ matrix.go386 }}
         run: |
           make ${{ env.BIN_NAME }} GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} GOAMD64=${{ matrix.goamd64 }} GOARM=${{ matrix.goarm }} GO386=${{ matrix.go386 }}
+          make ${{ env.BIN_NAME_AGENT }} GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} GOAMD64=${{ matrix.goamd64 }} GOARM=${{ matrix.goarm }} GO386=${{ matrix.go386 }}
           
       - name: List build dir
         run: ls -lh build/
@@ -157,24 +159,29 @@ jobs:
         env:
           ARCH_MAP: ${{ env.ARCH_MAP }}
         run: |
-          for line in $(echo "${ARCH_MAP}"); do
-            short=$(echo "$line" | cut -d: -f1)
-            long=$(echo "$line" | cut -d: -f2)
-            src="build/${{ env.BIN_NAME }}-linux-$long"
-            dst="build/${{ env.BIN_NAME }}-linux-$short"
-            if [ -f "$src" ]; then
-              cp "$src" "$dst" || true
-              echo "Copied $src -> $dst"
-            else
-              echo "Warning: $src not found, skip $key"
-            fi
+          # Process both binaries
+          for binary in "${{ env.BIN_NAME }}" "${{ env.BIN_NAME_AGENT }}"; do
+            echo "Processing $binary..."
+            for line in $(echo "${ARCH_MAP}"); do
+              short=$(echo "$line" | cut -d: -f1)
+              long=$(echo "$line" | cut -d: -f2)
+              src="build/${binary}-linux-$long"
+              dst="build/${binary}-linux-$short"
+              if [ -f "$src" ]; then
+                cp "$src" "$dst" || true
+                echo "Copied $src -> $dst"
+              else
+                echo "Warning: $src not found, skip $short for $binary"
+              fi
+            done
           done
+          
           ls -lhR build/
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.BIN_NAME }}-${{ matrix.goos }}-${{ matrix.output }}
+          name: binaries-${{ matrix.goos }}-${{ matrix.output }}
           path: build/*
           retention-days: 30
 
@@ -189,7 +196,7 @@ jobs:
       - name: Download all linux artifacts for docker
         uses: actions/download-artifact@v4
         with:
-          pattern: ${{ env.BIN_NAME }}-linux-*
+          pattern: binaries-linux-*  # 更新模式以匹配新的工件名称
           path: build/
           merge-multiple: true
 
@@ -217,11 +224,12 @@ jobs:
           username: ${{ secrets.LITEYUKIREG_USER }}
           password: ${{ secrets.LITEYUKIREG_TOKEN }}
 
-      - name: Build & Push Docker Images (tag & latest)
+      - name: Build & Push Docker Images ${{ env.BIN_NAME }} (tag & latest)
         if: ${{ needs.backend.outputs.nightly == 'false' }}
         uses: docker/build-push-action@v6
         with:
           context: .
+          file: Dockerfile.spage
           push: true
           tags: |
             ${{ env.NAMESPACE_DOCKERHUB }}/${{ env.BIN_NAME }}:${{ needs.backend.outputs.tag }}
@@ -235,16 +243,49 @@ jobs:
             ${{ env.REG_LCR }}/${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME }}:nightly
           platforms: ${{ env.CONTAINER_PLATFORMS }}
 
-      - name: Build & Push Docker Images (nightly only)
+      - name: Build & Push Docker Images ${{ env.BIN_NAME_AGENT }} (tag & latest)
+        if: ${{ needs.backend.outputs.nightly == 'false' }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.spage-agent
+          push: true
+          tags: |
+            ${{ env.NAMESPACE_DOCKERHUB }}/${{ env.BIN_NAME_AGENT }}:${{ needs.backend.outputs.tag }}
+            ${{ env.NAMESPACE_DOCKERHUB }}/${{ env.BIN_NAME_AGENT }}:latest
+            ${{ env.NAMESPACE_DOCKERHUB }}/${{ env.BIN_NAME_AGENT }}:nightly
+            ${{ env.REG_GHCR }}/${{ env.NAMESPACE_GHCR }}/${{ env.BIN_NAME_AGENT }}:${{ needs.backend.outputs.tag }}
+            ${{ env.REG_GHCR }}/${{ env.NAMESPACE_GHCR }}/${{ env.BIN_NAME_AGENT }}:latest
+            ${{ env.REG_GHCR }}/${{ env.NAMESPACE_GHCR }}/${{ env.BIN_NAME_AGENT }}:nightly
+            ${{ env.REG_LCR }}/${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME_AGENT }}:${{ needs.backend.outputs.tag }}
+            ${{ env.REG_LCR }}/${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME_AGENT }}:latest
+            ${{ env.REG_LCR }}/${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME_AGENT }}:nightly
+          platforms: ${{ env.CONTAINER_PLATFORMS }}
+
+      - name: Build & Push Docker Images ${{ env.BIN_NAME }} (nightly only)
         if: ${{ needs.backend.outputs.nightly == 'true' }}
         uses: docker/build-push-action@v6
         with:
           context: .
+          file: Dockerfile.spage
           push: true
           tags: |
             ${{ env.NAMESPACE_DOCKERHUB }}/${{ env.BIN_NAME }}:nightly
             ${{ env.REG_GHCR }}/${{ env.NAMESPACE_GHCR }}/${{ env.BIN_NAME }}:nightly
             ${{ env.REG_LCR }}/${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME }}:nightly
+          platforms: ${{ env.CONTAINER_PLATFORMS }}
+
+      - name: Build & Push Docker Images ${{ env.BIN_NAME_AGENT }} (nightly only)
+        if: ${{ needs.backend.outputs.nightly == 'true' }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.spage-agent
+          push: true
+          tags: |
+            ${{ env.NAMESPACE_DOCKERHUB }}/${{ env.BIN_NAME_AGENT }}:nightly
+            ${{ env.NAMESPACE_GHCR }}/${{ env.BIN_NAME_AGENT }}:nightly
+            ${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME_AGENT }}:nightly
           platforms: ${{ env.CONTAINER_PLATFORMS }}
 
   release:
@@ -255,7 +296,7 @@ jobs:
       - name: Download all linux artifacts for docker
         uses: actions/download-artifact@v4
         with:
-          pattern: ${{ env.BIN_NAME }}-*
+          pattern: binaries-*  # 更新模式以匹配新的工件名称
           path: build/
           merge-multiple: true
 
