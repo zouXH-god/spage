@@ -270,7 +270,8 @@ jobs:
           file: Dockerfile.spage
           push: true
           tags: |
-
+            ${{ env.NAMESPACE_DOCKERHUB }}/${{ env.BIN_NAME }}:nightly
+            ${{ env.REG_GHCR }}/${{ env.NAMESPACE_GHCR }}/${{ env.BIN_NAME }}:nightly
             ${{ env.REG_LCR }}/${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME }}:nightly
           platforms: ${{ env.CONTAINER_PLATFORMS }}
 
@@ -282,7 +283,8 @@ jobs:
           file: Dockerfile.spage-agent
           push: true
           tags: |
-
+            ${{ env.NAMESPACE_DOCKERHUB }}/${{ env.BIN_NAME_AGENT }}:nightly
+            ${{ env.NAMESPACE_GHCR }}/${{ env.BIN_NAME_AGENT }}:nightly
             ${{ env.NAMESPACE_LCR }}/${{ env.BIN_NAME_AGENT }}:nightly
           platforms: ${{ env.CONTAINER_PLATFORMS }}
 
