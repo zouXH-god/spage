@@ -305,7 +305,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ needs.backend.outputs.tag }}
-          artifacts: build/${{ env.BIN_NAME }}-*
+          artifacts: build/*
           name: "Release ${{ needs.backend.outputs.tag }}"
           generateReleaseNotes: true
           allowUpdates: true
