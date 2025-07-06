@@ -2,7 +2,7 @@ package filedriver
 
 import (
 	"fmt"
-	"github.com/LiteyukiStudio/spage/constants"
+	"github.com/LiteyukiStudio/spage/pkg/constants"
 	"github.com/cloudwego/hertz/pkg/app"
 	"io"
 	"os"

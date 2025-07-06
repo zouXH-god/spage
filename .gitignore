@@ -11,12 +11,14 @@ config.yaml
 .DS_Store
 .idea/
 .vscode/
+.env
 
 data/
 # backend build
 build/
 **.so
 **.dylib
+test.json
 
 # backend embed fs
 spage/static/dist/**

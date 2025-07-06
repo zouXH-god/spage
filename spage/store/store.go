@@ -3,10 +3,10 @@ package store
 import (
 	"errors"
 	"fmt"
-	"github.com/LiteyukiStudio/spage/config"
-	"github.com/LiteyukiStudio/spage/constants"
+	"github.com/LiteyukiStudio/spage/pkg/config"
+	"github.com/LiteyukiStudio/spage/pkg/constants"
+	"github.com/LiteyukiStudio/spage/pkg/utils"
 	"github.com/LiteyukiStudio/spage/spage/models"
-	"github.com/LiteyukiStudio/spage/utils"
 	"github.com/glebarez/sqlite"
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/postgres"

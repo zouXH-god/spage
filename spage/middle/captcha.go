@@ -2,11 +2,10 @@ package middle
 
 import (
 	"context"
-	"github.com/LiteyukiStudio/spage/config"
-	"github.com/LiteyukiStudio/spage/constants"
-	"github.com/LiteyukiStudio/spage/utils"
-
-	"github.com/LiteyukiStudio/spage/resps"
+	"github.com/LiteyukiStudio/spage/pkg/config"
+	"github.com/LiteyukiStudio/spage/pkg/constants"
+	"github.com/LiteyukiStudio/spage/pkg/resps"
+	"github.com/LiteyukiStudio/spage/pkg/utils"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/go-resty/resty/v2"
 	"github.com/sirupsen/logrus"

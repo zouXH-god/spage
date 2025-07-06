@@ -1,8 +1,8 @@
 package router
 
 import (
-	"fmt"
-	"github.com/LiteyukiStudio/spage/constants"
+	middle3 "github.com/LiteyukiStudio/spage/pkg/middle"
+	"github.com/LiteyukiStudio/spage/pkg/utils"
 	"github.com/LiteyukiStudio/spage/spage/handlers"
 	"github.com/LiteyukiStudio/spage/spage/middle"
 	"github.com/cloudwego/hertz/pkg/app/server"
@@ -12,7 +12,7 @@ import (
 // Run 运行路由服务
 func Run(opts ...config.Option) error {
 	h := server.New(opts...)
-	h.Use(middle.Cors.UseCors(), middle.Trace.UseTrace())
+	h.Use(middle3.Cors.UseCors(), middle3.Trace.UseTrace())
 
 	apiV1 := h.Group("/api/v1")
 	apiV1.Use(middle.Auth.UseAuth(true))
@@ -26,20 +26,5 @@ func Run(opts ...config.Option) error {
 	registerNodeGroup(apiV1)
 	registerMetaGroup(apiV1, apiV1WithoutAuth)
 	h.GET("/*any", handlers.WebHandler)
-
-	return runWithMode(h, "dev")
-}
-
-func runWithMode(h *server.Hertz, mode string) error {
-	if mode == constants.ModeDev {
-		err := h.Run()
-		if err != nil {
-			return err
-		}
-	} else if mode == constants.ModeProd {
-		h.Spin()
-	} else {
-		return fmt.Errorf("unsupported mode: %s", mode)
-	}
-	return nil
+	return utils.RunWithMode(h, "dev")
 }

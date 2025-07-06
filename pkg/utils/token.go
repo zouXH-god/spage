@@ -2,7 +2,7 @@ package utils
 
 import (
 	"crypto/rand"
-	"github.com/LiteyukiStudio/spage/config"
+	"github.com/LiteyukiStudio/spage/pkg/config"
 	"github.com/LiteyukiStudio/spage/spage/models"
 	"math/big"
 	"time"

@@ -2,7 +2,7 @@ package utils
 
 import (
 	"fmt"
-	"github.com/LiteyukiStudio/spage/constants"
+	"github.com/LiteyukiStudio/spage/pkg/constants"
 	"github.com/go-resty/resty/v2"
 )
 

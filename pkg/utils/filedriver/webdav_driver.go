@@ -3,8 +3,8 @@ package filedriver
 import (
 	"bytes"
 	"fmt"
-	"github.com/LiteyukiStudio/spage/constants"
-	"github.com/LiteyukiStudio/spage/resps"
+	"github.com/LiteyukiStudio/spage/pkg/constants"
+	"github.com/LiteyukiStudio/spage/pkg/resps"
 	"github.com/cloudwego/hertz/pkg/app"
 	"io"
 	"os"

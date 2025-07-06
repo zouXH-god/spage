@@ -2,9 +2,9 @@ package store
 
 import (
 	"fmt"
-	"github.com/LiteyukiStudio/spage/constants"
+	"github.com/LiteyukiStudio/spage/pkg/constants"
+	"github.com/LiteyukiStudio/spage/pkg/utils"
 	"github.com/LiteyukiStudio/spage/spage/models"
-	"github.com/LiteyukiStudio/spage/utils"
 )
 
 type projectType struct {

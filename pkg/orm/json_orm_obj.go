@@ -1,4 +1,4 @@
-package models
+package orm
 
 import (
 	"database/sql/driver"

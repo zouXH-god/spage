@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/LiteyukiStudio/spage/config"
+	"github.com/LiteyukiStudio/spage/pkg/config"
 	"github.com/LiteyukiStudio/spage/spage/router"
 	"github.com/LiteyukiStudio/spage/spage/store"
 	"github.com/cloudwego/hertz/pkg/app/server"

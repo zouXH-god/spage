@@ -1,11 +1,10 @@
 package utils
 
 import (
+	"github.com/LiteyukiStudio/spage/pkg/config"
 	"os"
 	"path"
 	"testing"
-
-	"github.com/LiteyukiStudio/spage/config"
 )
 
 func TestFileHash(t *testing.T) {

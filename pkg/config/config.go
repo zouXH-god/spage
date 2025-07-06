@@ -3,14 +3,12 @@ package config
 import (
 	"embed"
 	"errors"
-	"os"
-	"path/filepath"
-
-	"github.com/LiteyukiStudio/spage/constants"
-	"github.com/LiteyukiStudio/spage/utils/filedriver"
-
+	"github.com/LiteyukiStudio/spage/pkg/constants"
+	"github.com/LiteyukiStudio/spage/pkg/utils/filedriver"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"os"
+	"path/filepath"
 )
 
 var (
@@ -78,28 +76,23 @@ var (
 func InitConfig() error {
 	configPath := "config.yaml"
 	// 目标配置文件路径
-
 	// 如果 config.yaml 已存在，直接返回
 	if _, err := os.Stat(configPath); err == nil {
 		return nil
 	}
-
 	// 读取嵌入的示例配置
 	data, err := configExample.ReadFile("config.example.yaml")
 	if err != nil {
 		return errors.New("failed to read embedded config: " + err.Error())
 	}
-
 	// 确保目录存在（如果 config.yaml 不在当前目录）
 	if err := os.MkdirAll(filepath.Dir(configPath), 0755); err != nil {
 		return errors.New("failed to create config directory: " + err.Error())
 	}
-
 	// 写入 config.yaml
 	if err := os.WriteFile(configPath, data, 0644); err != nil {
 		return errors.New("failed to write config file: " + err.Error())
 	}
-
 	return nil
 }
 
@@ -198,8 +191,6 @@ func Init() error {
 			return errors.New("failed to create directory: " + path + ", error: " + err.Error())
 		}
 	}
-	// 其他配置项合法校验流程
-	// ...
 	return nil
 
 }
