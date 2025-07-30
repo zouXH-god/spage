@@ -23,6 +23,11 @@ func main() {
 		logrus.Panicf("Failed to initialize agent configuration: %v", err)
 		return
 	}
+	// 启动caddy
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	caddy.StartDaemon(ctx)
 	// 注册 grpc 服务
 	grpcServer, err := agent.RegisterGrpcApps()
 	if err != nil {

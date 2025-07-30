@@ -1,7 +1,7 @@
 package store
 
 import (
-	"github.com/LiteyukiStudio/spage/constants"
+	"github.com/LiteyukiStudio/spage/pkg/constants"
 	"github.com/LiteyukiStudio/spage/spage/models"
 )
 

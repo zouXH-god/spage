@@ -2,16 +2,18 @@ package handlers
 
 import (
 	"context"
-	"github.com/LiteyukiStudio/spage/config"
-	"github.com/LiteyukiStudio/spage/constants"
+	"github.com/LiteyukiStudio/spage/pkg/config"
+	"github.com/LiteyukiStudio/spage/pkg/constants"
+	"github.com/LiteyukiStudio/spage/pkg/resps"
+	"github.com/LiteyukiStudio/spage/pkg/utils"
 	"github.com/LiteyukiStudio/spage/spage/middle"
 	"github.com/LiteyukiStudio/spage/spage/models"
+	"github.com/LiteyukiStudio/spage/spage/static"
 	"github.com/LiteyukiStudio/spage/spage/store"
-	"github.com/LiteyukiStudio/spage/utils"
+	"io"
 	"strconv"
 	"time"
 
-	"github.com/LiteyukiStudio/spage/resps"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/protocol"
 )
@@ -181,19 +183,15 @@ func (userApi) Register(ctx context.Context, c *app.RequestContext) {
 		resps.BadRequest(c, "Parameter error")
 		return
 	}
-	// TODO 校验邮箱验证码
-	// 校验密码复杂度
-	passwordLevel := config.GetInt("password_complexity", 3)
+	passwordLevel := config.GetInt("password_complexity", 1)
 	if !utils.Password.CheckPasswordComplexity(request.Password, passwordLevel) {
 		resps.BadRequest(c, "Password complexity is too low")
 		return
 	}
-	// 判断用户名是否存在
-	if store.Owner.IsNameAvailable(request.Username) {
+	if !store.Owner.IsNameAvailable(request.Username) {
 		resps.BadRequest(c, "Username already exists")
 		return
 	}
-	// 创建用户
 	hashPassword, err := utils.Password.HashPassword(request.Password, config.JwtSecret)
 	if err != nil {
 		resps.InternalServerError(c, "Failed to hash password")
@@ -313,4 +311,50 @@ func (userApi) ListApiToken(ctx context.Context, c *app.RequestContext) {
 		}(),
 		"total": total,
 	})
+}
+
+// SendVerifyCode 主动请求发送邮件验证码
+func (userApi) SendVerifyCode(ctx context.Context, c *app.RequestContext) {
+	sendVerifyCodeReq := &SendVerifyCodeReq{}
+	err := c.BindJSON(sendVerifyCodeReq)
+	if err != nil {
+		resps.BadRequest(c, resps.ParameterError)
+		return
+	}
+	err = sendEmailVerifyCode(sendVerifyCodeReq.Email, utils.Random.Number(6))
+	if err != nil {
+		resps.InternalServerError(c, err.Error())
+		return
+	}
+	resps.Ok(c, "Verify code sent successfully", map[string]any{})
+}
+
+func sendEmailVerifyCode(email, code string) error {
+	kvStore := utils.GetKVStore()
+	expire := 60 * 5
+	kvStore.Set(constants.KVPrefixEmailVerifyCode+email, code, time.Duration(expire)*time.Second)
+	tmplFile, err := static.AssetsFS.Open("assets/verify_code.tmpl")
+	if err != nil {
+		return err
+	}
+	defer tmplFile.Close()
+	tmplBytes, err := io.ReadAll(tmplFile)
+	if err != nil {
+		return err
+	}
+	return utils.SendTemplate(context.Background(), &utils.EmailConfig{
+		Enable:   config.EmailEnable,
+		Username: config.EmailUsername,
+		Address:  config.EmailAddress,
+		Host:     config.EmailHost,
+		Port:     config.EmailPort,
+		Password: config.EmailPassword,
+		SSL:      config.EmailSSL,
+	}, email, "验证您的电子邮件", string(tmplBytes), map[string]any{
+		"Title":      config.Title,
+		"Email":      email,
+		"VerifyCode": code,
+		"Expire":     expire / 60, // 过期时间，单位分钟
+	})
+
 }

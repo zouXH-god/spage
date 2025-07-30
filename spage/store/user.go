@@ -2,7 +2,7 @@ package store
 
 import (
 	"errors"
-	"github.com/LiteyukiStudio/spage/constants"
+	"github.com/LiteyukiStudio/spage/pkg/constants"
 	"github.com/LiteyukiStudio/spage/spage/models"
 	"github.com/sirupsen/logrus"
 
