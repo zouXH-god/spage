@@ -130,11 +130,6 @@ func (ReleaseApi) Delete(ctx context.Context, c *app.RequestContext) {
 		resps.NotFound(c, resps.TargetNotFound)
 		return
 	}
-	// 删除文件
-	if err != nil {
-		resps.InternalServerError(c, "delete file error")
-		return
-	}
 	// 删除 release 记录
 	err = store.Site.DeleteRelease(release)
 	if err != nil {

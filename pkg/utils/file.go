@@ -5,9 +5,12 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
 	"io"
 	"mime/multipart"
 	"os"
+	"path/filepath"
+	"strings"
 )
 
 // IsValidZipFile 检查 multipart.FileHeader 是否为合法的 ZIP 文件
@@ -71,6 +74,60 @@ func isZipFileSignature(data []byte) bool {
 		(data[2] == 0x03 && data[3] == 0x04 || // 常规文件
 			data[2] == 0x05 && data[3] == 0x06 || // 空归档
 			data[2] == 0x07 && data[3] == 0x08) // 分卷归档
+}
+
+// UnzipFromBytes 解压二进制 zip 数据到目标目录
+func UnzipFromBytes(zipData []byte, targetDir string) error {
+	// 创建 zip.Reader
+	reader, err := zip.NewReader(bytes.NewReader(zipData), int64(len(zipData)))
+	if err != nil {
+		return fmt.Errorf("无法读取zip数据: %w", err)
+	}
+
+	for _, file := range reader.File {
+		// 构造目标文件路径
+		destPath := filepath.Join(targetDir, file.Name)
+
+		// 检查路径是否安全，防止 Zip Slip 攻击
+		if !strings.HasPrefix(destPath, filepath.Clean(targetDir)+string(os.PathSeparator)) {
+			return fmt.Errorf("非法文件路径: %s", destPath)
+		}
+
+		if file.FileInfo().IsDir() {
+			// 创建目录
+			if err := os.MkdirAll(destPath, os.ModePerm); err != nil {
+				return fmt.Errorf("创建目录失败: %w", err)
+			}
+			continue
+		}
+
+		// 创建上级目录
+		if err := os.MkdirAll(filepath.Dir(destPath), os.ModePerm); err != nil {
+			return fmt.Errorf("创建上级目录失败: %w", err)
+		}
+
+		// 打开压缩文件
+		srcFile, err := file.Open()
+		if err != nil {
+			return fmt.Errorf("打开压缩包内文件失败: %w", err)
+		}
+		defer srcFile.Close()
+
+		// 创建目标文件
+		dstFile, err := os.Create(destPath)
+		if err != nil {
+			return fmt.Errorf("创建目标文件失败: %w", err)
+		}
+
+		// 复制内容
+		if _, err := io.Copy(dstFile, srcFile); err != nil {
+			dstFile.Close()
+			return fmt.Errorf("复制内容失败: %w", err)
+		}
+		dstFile.Close()
+	}
+
+	return nil
 }
 
 // FileHash 计算文件的哈希值并返回十六进制字符串
