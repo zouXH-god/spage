@@ -3,6 +3,8 @@ package config
 import (
 	"embed"
 	"errors"
+	"fmt"
+	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
 
@@ -198,6 +200,68 @@ func Init() error {
 	// ...
 	return nil
 
+}
+
+type agentConfig struct {
+	Server struct {
+		Token string `yaml:"token"`
+		Host  string `yaml:"host"`
+		Port  string `yaml:"port"`
+	} `yaml:"server"` // 服务器配置
+	Service struct {
+		Host   string `yaml:"host"`
+		Port   string `yaml:"port"`
+		Static string `yaml:"static"`
+	} `yaml:"service"` // 当前服务配置
+	Caddy struct {
+		Point string `yaml:"point"`
+	} `yaml:"caddy"` // Caddy 配置
+}
+
+var AgentConfig = agentConfig{}
+
+// InitAgentConfig 初始化 Agent 配置文件，如果不存在则创建；存在则读取并赋值给 a
+func (a *agentConfig) InitAgentConfig() error {
+	// 获取配置路径
+	configPath := os.Getenv("CONFIG")
+	if configPath == "" {
+		configPath = "./config.yaml"
+	} else {
+		configPath = filepath.Clean(configPath)
+	}
+
+	// 设置 viper 的读取目标
+	viper.SetConfigFile(configPath)
+	viper.SetConfigType("yaml")
+
+	// 尝试读取配置
+	if err := viper.ReadInConfig(); err != nil {
+		var configFileNotFoundError viper.ConfigFileNotFoundError
+		if errors.As(err, &configFileNotFoundError) {
+			// 文件不存在：序列化当前结构体 a 并写入配置文件
+			configData, err := yaml.Marshal(a)
+			if err != nil {
+				return fmt.Errorf("序列化配置失败: %w", err)
+			}
+			// 创建文件夹（若存在上级路径）
+			if err := os.MkdirAll(filepath.Dir(configPath), os.ModePerm); err != nil {
+				return fmt.Errorf("创建配置文件目录失败: %w", err)
+			}
+			if err := os.WriteFile(configPath, configData, 0644); err != nil {
+				return fmt.Errorf("写入配置文件失败: %w", err)
+			}
+			return nil
+		}
+		// 如果是其他读取错误
+		return fmt.Errorf("读取配置文件失败: %w", err)
+	}
+
+	// 如果成功读取配置，则将其绑定到结构体 a
+	if err := viper.Unmarshal(a); err != nil {
+		return fmt.Errorf("解析配置文件失败: %w", err)
+	}
+
+	return nil
 }
 
 // Get 返回配置项的值，如果不存在则返回默认值
