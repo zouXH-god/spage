@@ -57,9 +57,14 @@ func (ServerVisit) CreateSite(ctx context.Context, request *pb.CreateSiteRequest
 }
 
 func (ServerVisit) UpdateSite(ctx context.Context, request *pb.UpdateSiteRequest) (response *pb.UpdateSiteResponse, err error) {
-	return &pb.UpdateSiteResponse{
-		Message: "ok",
-	}, nil
+	sitePath, err := getSitePath(request.OwnerName, request.ProjectName, request.Name)
+	if err != nil {
+		return
+	}
+	// TODO 在caddy更新站点
+	response.Success = true
+	response.Message = sitePath
+	return
 }
 
 func (ServerVisit) DeleteSite(context.Context, *pb.DeleteSiteRequest) (response *pb.DeleteSiteResponse, err error) {
