@@ -23,7 +23,8 @@ message CreateSiteRequest {
   repeated string domains = 5;
 }
 message CreateSiteResponse {
-  string message = 1;
+  bool success = 1;
+  string message = 2;
 }
 
 // 更新站点信息
@@ -35,7 +36,8 @@ message UpdateSiteRequest {
   repeated string domains = 5;
 }
 message UpdateSiteResponse {
-  string message = 1;
+  bool success = 1;
+  string message = 2;
 }
 
 // 删除站点
@@ -45,7 +47,8 @@ message DeleteSiteRequest {
   string OwnerName  = 3;
 }
 message DeleteSiteResponse {
-  string message = 1;
+  bool success = 1;
+  string message = 2;
 }
 
 // 上传 release
@@ -56,5 +59,6 @@ message UploadReleaseRequest {
   bytes content = 4;
 }
 message UploadReleaseResponse {
-  string message = 1;
+  bool success = 1;
+  string message = 2;
 }

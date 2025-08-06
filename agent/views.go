@@ -2,8 +2,11 @@ package agent
 
 import (
 	"context"
+	"github.com/LiteyukiStudio/spage/pkg/config"
 	pb "github.com/LiteyukiStudio/spage/protos/result/protos/source"
 	"google.golang.org/grpc"
+	"os"
+	"path/filepath"
 )
 
 type ServerVisit struct {
@@ -20,7 +23,27 @@ func RegisterGrpcApps() (*grpc.Server, error) {
 	return s, nil
 }
 
+/*
+站点保存路径规则：
+站点保存路径：<static_path>/<OwnerName>/<ProjectName>/<Name>
+*/
+func getSitePath(ownerName, projectName, siteName string) (string, error) {
+	sitePath := filepath.Join(config.AgentConfig.Service.Static, ownerName, projectName, siteName)
+	// 判断路径是否存在
+	if _, err := os.Stat(sitePath); os.IsNotExist(err) {
+		// 创建目录
+		if err = os.MkdirAll(sitePath, os.ModePerm); err != nil {
+			return "", err
+		}
+	}
+	return sitePath, nil
+}
+
 func (ServerVisit) CreateSite(ctx context.Context, request *pb.CreateSiteRequest) (*pb.CreateSiteResponse, error) {
+	sitePath, err := getSitePath(request.OwnerName, request.ProjectName, request.Name)
+	if err != nil {
+		return nil, err
+	}
 	return &pb.CreateSiteResponse{
 		Message: "ok",
 	}, nil

@@ -216,6 +216,17 @@ type agentConfig struct {
 
 var AgentConfig = agentConfig{}
 
+func (a *agentConfig) LoadByCmd() {
+	Cmd.ParseArgs()
+	a.Server.Token = Cmd.GetString("server.token", "")
+	a.Server.Host = Cmd.GetString("server.host", "127.0.0.1")
+	a.Server.Port = Cmd.GetString("server.port", "9526")
+	a.Service.Host = Cmd.GetString("service.host", "")
+	a.Service.Port = Cmd.GetString("service.port", "9527")
+	a.Service.Static = Cmd.GetString("service.static", "./static")
+	a.Caddy.Point = Cmd.GetString("caddy.point", "")
+}
+
 // InitAgentConfig 初始化 Agent 配置文件，如果不存在则创建；存在则读取并赋值给 a
 func (a *agentConfig) InitAgentConfig() error {
 	// 获取配置路径
