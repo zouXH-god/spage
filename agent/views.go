@@ -2,6 +2,7 @@ package agent
 
 import (
 	"context"
+	"fmt"
 	"github.com/LiteyukiStudio/spage/pkg/config"
 	pb "github.com/LiteyukiStudio/spage/protos/result/protos/source"
 	"google.golang.org/grpc"
@@ -39,14 +40,16 @@ func getSitePath(ownerName, projectName, siteName string) (string, error) {
 	return sitePath, nil
 }
 
-func (ServerVisit) CreateSite(ctx context.Context, request *pb.CreateSiteRequest) (*pb.CreateSiteResponse, error) {
+func (ServerVisit) CreateSite(ctx context.Context, request *pb.CreateSiteRequest) (response *pb.CreateSiteResponse, err error) {
 	sitePath, err := getSitePath(request.OwnerName, request.ProjectName, request.Name)
 	if err != nil {
-		return nil, err
+		response.Success = false
+		response.Message = err.Error()
+		return
 	}
-	return &pb.CreateSiteResponse{
-		Message: "ok",
-	}, nil
+	response.Success = true
+	response.Message = fmt.Sprintf("Path Created Successfully 【%s】", sitePath)
+	return
 }
 
 func (ServerVisit) UpdateSite(context.Context, *pb.UpdateSiteRequest) (*pb.UpdateSiteResponse, error) {
