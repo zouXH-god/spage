@@ -67,10 +67,15 @@ func (ServerVisit) UpdateSite(ctx context.Context, request *pb.UpdateSiteRequest
 	return
 }
 
-func (ServerVisit) DeleteSite(context.Context, *pb.DeleteSiteRequest) (response *pb.DeleteSiteResponse, err error) {
-	return &pb.DeleteSiteResponse{
-		Message: "ok",
-	}, nil
+func (ServerVisit) DeleteSite(ctx context.Context, request *pb.DeleteSiteRequest) (response *pb.DeleteSiteResponse, err error) {
+	sitePath, err := getSitePath(request.OwnerName, request.ProjectName, request.Name)
+	if err != nil {
+		return
+	}
+	err = os.RemoveAll(sitePath)
+	// TODO 在caddy删除站点
+	response.Success = true
+	return
 }
 
 func (ServerVisit) GetSite(ctx context.Context, request *pb.GetSiteRequest) (response *pb.GetSiteResponse, err error) {
