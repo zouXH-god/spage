@@ -1,9 +1,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/LiteyukiStudio/spage/agent"
-	"github.com/LiteyukiStudio/spage/config"
+	"github.com/LiteyukiStudio/spage/agent/caddy"
+	"github.com/LiteyukiStudio/spage/pkg/config"
 	"github.com/sirupsen/logrus"
 	"net"
 )

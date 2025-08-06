@@ -2,7 +2,7 @@ package agent
 
 import (
 	"context"
-	"github.com/LiteyukiStudio/spage/config"
+	"github.com/LiteyukiStudio/spage/pkg/config"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
