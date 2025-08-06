@@ -56,7 +56,7 @@ func (ServerVisit) CreateSite(ctx context.Context, request *pb.CreateSiteRequest
 	return
 }
 
-func (ServerVisit) UpdateSite(context.Context, *pb.UpdateSiteRequest) (response *pb.UpdateSiteResponse, err error) {
+func (ServerVisit) UpdateSite(ctx context.Context, request *pb.UpdateSiteRequest) (response *pb.UpdateSiteResponse, err error) {
 	return &pb.UpdateSiteResponse{
 		Message: "ok",
 	}, nil
@@ -68,10 +68,25 @@ func (ServerVisit) DeleteSite(context.Context, *pb.DeleteSiteRequest) (response 
 	}, nil
 }
 
-func (ServerVisit) GetSite(context.Context, *pb.GetSiteRequest) (response *pb.GetSiteResponse, err error) {
-	return &pb.GetSiteResponse{
-		Message: "ok",
-	}, nil
+func (ServerVisit) GetSite(ctx context.Context, request *pb.GetSiteRequest) (response *pb.GetSiteResponse, err error) {
+	sitePath, err := getSitePath(request.OwnerName, request.ProjectName, request.Name)
+	if err != nil {
+		return
+	}
+	hash, updateAt, err := agentUtils.GetHash(sitePath)
+	if err != nil {
+		return
+	}
+	response.ReleaseHash = hash
+	response.ReleaseUpdateAt = updateAt.String()
+	response.Success = true
+	response.SitePath = sitePath
+	/*
+		TODO 获取caddy中的站点信息
+		response.Domains = []string{"example.com"}
+		response.SubDomain = "sub.example.com"
+	*/
+	return
 }
 
 func (ServerVisit) UploadRelease(stream grpc.ClientStreamingServer[pb.UploadReleaseRequest, pb.UploadReleaseResponse]) error {
