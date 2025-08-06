@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 var ReleaseName = "release.zip"
@@ -30,10 +31,33 @@ func UpdateSiteHash(sitePath string) (string, error) {
 	hashFilePath := filepath.Join(sitePath, HashPath)
 
 	// 将哈希值写入文件
-	err = ioutil.WriteFile(hashFilePath, []byte(hash), 0644)
+	err = os.WriteFile(hashFilePath, []byte(hash), 0644)
 	if err != nil {
 		return "", fmt.Errorf("写入哈希文件失败: %v", err)
 	}
 
 	return hash, nil
+}
+
+func GetHash(sitePath string) (string, time.Time, error) {
+	// 构建哈希文件完整路径
+	hashFilePath := filepath.Join(sitePath, HashPath)
+
+	// 获取文件信息以获取修改时间
+	fileInfo, err := os.Stat(hashFilePath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return "", time.Time{}, fmt.Errorf("哈希文件不存在: %s", hashFilePath)
+		}
+		return "", time.Time{}, fmt.Errorf("获取哈希文件信息失败: %v", err)
+	}
+
+	// 读取哈希文件内容
+	hashBytes, err := ioutil.ReadFile(hashFilePath)
+	if err != nil {
+		return "", time.Time{}, fmt.Errorf("读取哈希文件失败: %v", err)
+	}
+
+	// 返回哈希值和修改时间
+	return string(hashBytes), fileInfo.ModTime(), nil
 }

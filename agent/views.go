@@ -68,6 +68,12 @@ func (ServerVisit) DeleteSite(context.Context, *pb.DeleteSiteRequest) (response 
 	}, nil
 }
 
+func (ServerVisit) GetSite(context.Context, *pb.GetSiteRequest) (response *pb.GetSiteResponse, err error) {
+	return &pb.GetSiteResponse{
+		Message: "ok",
+	}, nil
+}
+
 func (ServerVisit) UploadRelease(stream grpc.ClientStreamingServer[pb.UploadReleaseRequest, pb.UploadReleaseResponse]) error {
 	var sitePath string
 	var contentBytes []byte
@@ -80,13 +86,17 @@ func (ServerVisit) UploadRelease(stream grpc.ClientStreamingServer[pb.UploadRele
 			if outputFile != nil {
 				outputFile.Close()
 			}
-			// 解压 zip
-			err = utils.UnzipFromBytes(contentBytes, sitePath)
+			// 更新站点 hash
+			hash, err := agentUtils.UpdateSiteHash(sitePath)
 			if err != nil {
 				return err
 			}
-			// 更新站点 hash
-			_, err = agentUtils.UpdateSiteHash(sitePath)
+			// 对比hash
+			if hash != req.ReleaseHash {
+				return status.Errorf(codes.Internal, "站点 hash 不一致")
+			}
+			// 解压 zip
+			err = utils.UnzipFromBytes(contentBytes, sitePath)
 			if err != nil {
 				return err
 			}
